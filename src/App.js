@@ -6,8 +6,10 @@ function App() {
     const [canvasLoaded, setCanvasLoaded] = useState(true);
     const [canvas, setCanvas] = useState(null);
     const [ctx, setCtx] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
+    const [selectedSticker, setSelectedSticker] = useState(null);
+    const [dragItemOffsetPosition, setDragItemOffsetPosition] = useState(null);
 
+    //todo db split this file, it's POC mess
     const [stickers, setStickers] = useState([
         {
             id: '1',
@@ -77,9 +79,7 @@ function App() {
     }
 
     useEffect(() => {
-        if (ctx) {
-            redrawCanvas();
-        }
+        redrawCanvas();
     }, [stickers]);
 
     useEffect(() => {
@@ -89,27 +89,37 @@ function App() {
     }, [canvasLoaded])
 
     useEffect(() => {
-        if (ctx) {
-            redrawCanvas();
-        }
+        redrawCanvas();
     }, [ctx]);
 
+    function selectElementOnPosition(x, y) {
+        const sticker = stickers.find(s => (s.x <= x && (s.x + 100) >= x)
+            && (s.y <= y && (s.y + 100) >= y));
+        console.log(sticker);
+        setSelectedSticker(sticker);
+
+        if (sticker) {
+            setDragItemOffsetPosition({
+                x: x - sticker.x,
+                y: y - sticker.y,
+            });
+        }
+    }
+
     function onMouseDown(e) {
-        console.log('mouseDown');
-        setIsDragging(true);
-        console.log(e);
+        console.log(e.nativeEvent.x, e.nativeEvent.y);
+        selectElementOnPosition(e.nativeEvent.x, e.nativeEvent.y);
     }
 
     function onMouseUp(e) {
-        console.log('mouseUp');
-        setIsDragging(false);
-        console.log(e);
+        setSelectedSticker(null);
+        setDragItemOffsetPosition(null);
     }
 
     function onMouseMove(e) {
-        if (isDragging) {
-            stickers[0].x = e.pageX;
-            stickers[0].y = e.pageY;
+        if (selectedSticker) {
+            selectedSticker.x = e.pageX - dragItemOffsetPosition.x;
+            selectedSticker.y = e.pageY - dragItemOffsetPosition.y;
             redrawCanvas();
         }
     }
