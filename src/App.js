@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
 
-    const [canvasLoaded, setCanvasLoaded] = useState(true);
+    const [canvasLoaded] = useState(true);
     const [canvas, setCanvas] = useState(null);
     const [ctx, setCtx] = useState(null);
     const [selectedSticker, setSelectedSticker] = useState(null);
@@ -16,16 +16,29 @@ function App() {
             text: 'long text try to wrap it with pretty way',
             x: 100,
             y: 40,
+            width: 120,
+            height: 120,
         },
         {
             id: '2',
             text: 'funny little sticker',
             x: 250,
             y: 80,
+            width: 120,
+            height: 120,
+        },
+        {
+            id: '3',
+            text: 'long German word rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz',
+            x: 450,
+            y: 20,
+            width: 240,
+            height: 120,
         },
     ]);
 
     function printStickerText(context, text, x, y, lineHeight, fitWidth) {
+        //todo db handle long words
         //coppied from https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
         context.fillStyle = 'black';
         context.font = '16px Arial';
@@ -59,9 +72,7 @@ function App() {
             context.fillText(words.join(' '), x, y + (lineHeight * currentLine));
     }
 
-    function createSticker(context, text, x, y) {
-        const width = 100;
-        const height = 100;
+    function createSticker(context, text, x, y, width, height) {
         context.fillStyle = '#fbfb57';
         context.fillRect(x, y, width, height);
 
@@ -73,7 +84,7 @@ function App() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             stickers.forEach(s => {
-                createSticker(ctx, s.text, s.x, s.y);
+                createSticker(ctx, s.text, s.x, s.y, s.width, s.height);
             })
         }
     }
@@ -93,9 +104,10 @@ function App() {
     }, [ctx]);
 
     function selectElementOnPosition(x, y) {
-        const sticker = stickers.find(s => (s.x <= x && (s.x + 100) >= x)
-            && (s.y <= y && (s.y + 100) >= y));
-        console.log(sticker);
+        //todo db should find sticker that is on top
+        const sticker = stickers.find(s =>
+            (s.x <= x && (s.x + s.width) >= x)
+            && (s.y <= y && (s.y + s.height) >= y));
         setSelectedSticker(sticker);
 
         if (sticker) {
@@ -107,7 +119,6 @@ function App() {
     }
 
     function onMouseDown(e) {
-        console.log(e.nativeEvent.x, e.nativeEvent.y);
         selectElementOnPosition(e.nativeEvent.x, e.nativeEvent.y);
     }
 
