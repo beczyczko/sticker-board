@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
+import AddStickerDialog from "./add-sticker-dialog/AddStickerDialog";
 
 function App() {
 
@@ -8,6 +9,8 @@ function App() {
     const [ctx, setCtx] = useState(null);
     const [selectedSticker, setSelectedSticker] = useState(null);
     const [dragItemOffsetPosition, setDragItemOffsetPosition] = useState(null);
+
+    const [newStickerCreating, setNewStickerCreating] = useState(false);
 
     //todo db split this file, it's POC mess
     const [stickers, setStickers] = useState([
@@ -135,15 +138,48 @@ function App() {
         }
     }
 
+    const handleDoubleClick = () => {
+        console.log('handleDoubleClick');
+        setNewStickerCreating(true);
+    };
+
+    function onDoubleClick(e) {
+        console.log(e.nativeEvent);
+        //todo db add sticker now with desired text
+        handleDoubleClick();
+    }
+
+    const handleStickerCreation = stickerText => {
+        console.log(stickerText);
+
+        const newSticker = {
+            id: '4', //todo db next id
+            text: stickerText,
+            x: Math.floor(Math.random() * 500), //todo db position
+            y: Math.floor(Math.random() * 500),
+            width: 120,
+            height: 120,
+        };
+
+        stickers.push(newSticker);
+        setStickers(JSON.parse(JSON.stringify(stickers)));
+
+        setNewStickerCreating(false);
+    };
+
     return (
         <div className="App">
             <canvas id="board-canvas" width="800" height="600"
                     onMouseDown={e => onMouseDown(e)}
                     onMouseUp={e => onMouseUp(e)}
-                    onMouseMove={e => onMouseMove(e)}>
+                    onMouseMove={e => onMouseMove(e)}
+                    onDoubleClick={e => onDoubleClick(e)}>
                 Your browser does not support the HTML5 canvas tag.
             </canvas>
             <div id="test-event-sticker" className="sticker">Event sticker</div>
+            <AddStickerDialog open={newStickerCreating}
+                              onCloseHandle={stickerText => handleStickerCreation(stickerText)}>
+            </AddStickerDialog>
         </div>
     );
 }
