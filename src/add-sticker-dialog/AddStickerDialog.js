@@ -6,12 +6,18 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
-const AddStickerDialog = ({positionX, positionY, open, onCloseHandle}) => {
+const AddStickerDialog = ({open, setOpen, onSaveCallback}) => {
 
     const [stickerText, setStickerText] = useState('');
 
-    const onClose = () => {
-        onCloseHandle(stickerText);
+    const onSave = () => {
+        onSaveCallback(stickerText);
+        setOpen(false);
+        setStickerText('');
+    };
+
+    const onCancel = () => {
+        setOpen(false);
         setStickerText('');
     };
 
@@ -21,7 +27,7 @@ const AddStickerDialog = ({positionX, positionY, open, onCloseHandle}) => {
 
     return (
         <div>
-            <Dialog open={open} onClose={onClose}>
+            <Dialog open={open} onClose={onCancel}>
                 <DialogTitle>dialog title</DialogTitle>
 
                 <DialogContent>
@@ -38,10 +44,10 @@ const AddStickerDialog = ({positionX, positionY, open, onCloseHandle}) => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={onClose} color="primary">
+                    <Button onClick={onCancel} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={onClose} color="primary">
+                    <Button onClick={onSave} color="primary">
                         Save
                     </Button>
                 </DialogActions>

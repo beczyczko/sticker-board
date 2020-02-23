@@ -1,12 +1,19 @@
 #board-canvas {
-  border: 1px solid #d3d3d3;
+    border: 1px solid #d3d3d3;
 }
 
 .sticker {
-  width: 80px;
-  height: 80px;
+    width: 80px;
+    height: 80px;
 }
 
 #test-event-sticker {
-  background-color: #fbfb57;
+    background-color: #fbfb57;
+}
+
+#new-sticker-text {
+    z-index: 2;
+    position: absolute;
+    top: 150px;
+    left: 100px;
 }

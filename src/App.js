@@ -3,10 +3,11 @@ import './App.css';
 import * as PIXI from 'pixi.js'
 import stickerImage from './assets/sticker.png';
 import Sticker from './board/sticker';
+import StickersRepo from './board/stickersRepoMock';
+import Board from './board/board';
+import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 
 function App() {
-
-    let stage;
 
     const loader = new PIXI.Loader();
     loader
@@ -14,6 +15,14 @@ function App() {
         .load();
 
     const [canvas, setCanvas] = useState('');
+    const [board, setBoard] = useState(null);
+    const [newStickerCreating, setNewStickerCreating] = useState(false);
+    const [newStickerPosition, setNewStickerPosition] = useState(null);
+
+    const onBoardDoubleClick = clickPosition => {
+        setNewStickerPosition(clickPosition);
+        setNewStickerCreating(true);
+    };
 
     useEffect(() => {
         const canvas = document.getElementById('canvas');
@@ -24,24 +33,31 @@ function App() {
             height: window.innerHeight - 100,
             backgroundColor: 0x1099bb
         });
-        stage = app.stage;
 
-        loader.onComplete.add(() => {
-            stage.addChild(Sticker.createSticker(100, 100, 'Basic text in pixisafffffffffffffffffffff, pixisafffffffffffffffff, Basic text in pixi, Basic text in pixi'));
-            stage.addChild(Sticker.createSticker(200, 300, 'Basic text in pixisafffffffffffffffffffff, pixisafffffffffffffffff'));
-            stage.addChild(Sticker.createSticker(500, 350, 'Basic text in pixisafffffffffffffffffffff'));
-        });
-
+        const stage = app.stage;
         stage.scale.set(0.4);
 
+        const newBoard = new Board(stage, clickPosition => onBoardDoubleClick(clickPosition));
+        setBoard(newBoard);
+
+        loader.onComplete.add(() => {
+            const stickers = StickersRepo.get().map(s => Sticker.createSticker(s.x, s.y, s.text));
+            stickers.forEach(s => newBoard.addSticker(s));
+        });
     }, [canvas]);
+
+    const handleStickerCreation = (stickerText) => {
+        const sticker = Sticker.createSticker(newStickerPosition.x, newStickerPosition.y, stickerText);
+        board.addSticker(sticker);
+    }
 
     return (
         <div className="App">
             <canvas id="canvas"></canvas>
-            {/*<AddStickerDialog open={newStickerCreating}*/}
-            {/*                  onCloseHandle={stickerText => handleStickerCreation(stickerText)}>*/}
-            {/*</AddStickerDialog>*/}
+            <AddStickerDialog open={newStickerCreating}
+                              setOpen={setNewStickerCreating}
+                              onSaveCallback={stickerText => handleStickerCreation(stickerText)}>
+            </AddStickerDialog>
         </div>
     );
 }
