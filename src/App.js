@@ -15,7 +15,7 @@ function App() {
 
     const [canvas, setCanvas] = useState('');
 
-    const createSticker = (positionX, positionY) => {
+    const createSticker = (positionX, positionY, text) => {
         const textureCacheElement = TextureCache['sticker'];
         console.log(textureCacheElement);
 
@@ -23,10 +23,8 @@ function App() {
         sticker.width = sticker.texture.width;
         sticker.height = sticker.texture.height;
 
-        sticker.scale.set(0.25);
         sticker.interactive = true;
         sticker.buttonMode = true;
-        sticker.anchor.set(0.5);
 
         sticker
             // events for drag start
@@ -44,11 +42,22 @@ function App() {
         sticker.x = positionX;
         sticker.y = positionY;
 
+        const textStyle = {
+            wordWrap: true,
+            wordWrapWidth: 340,
+            fontSize: 36,
+            align: 'center',
+        };
+        const textElement = new PIXI.Text(text, textStyle);
+        textElement.x = 30;
+        textElement.y = 30;
+
+        sticker.addChild(textElement);
+
         stage.addChild(sticker);
     };
 
-    function onDragStart(event)
-    {
+    function onDragStart(event) {
         // store a reference to the data
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
@@ -57,8 +66,7 @@ function App() {
         this.dragging = true;
     }
 
-    function onDragEnd()
-    {
+    function onDragEnd() {
         this.alpha = 1;
 
         this.dragging = false;
@@ -67,10 +75,8 @@ function App() {
         this.data = null;
     }
 
-    function onDragMove()
-    {
-        if (this.dragging)
-        {
+    function onDragMove() {
+        if (this.dragging) {
             const newPosition = this.data.getLocalPosition(this.parent);
             this.position.x = newPosition.x;
             this.position.y = newPosition.y;
@@ -89,9 +95,12 @@ function App() {
         stage = app.stage;
 
         loader.onComplete.add(() => {
-            createSticker(100, 100);
-            createSticker(200, 400);
+            createSticker(100, 100, 'Basic text in pixisafffffffffffffffffffff, pixisafffffffffffffffff, Basic text in pixi, Basic text in pixi');
+            createSticker(200, 300, 'Basic text in pixisafffffffffffffffffffff, pixisafffffffffffffffff');
+            createSticker(500, 350, 'Basic text in pixisafffffffffffffffffffff');
         });
+
+        app.stage.scale.set(0.4);
 
     }, [canvas]);
 
