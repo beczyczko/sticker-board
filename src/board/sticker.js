@@ -2,6 +2,8 @@ import * as PIXI from "pixi.js";
 
 const TextureCache = PIXI.utils.TextureCache;
 
+let dragItemOffsetPosition = { x: 0, y: 0 };
+
 const Sticker = {
     createSticker: (positionX, positionY, text) => {
         const textureCacheElement = TextureCache['sticker'];
@@ -46,12 +48,19 @@ const Sticker = {
 }
 
 function onDragStart(event) {
-    // store a reference to the data
+    // store a reference to the dragData
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
-    this.data = event.data;
+
+    this.dragData = event.data;
     this.alpha = 0.5;
     this.dragging = true;
+
+    const clickPosition = this.dragData.getLocalPosition(this.parent);
+    dragItemOffsetPosition = {
+        x: clickPosition.x - this.x,
+        y: clickPosition.y - this.y
+    };
 }
 
 function onDragEnd() {
@@ -59,15 +68,16 @@ function onDragEnd() {
 
     this.dragging = false;
 
-    // set the interaction data to null
-    this.data = null;
+    // set the interaction dragData to null
+    this.dragData = null;
+    dragItemOffsetPosition = { x: 0, y: 0 };
 }
 
 function onDragMove() {
     if (this.dragging) {
-        const newPosition = this.data.getLocalPosition(this.parent);
-        this.position.x = newPosition.x;
-        this.position.y = newPosition.y;
+        const newPosition = this.dragData.getLocalPosition(this.parent);
+        this.position.x = newPosition.x - dragItemOffsetPosition.x;
+        this.position.y = newPosition.y - dragItemOffsetPosition.y;
     }
 }
 
