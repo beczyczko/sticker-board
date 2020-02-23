@@ -1,22 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import * as PIXI from 'pixi.js'
-import stickerImage from './sticker.jpg';
+import stickerImage from './assets/sticker.png';
 
 function App() {
-    const sprites = {};
+
+    let TextureCache = PIXI.utils.TextureCache;
 
     const loader = new PIXI.Loader();
-    loader.add('sticker', stickerImage);
-
-    loader.load((loader, resources) => {
-        sprites.sticker = new PIXI.TilingSprite(resources.sticker.texture);
-    });
+    loader
+        .add('sticker', stickerImage)
+        .load();
 
     const [canvas, setCanvas] = useState('');
 
-    useEffect(() => {
+    const createSticker = (positionX, positionY) => {
+        const textureCacheElement = TextureCache['sticker'];
+        console.log(textureCacheElement);
 
+        const sticker = new PIXI.TilingSprite(textureCacheElement);
+        sticker.width = sticker.texture.width;
+        sticker.height = sticker.texture.height;
+
+        sticker.scale = { x: 0.25, y: 0.25 };
+
+        sticker.x = positionX;
+        sticker.y = positionY;
+
+        return sticker;
+    };
+
+    useEffect(() => {
         const canvas = document.getElementById('canvas');
 
         let app = new PIXI.Application({
@@ -27,11 +41,12 @@ function App() {
         });
 
         loader.onComplete.add(() => {
-            const sticker = sprites.sticker;
-            sticker.x = app.renderer.width / 2;
-            sticker.y = app.renderer.height / 2;
+            const sticker = createSticker(100, 100);
             app.stage.addChild(sticker);
-        }); // called once when the queued resources all load.
+
+            const sticker2 = createSticker(200, 400);
+            app.stage.addChild(sticker2);
+        });
 
     }, [canvas]);
 
