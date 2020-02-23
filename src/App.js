@@ -31,7 +31,6 @@ function App() {
             view: canvas,
             width: window.innerWidth,
             height: window.innerHeight - 100,
-            backgroundColor: 0x1099bb
         });
 
         const stage = app.stage;
