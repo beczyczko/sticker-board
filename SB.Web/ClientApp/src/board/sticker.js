@@ -81,4 +81,4 @@ function onDragMove() {
     }
 }
 
-export default Sticker
+export default Sticker;
