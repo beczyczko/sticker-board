@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SB.Boards.Commands.AddSticker;
+using SB.Boards.Queries.Stickers;
 using SB.Common.Dispatchers;
 
 namespace SB.Web.Controllers
@@ -13,9 +14,10 @@ namespace SB.Web.Controllers
         }
 
         [HttpGet]
-        public async Task Get()
+        public async Task<ActionResult<IImmutableList<StickerDto>>> Get()
         {
-            
+            var stickers = await QueryAsync(new StickersQuery());
+            return Ok(stickers);
         }
 
         [HttpPost]

@@ -18,6 +18,6 @@ namespace SB.Boards.Domain
         public Position Position { get; private set; }
 
         [BsonElement("text")]
-        public string Text { get; }
+        public string Text { get; private set; }
     }
 }
