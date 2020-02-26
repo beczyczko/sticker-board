@@ -30,7 +30,7 @@ namespace SB.Web.Controllers
             return Ok(data);
         }
 
-        protected async Task Send<T>(T command) where T : ICommand
+        protected async Task SendAsync<T>(T command) where T : ICommand
             => await _dispatcher.SendAsync(command);
 
         protected ActionResult<PagedResult<T>> Collection<T>(PagedResult<T> pagedResult)

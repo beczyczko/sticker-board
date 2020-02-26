@@ -1,5 +1,6 @@
 using System.Reflection;
 using Autofac;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SB.Boards.Domain;
 using SB.Common.Dispatchers;
 using SB.Common.Mongo;
 
@@ -21,9 +23,7 @@ namespace SB.Web
 
         public IConfiguration Configuration { get; }
 
-        public ILifetimeScope AutofacContainer { get; private set; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        [UsedImplicitly]
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSwaggerGen(c =>
@@ -37,7 +37,6 @@ namespace SB.Web
 
             services.AddControllersWithViews();
 
-            // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/build";
@@ -46,20 +45,20 @@ namespace SB.Web
             services.AddOptions();
         }
 
+        [UsedImplicitly]
         public void ConfigureContainer(ContainerBuilder builder)
         {
-
             builder.RegisterAssemblyTypes(Assembly.GetEntryAssembly()).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Dispatcher).Assembly).AsImplementedInterfaces();
-            //            builder.RegisterAssemblyTypes(typeof(EntityConfiguration).Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(Sticker).Assembly).AsImplementedInterfaces();
             builder.AddDispatchers();
 
             builder.AddMongo();
-            //            builder.AddMongoRepository<Entity>("entity");
+            builder.AddMongoRepository<Sticker>("stickers");
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        [UsedImplicitly]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
