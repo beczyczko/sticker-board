@@ -7,7 +7,7 @@ namespace SB.Boards.Commands.AddSticker
     {
         public Guid Id { get; set; }
         public string Text { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+        public double PositionX { get; set; }
+        public double PositionY { get; set; }
     }
 }

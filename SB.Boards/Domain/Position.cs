@@ -6,17 +6,17 @@ namespace SB.Boards.Domain
 {
     internal class Position : ValueObject
     {
-        public Position(int x, int y)
+        public Position(double x, double y)
         {
             X = x;
             Y = y;
         }
 
         [BsonElement("x")]
-        public int X { get; }
+        public double X { get; }
 
         [BsonElement("y")]
-        public int Y { get; }
+        public double Y { get; }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

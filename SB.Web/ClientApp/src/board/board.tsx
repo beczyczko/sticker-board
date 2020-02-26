@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
+import Sticker from './sticker';
 
 class Board {
-    container;
-    stickers = [];
+    container: any;
+    stickers = Array<Sticker>();
     lastTimeClicked = 0;
-    _onDoubleClick;
+    _onDoubleClick: (clickPosition: any) => void;
 
-    constructor(stage, onDoubleClick) {
+    constructor(stage: any, onDoubleClick: (clickPosition: any) => void) {
         this._onDoubleClick = onDoubleClick;
 
         const board = new PIXI.Graphics();
@@ -23,13 +24,13 @@ class Board {
         stage.addChild(board);
     }
 
-    addSticker(sticker) {
+    addSticker(sticker: Sticker) {
         this.stickers.push(sticker);
-        this.container.addChild(sticker);
+        this.container.addChild(sticker.element);
     }
 
     onClick() {
-        return e => {
+        return (e: any) => {
             const clickTime = Date.now();
 
             if (clickTime - this.lastTimeClicked < 300) {

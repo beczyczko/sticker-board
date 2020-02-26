@@ -8,7 +8,7 @@ import TextField from '@material-ui/core/TextField';
 
 const textElementId = 'sticker-text';
 
-const AddStickerDialog = ({ open, setOpen, onSaveCallback }) => {
+const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
 
     const [stickerText, setStickerText] = useState('');
 
@@ -23,7 +23,7 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }) => {
         setStickerText('');
     };
 
-    const updateStickerText = e => {
+    const updateStickerText = (e: any) => {
         setStickerText(e.target.value);
     };
 
@@ -38,7 +38,7 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }) => {
         }
     }, [open]);
 
-    const keyPress = e => {
+    const keyPress = (e: any) => {
         //todo db add num-pad enter i condition, can't test it right now
         if (e.keyCode === 13) {
             e.preventDefault();
