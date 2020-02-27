@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CSharpFunctionalExtensions;
 using MongoDB.Bson.Serialization.Attributes;
+using SB.Boards.Queries.Stickers;
 
 namespace SB.Boards.Domain
 {
@@ -10,6 +11,12 @@ namespace SB.Boards.Domain
         {
             X = x;
             Y = y;
+        }
+
+        public Position(PositionDto position)
+        {
+            X = position.X;
+            Y = position.Y;
         }
 
         [BsonElement("x")]

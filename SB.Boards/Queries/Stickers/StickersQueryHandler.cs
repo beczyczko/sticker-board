@@ -26,7 +26,11 @@ namespace SB.Boards.Queries.Stickers
                 .Select(s => new StickerDto(
                     s.Id,
                     s.Text,
-                    new PositionDto(s.Position.X, s.Position.Y)))
+                    new PositionDto
+                    {
+                        X = s.Position.X,
+                        Y = s.Position.Y
+                    }))
                 .ToImmutableList();
         }
     }

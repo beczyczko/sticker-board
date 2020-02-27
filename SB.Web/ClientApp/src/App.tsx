@@ -6,18 +6,19 @@ import stickerImage from './assets/sticker.png';
 import Sticker from './board/sticker';
 import Board from './board/board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
-import { AddStickerCommand, StickersService } from './services/services';
+import { AddStickerCommand } from './services/services';
+import { ServicesProvider } from './services/services-provider';
 
 function App() {
 
-    const stickersService = new StickersService('https://localhost:44323');
+    const stickersService = ServicesProvider.stickersService;
 
     const loader = new PIXI.Loader();
     loader
         .add('sticker', stickerImage)
         .load();
 
-    const [canvas, setCanvas] = useState('');
+    const [canvas, setCanvas] = useState();
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
@@ -63,8 +64,8 @@ function App() {
 
             stickersService.stickersPost(({
                 id: sticker.id,
-                positionX: sticker.positionX,
-                positionY: sticker.positionY,
+                positionX: sticker.element.x,
+                positionY: sticker.element.y,
                 text: sticker.text
             } as AddStickerCommand))
                 .then(() => board.addSticker(sticker));

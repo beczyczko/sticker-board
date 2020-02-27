@@ -1,18 +1,23 @@
 import * as PIXI from 'pixi.js';
+import { PositionDto, StickersService } from '../services/services';
+import { ServicesProvider } from '../services/services-provider';
 
 const TextureCache = PIXI.utils.TextureCache;
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
-class Sticker {
-    public dragData: any;
+const stickersServiceProvider = ServicesProvider;
 
+class Sticker {
+    private positionBeforeDrag: PositionDto = { x: 0, y: 0 };
+
+    public dragData: any;
     public element: any;
 
     constructor(
         public id: string,
-        public positionX: number,
-        public positionY: number,
+        positionX: number,
+        positionY: number,
         public text: string) {
         const textureCacheElement = TextureCache['sticker'];
 
@@ -52,6 +57,11 @@ class Sticker {
         sticker.addChild(textElement);
 
         this.element = sticker;
+
+        this.positionBeforeDrag = {
+            x: positionX,
+            y: positionY
+        } as PositionDto;
     }
 
     onDragStart(event: any) {
@@ -70,13 +80,29 @@ class Sticker {
         };
     }
 
-    onDragEnd() {
+    async onDragEnd() {
         this.element.alpha = 1;
-
         this.element.dragging = false;
 
-        // set the interaction dragData to null
         this.dragData = null;
+
+        stickersServiceProvider.stickersService.move(
+            this.id,
+            {
+                x: this.element.x,
+                y: this.element.y
+            } as PositionDto)
+            .then(() => {
+                this.positionBeforeDrag = {
+                    x: this.element.x,
+                    y: this.element.y
+                } as PositionDto
+            })
+            .catch(() => {
+                this.element.x = this.positionBeforeDrag.x;
+                this.element.y = this.positionBeforeDrag.y;
+            });
+
         dragItemOffsetPosition = { x: 0, y: 0 };
     }
 
@@ -88,6 +114,5 @@ class Sticker {
         }
     }
 }
-
 
 export default Sticker;
