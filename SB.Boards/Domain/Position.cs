@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CSharpFunctionalExtensions;
-using MongoDB.Bson.Serialization.Attributes;
 using SB.Boards.Queries.Stickers;
 
 namespace SB.Boards.Domain
@@ -19,10 +18,7 @@ namespace SB.Boards.Domain
             Y = position.Y;
         }
 
-        [BsonElement("x")]
         public double X { get; }
-
-        [BsonElement("y")]
         public double Y { get; }
 
         protected override IEnumerable<object> GetEqualityComponents()

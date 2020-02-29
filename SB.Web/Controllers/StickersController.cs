@@ -23,13 +23,13 @@ namespace SB.Web.Controllers
         }
 
         [HttpPost]
-        public async Task Create([FromBody] AddStickerCommand command)
+        public async Task Create(AddStickerCommand command)
         {
             await SendAsync(command);
         }
 
         [HttpPost("{stickerId}/[Action]")]
-        public async Task Move(Guid stickerId, [FromBody] PositionDto newPosition)
+        public async Task Move(Guid stickerId, PositionDto newPosition)
         {
             await SendAsync(new MoveStickerCommand(stickerId, newPosition));
         }

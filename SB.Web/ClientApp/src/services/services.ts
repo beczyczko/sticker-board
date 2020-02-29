@@ -69,7 +69,7 @@ export class StickersService {
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json-patch+json",
             }
         };
 
@@ -110,7 +110,7 @@ export class StickersService {
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json-patch+json",
             }
         };
 
@@ -136,8 +136,8 @@ export class StickersService {
 }
 
 export interface PositionDto {
-    readonly x: number;
-    readonly y: number;
+    x: number;
+    y: number;
 }
 
 export interface StickerDto {
@@ -147,10 +147,10 @@ export interface StickerDto {
 }
 
 export interface AddStickerCommand {
-    id: string;
-    text: string | null;
-    positionX: number;
-    positionY: number;
+    readonly id: string;
+    readonly text: string | null;
+    readonly positionX: number;
+    readonly positionY: number;
 }
 
 export class ApiException extends Error {

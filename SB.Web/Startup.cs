@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using SB.Boards.Domain;
 using SB.Common.Dispatchers;
 using SB.Common.Mongo;
+using SB.Common.Mvc;
 
 namespace SB.Web
 {
@@ -25,6 +26,8 @@ namespace SB.Web
         [UsedImplicitly]
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCustomMvc();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -34,7 +37,7 @@ namespace SB.Web
                 });
             });
 
-            services.AddControllersWithViews();
+            services.AddControllers();
 
             services.AddSpaStaticFiles(configuration =>
             {
@@ -54,11 +57,13 @@ namespace SB.Web
 
             builder.AddMongo();
             builder.AddMongoRepository<Sticker>("stickers");
-
         }
 
         [UsedImplicitly]
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
+            IMongoDbInitializer mongoDbInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -74,7 +79,7 @@ namespace SB.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-            
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -82,7 +87,7 @@ namespace SB.Web
             });
 
             app.UseRouting();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -101,6 +106,8 @@ namespace SB.Web
             });
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
+            mongoDbInitializer.InitializeAsync();
         }
     }
 }

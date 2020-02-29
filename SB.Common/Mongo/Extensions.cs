@@ -12,7 +12,7 @@ namespace SB.Common.Mongo
             builder.Register(context =>
             {
                 var configuration = context.Resolve<IConfiguration>();
-                var options = configuration.GetOptions<MongoDbOptions>("Mongo");
+                var options = configuration.GetOptions<MongoDbOptions>("mongo");
 
                 return options;
             }).SingleInstance();
@@ -31,6 +31,14 @@ namespace SB.Common.Mongo
                 return client.GetDatabase(options.Database);
 
             }).InstancePerLifetimeScope();
+
+            builder.RegisterType<MongoDbInitializer>()
+                .As<IMongoDbInitializer>()
+                .InstancePerLifetimeScope();
+
+            builder.RegisterType<MongoDbSeeder>()
+                .As<IMongoDbSeeder>()
+                .InstancePerLifetimeScope();
         }
 
         public static void AddMongoRepository<TEntity>(this ContainerBuilder builder, string collectionName)
