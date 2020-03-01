@@ -95,22 +95,25 @@ class Sticker {
 
         this.dragData = null;
 
-        stickersServiceProvider.stickersService.move(
-            this.id,
-            {
-                x: this.element.x,
-                y: this.element.y
-            } as PositionDto)
-            .then(() => {
-                this.positionBeforeDrag = {
+        const positionChanged = this.positionBeforeDrag.x !== this.element.x || this.positionBeforeDrag.y !== this.element.y;
+        if (positionChanged) {
+            stickersServiceProvider.stickersService.move(
+                this.id,
+                {
                     x: this.element.x,
                     y: this.element.y
-                } as PositionDto
-            })
-            .catch(() => {
-                this.element.x = this.positionBeforeDrag.x;
-                this.element.y = this.positionBeforeDrag.y;
-            });
+                } as PositionDto)
+                .then(() => {
+                    this.positionBeforeDrag = {
+                        x: this.element.x,
+                        y: this.element.y
+                    } as PositionDto
+                })
+                .catch(() => {
+                    this.element.x = this.positionBeforeDrag.x;
+                    this.element.y = this.positionBeforeDrag.y;
+                });
+        }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
     }
