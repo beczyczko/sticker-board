@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using SB.Boards.Domain;
+using SB.Boards.Dtos;
 using SB.Common.Handlers;
 using SB.Common.Mongo;
 
@@ -30,7 +31,8 @@ namespace SB.Boards.Queries.Stickers
                     {
                         X = s.Position.X,
                         Y = s.Position.Y
-                    }))
+                    },
+                    new ColorDto(s.Color.Red, s.Color.Green, s.Color.Blue)))
                 .ToImmutableList();
         }
     }

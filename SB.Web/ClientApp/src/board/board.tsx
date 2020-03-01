@@ -11,13 +11,13 @@ class Board {
         this._onDoubleClick = onDoubleClick;
 
         const board = new PIXI.Graphics();
-        board.beginFill(0x1099bb);
+        board.beginFill(0xf1f1f1);
         board.drawRect(0, 0, 1000000, 1000000);
         board.endFill();
 
         board.interactive = true;
 
-        board.on("mousedown", this.onClick());
+        board.on('mousedown', this.onClick());
 
         this.container = board;
 

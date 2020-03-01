@@ -1,6 +1,8 @@
+import { AdjustmentFilter } from '@pixi/filter-adjustment';
 import * as PIXI from 'pixi.js';
-import { PositionDto, StickersService } from '../services/services';
+import { PositionDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
+import { StickerColor } from './sticker-color';
 
 const TextureCache = PIXI.utils.TextureCache;
 
@@ -18,12 +20,19 @@ class Sticker {
         public id: string,
         positionX: number,
         positionY: number,
-        public text: string) {
+        public text: string,
+        public color: StickerColor) {
         const textureCacheElement = TextureCache['sticker'];
 
         const sticker = new PIXI.Sprite(textureCacheElement);
         sticker.width = sticker.texture.width;
         sticker.height = sticker.texture.height;
+
+        sticker.filters = [new AdjustmentFilter({
+            red: color.red / 255,
+            green: color.green / 255,
+            blue: color.blue / 255
+        })];
 
         sticker.interactive = true;
         sticker.buttonMode = true;
@@ -70,7 +79,7 @@ class Sticker {
         // we want to track the movement of this particular touch
 
         this.dragData = event.data;
-        this.element.alpha = 0.5;
+        this.element.alpha = 0.6;
         this.element.dragging = true;
 
         const clickPosition = this.dragData.getLocalPosition(this.element.parent);
@@ -86,22 +95,25 @@ class Sticker {
 
         this.dragData = null;
 
-        stickersServiceProvider.stickersService.move(
-            this.id,
-            {
-                x: this.element.x,
-                y: this.element.y
-            } as PositionDto)
-            .then(() => {
-                this.positionBeforeDrag = {
+        const positionChanged = this.positionBeforeDrag.x !== this.element.x || this.positionBeforeDrag.y !== this.element.y;
+        if (positionChanged) {
+            stickersServiceProvider.stickersService.move(
+                this.id,
+                {
                     x: this.element.x,
                     y: this.element.y
-                } as PositionDto
-            })
-            .catch(() => {
-                this.element.x = this.positionBeforeDrag.x;
-                this.element.y = this.positionBeforeDrag.y;
-            });
+                } as PositionDto)
+                .then(() => {
+                    this.positionBeforeDrag = {
+                        x: this.element.x,
+                        y: this.element.y
+                    } as PositionDto
+                })
+                .catch(() => {
+                    this.element.x = this.positionBeforeDrag.x;
+                    this.element.y = this.positionBeforeDrag.y;
+                });
+        }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
     }
