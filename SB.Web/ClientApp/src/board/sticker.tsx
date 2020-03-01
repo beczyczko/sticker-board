@@ -1,6 +1,8 @@
+import { AdjustmentFilter } from '@pixi/filter-adjustment';
 import * as PIXI from 'pixi.js';
-import { PositionDto, StickersService } from '../services/services';
+import { PositionDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
+import { StickerColor } from './sticker-color';
 
 const TextureCache = PIXI.utils.TextureCache;
 
@@ -18,12 +20,19 @@ class Sticker {
         public id: string,
         positionX: number,
         positionY: number,
-        public text: string) {
+        public text: string,
+        public color: StickerColor) { //todo db handle no color returned from API?
         const textureCacheElement = TextureCache['sticker'];
 
         const sticker = new PIXI.Sprite(textureCacheElement);
         sticker.width = sticker.texture.width;
         sticker.height = sticker.texture.height;
+
+        sticker.filters = [new AdjustmentFilter({
+            red: color.red / 255,
+            green: color.green / 255,
+            blue: color.blue / 255
+        })];
 
         sticker.interactive = true;
         sticker.buttonMode = true;

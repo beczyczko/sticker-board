@@ -5,15 +5,19 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import SelectStickerColor from './select-sticker-color/SelectStickerColor';
+import { ColorDto } from '../services/services';
+import { StickerColor } from '../board/sticker-color';
 
 const textElementId = 'sticker-text';
 
 const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
 
     const [stickerText, setStickerText] = useState('');
+    const [selectedColor, setSelectedColor] = useState<ColorDto | null>(null);
 
     const onSave = () => {
-        onSaveCallback(stickerText);
+        onSaveCallback(stickerText, selectedColor);
         setOpen(false);
         setStickerText('');
     };
@@ -44,14 +48,25 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
             e.preventDefault();
             onSave();
         }
-    }
+    };
+
+    const onColorSelected = (color: ColorDto | undefined) => {
+        if (color) {
+            setSelectedColor(color);
+        } else {
+            setSelectedColor(StickerColor.default);
+        }
+    };
 
     return (
         <div>
             <Dialog open={open} onClose={onCancel}>
-                <DialogTitle>Add new sticker</DialogTitle>
+                <DialogTitle>Add new sticker
+                </DialogTitle>
 
                 <DialogContent>
+                    <SelectStickerColor onColorSelected={c => onColorSelected(c)}>
+                    </SelectStickerColor>
                     <TextField
                         autoFocus
                         margin="dense"
