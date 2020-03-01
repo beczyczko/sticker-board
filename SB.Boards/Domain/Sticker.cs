@@ -11,11 +11,14 @@ namespace SB.Boards.Domain
             Id = command.Id;
             Text = command.Text;
             Position = new Position(command.PositionX, command.PositionY);
+            Color = new Color(command.Color);
         }
 
         public Position Position { get; private set; }
 
         public string Text { get; private set; }
+
+        public Color Color { get; private set; }
 
         public void Move(MoveStickerCommand command)
         {

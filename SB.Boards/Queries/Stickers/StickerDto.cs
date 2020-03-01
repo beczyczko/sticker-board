@@ -10,7 +10,7 @@ namespace SB.Boards.Queries.Stickers
             Text = text;
             Position = position;
         }
-
+        //todo db color
         public Guid Id { get; }
         public string Text { get; }
         public PositionDto Position { get; }

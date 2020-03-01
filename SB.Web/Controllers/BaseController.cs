@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SB.Common.Dispatchers;
 using SB.Common.Messages;
@@ -41,6 +42,16 @@ namespace SB.Web.Controllers
             }
 
             return Ok(pagedResult);
+        }
+
+        protected ActionResult<IEnumerable<T>> Collection<T>(IEnumerable<T> collection)
+        {
+            if (collection == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(collection);
         }
     }
 }
