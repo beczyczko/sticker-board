@@ -11,6 +11,7 @@ import { StickerColor } from '../board/sticker-color';
 
 const textElementId = 'sticker-text';
 
+//todo db zrobić jakiś Type dla propsów
 const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
 
     const [stickerText, setStickerText] = useState('');

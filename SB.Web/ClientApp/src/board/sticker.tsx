@@ -21,7 +21,7 @@ class Sticker {
         positionX: number,
         positionY: number,
         public text: string,
-        public color: StickerColor) { //todo db handle no color returned from API?
+        public color: StickerColor) {
         const textureCacheElement = TextureCache['sticker'];
 
         const sticker = new PIXI.Sprite(textureCacheElement);

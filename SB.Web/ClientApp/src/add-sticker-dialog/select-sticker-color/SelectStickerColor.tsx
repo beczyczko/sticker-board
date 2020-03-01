@@ -17,8 +17,6 @@ const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
     const [stickerColors, setStickerColors] = useState<Array<StickerColor>>([]);
 
     useEffect(() => {
-        console.log(selectedColor);
-
         if (!initialized) {
             const stickersService = ServicesProvider.stickersService;
             stickersService.colors().then(response => {
@@ -75,9 +73,9 @@ const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
         <div className="color-picker">
             {stickerColors.map((c, i) => (
                 <button className="color-sample-container"
-                        onClick={() => colorSelected(c)}>
+                        onClick={() => colorSelected(c)}
+                        key={i}>
                     <div className={colorSampleClassNames(c)}
-                         key={i}
                          style={{ backgroundColor: colorAsCssRgbValue(c) }}>
                     </div>
                 </button>
