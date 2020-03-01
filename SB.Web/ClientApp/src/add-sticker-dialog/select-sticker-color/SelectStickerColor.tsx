@@ -4,12 +4,12 @@ import { ServicesProvider } from '../../services/services-provider';
 import { ColorDto } from '../../services/services';
 import { StickerColor } from '../../board/sticker-color';
 
-interface SelectStickerColor {
+interface SelectStickerColorProps {
     children: never[],
     onColorSelected: (color: StickerColor | undefined) => void
 }
 
-const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
+const SelectStickerColor = ({ onColorSelected }: SelectStickerColorProps) => {
     const latestSelectedColorStorageKey = 'latestSelectedColor';
 
     const [initialized, setInitialized] = useState(false);

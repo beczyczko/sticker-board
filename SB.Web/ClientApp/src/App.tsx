@@ -6,7 +6,7 @@ import stickerImage from './assets/sticker.png';
 import Sticker from './board/sticker';
 import Board from './board/board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
-import { AddStickerCommand, ColorDto } from './services/services';
+import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/sticker-color';
 

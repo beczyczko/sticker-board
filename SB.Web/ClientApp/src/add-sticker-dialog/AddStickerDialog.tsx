@@ -6,16 +6,22 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import SelectStickerColor from './select-sticker-color/SelectStickerColor';
-import { ColorDto } from '../services/services';
 import { StickerColor } from '../board/sticker-color';
 
 const textElementId = 'sticker-text';
 
+interface AddStickerDialogProps {
+    children: never[],
+    open: boolean,
+    setOpen: (value: (((prevState: boolean) => boolean) | boolean)) => void,
+    onSaveCallback: (stickerText: string, color: StickerColor) => void
+}
+
 //todo db zrobić jakiś Type dla propsów
-const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
+const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogProps) => {
 
     const [stickerText, setStickerText] = useState('');
-    const [selectedColor, setSelectedColor] = useState<ColorDto | null>(null);
+    const [selectedColor, setSelectedColor] = useState<StickerColor>(StickerColor.default);
 
     const onSave = () => {
         onSaveCallback(stickerText, selectedColor);
@@ -51,12 +57,9 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: any) => {
         }
     };
 
-    const onColorSelected = (color: ColorDto | undefined) => {
-        if (color) {
-            setSelectedColor(color);
-        } else {
-            setSelectedColor(StickerColor.default);
-        }
+    const onColorSelected = (color: StickerColor | undefined) => {
+        const stickerColor = color ?? StickerColor.default;
+        setSelectedColor(stickerColor);
     };
 
     return (
