@@ -76,6 +76,8 @@ namespace SB.Web
                 app.UseHsts();
             }
 
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
@@ -104,8 +106,6 @@ namespace SB.Web
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:3000/");
                 }
             });
-
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             mongoDbInitializer.InitializeAsync();
         }
