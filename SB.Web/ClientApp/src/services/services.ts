@@ -176,16 +176,17 @@ export interface PositionDto {
     y: number;
 }
 
-export interface StickerDto {
-    readonly id: string;
-    readonly text: string | null;
-    readonly position: PositionDto | null;
-}
-
 export interface ColorDto {
     readonly red: number;
     readonly green: number;
     readonly blue: number;
+}
+
+export interface StickerDto {
+    readonly id: string;
+    readonly text: string | null;
+    readonly position: PositionDto | null;
+    readonly color: ColorDto | null;
 }
 
 export interface AddStickerCommand {

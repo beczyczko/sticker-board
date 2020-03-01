@@ -79,7 +79,7 @@ class Sticker {
         // we want to track the movement of this particular touch
 
         this.dragData = event.data;
-        this.element.alpha = 0.5;
+        this.element.alpha = 0.6;
         this.element.dragging = true;
 
         const clickPosition = this.dragData.getLocalPosition(this.element.parent);

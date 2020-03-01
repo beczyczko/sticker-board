@@ -6,22 +6,24 @@ import { StickerColor } from '../../board/sticker-color';
 
 interface SelectStickerColor {
     children: never[],
-    onColorSelected: (color: ColorDto | undefined) => void
+    onColorSelected: (color: StickerColor | undefined) => void
 }
 
 const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
+    const latestSelectedColorStorageKey = 'latestSelectedColor';
 
     const [initialized, setInitialized] = useState(false);
     const [selectedColor, setSelectedColor] = useState<StickerColor | undefined>(undefined);
     const [stickerColors, setStickerColors] = useState<Array<StickerColor>>([]);
 
     useEffect(() => {
+        console.log(selectedColor);
+
         if (!initialized) {
             const stickersService = ServicesProvider.stickersService;
             stickersService.colors().then(response => {
                 const colors = response.map(c => StickerColor.create(c));
                 setStickerColors(colors);
-                setSelectedColor(colors[0]);
             });
         }
 
@@ -32,11 +34,27 @@ const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
         onColorSelected(selectedColor);
     }, [selectedColor]);
 
-    const colorAsCssRgbValue = (color: ColorDto) => {
+    useEffect(() => {
+        const latestSelectedColorAsString = localStorage.getItem('latestSelectedColor');
+        if (latestSelectedColorAsString) {
+            const latestSelectedColor = JSON.parse(latestSelectedColorAsString) as StickerColor;
+            const color = stickerColors.find(c => c.equals(latestSelectedColor));
+            if (color) {
+                setSelectedColor(color);
+            } else {
+                setSelectedColor(stickerColors[0]);
+            }
+        } else {
+            setSelectedColor(stickerColors[0]);
+        }
+    }, [stickerColors]);
+
+    const colorAsCssRgbValue = (color: StickerColor) => {
         return `rgb(${color.red}, ${color.green}, ${color.blue})`;
     };
 
-    const colorSelected = (color: ColorDto) => {
+    const colorSelected = (color: StickerColor) => {
+        localStorage.setItem(latestSelectedColorStorageKey, JSON.stringify(color));
         if (color !== selectedColor) {
             setSelectedColor(color);
         }
@@ -56,13 +74,13 @@ const SelectStickerColor = ({ onColorSelected }: SelectStickerColor) => {
     return (
         <div className="color-picker">
             {stickerColors.map((c, i) => (
-                <div className="color-sample-container">
-                    <button className={colorSampleClassNames(c)}
-                            key={i}
-                            style={{ backgroundColor: colorAsCssRgbValue(c) }}
-                            onClick={() => colorSelected(c)}>
-                    </button>
-                </div>
+                <button className="color-sample-container"
+                        onClick={() => colorSelected(c)}>
+                    <div className={colorSampleClassNames(c)}
+                         key={i}
+                         style={{ backgroundColor: colorAsCssRgbValue(c) }}>
+                    </div>
+                </button>
             ))}
         </div>
     );

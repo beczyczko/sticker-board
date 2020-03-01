@@ -8,6 +8,7 @@ import Board from './board/board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand, ColorDto } from './services/services';
 import { ServicesProvider } from './services/services-provider';
+import { StickerColor } from './board/sticker-color';
 
 function App() {
 
@@ -47,20 +48,19 @@ function App() {
             stickersService.stickersGet()
                 .then(stickers => {
                     stickers.forEach(s => {
-                        if (s.position && s.text)
+                        if (s.position && s.text && s.color)
                             newBoard.addSticker(new Sticker(
                                 s.id,
                                 s.position.x,
                                 s.position.y,
                                 s.text,
-                                { red: 1, green: 1, blue: 1 } as ColorDto)); //todo db get color from api
+                                StickerColor.create(s.color)));
                     });
                 });
         });
     }, [canvas]);
 
-    const handleStickerCreation = (stickerText: string, selectedColor: ColorDto) => {
-        debugger;
+    const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {
         if (newStickerPosition && board) {
             const sticker = new Sticker(
                 uuidv4(),
@@ -85,7 +85,7 @@ function App() {
             <canvas id="canvas"></canvas>
             <AddStickerDialog open={newStickerCreating}
                               setOpen={setNewStickerCreating}
-                              onSaveCallback={(stickerText: string, color: ColorDto) => handleStickerCreation(stickerText, color)}>
+                              onSaveCallback={(stickerText: string, color: StickerColor) => handleStickerCreation(stickerText, color)}>
             </AddStickerDialog>
         </div>
     );

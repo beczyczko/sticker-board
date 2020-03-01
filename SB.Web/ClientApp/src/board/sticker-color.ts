@@ -15,4 +15,8 @@ export class StickerColor implements ColorDto {
     public static get default(): StickerColor {
         return new StickerColor(245, 246, 248);
     }
+
+    public equals(color: StickerColor): boolean {
+        return JSON.stringify(color) === JSON.stringify(this);
+    }
 }

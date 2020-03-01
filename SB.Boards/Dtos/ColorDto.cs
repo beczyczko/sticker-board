@@ -1,7 +1,10 @@
-﻿namespace SB.Boards.Dtos
+﻿using Newtonsoft.Json;
+
+namespace SB.Boards.Dtos
 {
     public class ColorDto
     {
+        [JsonConstructor]
         public ColorDto(int red, int green, int blue)
         {
             Red = red;
