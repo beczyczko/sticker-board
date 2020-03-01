@@ -17,7 +17,6 @@ interface AddStickerDialogProps {
     onSaveCallback: (stickerText: string, color: StickerColor) => void
 }
 
-//todo db zrobić jakiś Type dla propsów
 const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogProps) => {
 
     const [stickerText, setStickerText] = useState('');
