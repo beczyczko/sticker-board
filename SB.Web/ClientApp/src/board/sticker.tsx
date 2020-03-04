@@ -82,7 +82,8 @@ class Sticker {
         this.element.alpha = 0.6;
         this.element.dragging = true;
 
-        const clickPosition = this.dragData.getLocalPosition(this.element.parent);
+        const board = this.element.parent;
+        const clickPosition = this.dragData.getLocalPosition(board);
         dragItemOffsetPosition = {
             x: clickPosition.x - this.element.x,
             y: clickPosition.y - this.element.y

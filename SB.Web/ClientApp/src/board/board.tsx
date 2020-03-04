@@ -1,10 +1,17 @@
 import * as PIXI from 'pixi.js';
 import Sticker from './sticker';
 
+enum MouseButton {
+    left = 0,
+    middle = 1
+}
+
 class Board {
-    container: any;
+    container: PIXI.Graphics;
     stickers = Array<Sticker>();
+    dragData: any;
     lastTimeClicked = 0;
+    lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
     _onDoubleClick: (clickPosition: any) => void;
 
     constructor(stage: any, onDoubleClick: (clickPosition: any) => void) {
@@ -12,16 +19,29 @@ class Board {
 
         const board = new PIXI.Graphics();
         board.beginFill(0xf1f1f1);
-        board.drawRect(0, 0, 1000000, 1000000);
+        board.drawRect(-10000, -5000, 20000, 10000);
         board.endFill();
 
         board.interactive = true;
-
-        board.on('mousedown', this.onClick());
+        this.registerMouseEventHandlers(board);
 
         this.container = board;
 
         stage.addChild(board);
+    }
+
+    private registerMouseEventHandlers(board: PIXI.Graphics) {
+        board
+            .on('mousedown', e => this.onClick(e))
+            .on('touchstart', e => this.onDragStart(e))
+            // events for drag end
+            .on('mouseup', () => this.onDragEnd())
+            .on('mouseupoutside', () => this.onDragEnd())
+            .on('touchend', () => this.onDragEnd())
+            .on('touchendoutside', () => this.onDragEnd())
+            // events for drag move
+            .on('mousemove', () => this.onDragMove())
+            .on('touchmove', () => this.onDragMove());
     }
 
     addSticker(sticker: Sticker) {
@@ -29,19 +49,41 @@ class Board {
         this.container.addChild(sticker.element);
     }
 
-    onClick() {
-        return (e: any) => {
-            const clickTime = Date.now();
+    private onClick(event) {
+        const clickTime = Date.now();
+        this.lastClickPosition = event.data.getLocalPosition(this.container);
 
-            if (clickTime - this.lastTimeClicked < 300) {
-                this.lastTimeClicked = 0;
-                const clickPosition = e.data.getLocalPosition(this.container.parent);
+        if (clickTime - this.lastTimeClicked < 300) {
+            this.lastTimeClicked = 0;
+            this._onDoubleClick(this.lastClickPosition);
+        } else {
+            this.lastTimeClicked = clickTime;
+        }
 
-                this._onDoubleClick(clickPosition);
-            } else {
-                this.lastTimeClicked = clickTime;
-            }
-        };
+        if (event.data.button === MouseButton.middle) {
+            this.onDragStart(event);
+        }
+    }
+
+    private onDragStart(event) {
+        this.dragData = event.data;
+        this.container.interactive = true;
+        this.container.buttonMode = true;
+        this.container.cursor = 'all-scroll';
+    }
+
+    private onDragEnd() {
+        this.container.buttonMode = false;
+        this.dragData = null;
+        this.container.cursor = 'default';
+    }
+
+    private onDragMove() {
+        if (this.dragData) {
+            const newPosition = this.dragData.getLocalPosition(this.container.parent);
+            this.container.position.x = newPosition.x - this.lastClickPosition.x;
+            this.container.position.y = newPosition.y - this.lastClickPosition.y;
+        }
     }
 }
 

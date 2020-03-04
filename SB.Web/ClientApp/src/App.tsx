@@ -9,16 +9,14 @@ import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/sticker-color';
+import { subscribeToScrollEvents } from './board/BoardNavigation';
 
 function App() {
 
+    let pixiLoader;
+
     const stickersService = ServicesProvider.stickersService;
-
-    const loader = new PIXI.Loader();
-    loader
-        .add('sticker', stickerImage)
-        .load();
-
+    const [initialized, setInitialized] = useState(false);
     const [canvas, setCanvas] = useState();
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
@@ -30,21 +28,41 @@ function App() {
     };
 
     useEffect(() => {
+        if (!initialized) {
+            pixiLoader = new PIXI.Loader();
+            pixiLoader
+                .add('sticker', stickerImage)
+                .load();
+        }
+
+        setInitialized(true);
+    }, [initialized]);
+
+
+    useEffect(() => {
         const canvas = document.getElementById('canvas');
 
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
         let app = new PIXI.Application({
             view: canvas,
-            width: window.innerWidth,
-            height: window.innerHeight - 100
+            width: windowWidth,
+            height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
         const stage = app.stage;
         stage.scale.set(0.4);
 
+        stage.position.x = windowWidth / 2;
+        stage.position.y = windowHeight / 2;
+
         const newBoard = new Board(stage, clickPosition => onBoardDoubleClick(clickPosition));
+
         setBoard(newBoard);
 
-        loader.onComplete.add(() => {
+        subscribeToScrollEvents(newBoard);
+
+        pixiLoader.onComplete.add(() => {
             stickersService.stickersGet()
                 .then(stickers => {
                     stickers.forEach(s => {
