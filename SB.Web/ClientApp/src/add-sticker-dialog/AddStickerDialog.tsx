@@ -6,7 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import SelectStickerColor from './select-sticker-color/SelectStickerColor';
-import { StickerColor } from '../board/sticker-color';
+import { StickerColor } from '../board/StickerColor';
 
 const textElementId = 'sticker-text';
 

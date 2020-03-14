@@ -1,17 +1,14 @@
 import * as PIXI from 'pixi.js';
-import Board from './board';
+import { MouseButton } from './MouseButton';
+import Board from './Board';
 
 const permittedScaleRange = { min: 0.2, max: 2 };
 let dragData: any;
 let lastClickStagePosition: { x: number, y: number } = { x: 0, y: 0 };
 let boardDragStartPosition: { x: number, y: number } = { x: 0, y: 0 };
 
-enum MouseButton {
-    left = 0,
-    middle = 1
-}
-
 export function subscribeToScrollEvents(board: Board) {
+
     const boardContainer = board.container;
     // todo db don't work with mouse scroll
     let ctrlKeyPressed = false;
@@ -81,7 +78,6 @@ export function subscribeToScrollEvents(board: Board) {
             y: boardContainer.position.y
         };
         dragData = event.data;
-        boardContainer.buttonMode = true;
         boardContainer.cursor = 'all-scroll';
     }
 

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import Sticker from './sticker';
+import Sticker from './Sticker';
 
 class Board {
     container: PIXI.Graphics;

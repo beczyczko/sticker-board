@@ -2,7 +2,8 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment';
 import * as PIXI from 'pixi.js';
 import { PositionDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
-import { StickerColor } from './sticker-color';
+import { StickerColor } from './StickerColor';
+import { MouseButton } from './MouseButton';
 
 const TextureCache = PIXI.utils.TextureCache;
 
@@ -39,8 +40,8 @@ class Sticker {
 
         sticker
             // events for drag start
-            .on('mousedown', (e: any) => this.onDragStart(e))
-            .on('touchstart', (e: any) => this.onDragStart(e))
+            .on('mousedown', (e: any) => this.onClick(e))
+            .on('touchstart', (e: any) => this.onClick(e))
             // events for drag end
             .on('mouseup', () => this.onDragEnd())
             .on('mouseupoutside', () => this.onDragEnd())
@@ -73,11 +74,16 @@ class Sticker {
         } as PositionDto;
     }
 
+    onClick(event: any) {
+        if (event.data.button === MouseButton.left) {
+            this.onDragStart(event);
+        }
+    }
+
     onDragStart(event: any) {
         // store a reference to the dragData
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
-        console.log('sticker drag start'); // todo db middle click on board should not move sticker
         this.dragData = event.data;
         this.element.alpha = 0.6;
         this.element.dragging = true;

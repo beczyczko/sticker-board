@@ -3,12 +3,12 @@ import './App.scss';
 import * as PIXI from 'pixi.js'
 import { v4 as uuidv4 } from 'uuid';
 import stickerImage from './assets/sticker.png';
-import Sticker from './board/sticker';
-import Board from './board/board';
+import Sticker from './board/Sticker';
+import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
-import { StickerColor } from './board/sticker-color';
+import { StickerColor } from './board/StickerColor';
 import { subscribeToScrollEvents } from './board/BoardNavigation';
 
 function App() {
