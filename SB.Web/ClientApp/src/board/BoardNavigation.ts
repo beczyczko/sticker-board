@@ -5,8 +5,8 @@ import Board from './Board';
 const permittedScaleRange = { min: 0.05, max: 2 };
 let dragData: any;
 let cursorMoveData: any;
-let lastClickStagePosition: { x: number, y: number } = { x: 0, y: 0 };
-let boardDragStartPosition: { x: number, y: number } = { x: 0, y: 0 };
+let lastClickPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
+let boardDragStartPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
 
 export function subscribeToScrollEvents(board: Board) {
     const boardContainer = board.container;
@@ -80,7 +80,7 @@ export function subscribeToScrollEvents(board: Board) {
     };
 
     function onClick(event) {
-        lastClickStagePosition = event.data.getLocalPosition(boardContainer.parent);
+        lastClickPositionOnStage = event.data.getLocalPosition(boardContainer.parent);
 
         if (event.data.button === MouseButton.middle) {
             onDragStart(event);
@@ -88,7 +88,7 @@ export function subscribeToScrollEvents(board: Board) {
     }
 
     function onDragStart(event) {
-        boardDragStartPosition = {
+        boardDragStartPositionOnStage = {
             x: boardContainer.position.x,
             y: boardContainer.position.y
         };
@@ -108,11 +108,11 @@ export function subscribeToScrollEvents(board: Board) {
         if (dragData) {
             const newPosition = dragData.getLocalPosition(boardContainer.parent);
             const mouseMove = {
-                x: newPosition.x - lastClickStagePosition.x,
-                y: newPosition.y - lastClickStagePosition.y
+                x: newPosition.x - lastClickPositionOnStage.x,
+                y: newPosition.y - lastClickPositionOnStage.y
             };
-            boardContainer.position.x = boardDragStartPosition.x + mouseMove.x;
-            boardContainer.position.y = boardDragStartPosition.y + mouseMove.y;
+            boardContainer.position.x = boardDragStartPositionOnStage.x + mouseMove.x;
+            boardContainer.position.y = boardDragStartPositionOnStage.y + mouseMove.y;
         }
     }
 
