@@ -1,15 +1,9 @@
 import * as PIXI from 'pixi.js';
 import Sticker from './sticker';
 
-enum MouseButton {
-    left = 0,
-    middle = 1
-}
-
 class Board {
     container: PIXI.Graphics;
     stickers = Array<Sticker>();
-    dragData: any;
     lastTimeClicked = 0;
     lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
     _onDoubleClick: (clickPosition: any) => void;
@@ -31,17 +25,7 @@ class Board {
     }
 
     private registerMouseEventHandlers(board: PIXI.Graphics) {
-        board
-            .on('mousedown', e => this.onClick(e))
-            .on('touchstart', e => this.onDragStart(e))
-            // events for drag end
-            .on('mouseup', () => this.onDragEnd())
-            .on('mouseupoutside', () => this.onDragEnd())
-            .on('touchend', () => this.onDragEnd())
-            .on('touchendoutside', () => this.onDragEnd())
-            // events for drag move
-            .on('mousemove', () => this.onDragMove())
-            .on('touchmove', () => this.onDragMove());
+        board.on('mousedown', e => this.onClick(e))
     }
 
     addSticker(sticker: Sticker) {
@@ -58,31 +42,6 @@ class Board {
             this._onDoubleClick(this.lastClickPosition);
         } else {
             this.lastTimeClicked = clickTime;
-        }
-
-        if (event.data.button === MouseButton.middle) {
-            this.onDragStart(event);
-        }
-    }
-
-    private onDragStart(event) {
-        this.dragData = event.data;
-        this.container.interactive = true;
-        this.container.buttonMode = true;
-        this.container.cursor = 'all-scroll';
-    }
-
-    private onDragEnd() {
-        this.container.buttonMode = false;
-        this.dragData = null;
-        this.container.cursor = 'default';
-    }
-
-    private onDragMove() {
-        if (this.dragData) {
-            const newPosition = this.dragData.getLocalPosition(this.container.parent);
-            this.container.position.x = newPosition.x - this.lastClickPosition.x;
-            this.container.position.y = newPosition.y - this.lastClickPosition.y;
         }
     }
 }

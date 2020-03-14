@@ -77,7 +77,7 @@ class Sticker {
         // store a reference to the dragData
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
-
+        console.log('sticker drag start'); // todo db middle click on board should not move sticker
         this.dragData = event.data;
         this.element.alpha = 0.6;
         this.element.dragging = true;

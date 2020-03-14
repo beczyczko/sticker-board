@@ -49,7 +49,6 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
     }, [open]);
 
     const keyPress = (e: any) => {
-        //todo db add num-pad enter i condition, can't test it right now
         if (e.keyCode === 13) {
             e.preventDefault();
             onSave();

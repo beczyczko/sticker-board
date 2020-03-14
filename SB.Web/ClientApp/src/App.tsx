@@ -50,13 +50,12 @@ function App() {
             height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
-        const stage = app.stage;
-        stage.scale.set(0.4);
+        const newBoard = new Board(app.stage, clickPosition => onBoardDoubleClick(clickPosition));
 
-        stage.position.x = windowWidth / 2;
-        stage.position.y = windowHeight / 2;
-
-        const newBoard = new Board(stage, clickPosition => onBoardDoubleClick(clickPosition));
+        // todo db last view position will be stored
+        newBoard.container.scale.set(0.4);
+        newBoard.container.x = windowWidth / 2;
+        newBoard.container.y = windowHeight / 2;
 
         setBoard(newBoard);
 
