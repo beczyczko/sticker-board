@@ -52,7 +52,6 @@ function App() {
 
         const newBoard = new Board(app.stage, clickPosition => onBoardDoubleClick(clickPosition));
 
-        // todo db last view position will be stored
         newBoard.container.scale.set(0.4);
         newBoard.container.x = windowWidth / 2;
         newBoard.container.y = windowHeight / 2;
