@@ -6,7 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import SelectStickerColor from './select-sticker-color/SelectStickerColor';
-import { StickerColor } from '../board/sticker-color';
+import { StickerColor } from '../board/StickerColor';
 
 const textElementId = 'sticker-text';
 
@@ -49,7 +49,6 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
     }, [open]);
 
     const keyPress = (e: any) => {
-        //todo db add num-pad enter i condition, can't test it right now
         if (e.keyCode === 13) {
             e.preventDefault();
             onSave();

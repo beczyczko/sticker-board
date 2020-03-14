@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './SelectStickerColor.scss';
 import { ServicesProvider } from '../../services/services-provider';
 import { ColorDto } from '../../services/services';
-import { StickerColor } from '../../board/sticker-color';
+import { StickerColor } from '../../board/StickerColor';
 
 interface SelectStickerColorProps {
     children: never[],

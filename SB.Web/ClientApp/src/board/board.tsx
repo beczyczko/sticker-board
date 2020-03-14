@@ -1,10 +1,11 @@
 import * as PIXI from 'pixi.js';
-import Sticker from './sticker';
+import Sticker from './Sticker';
 
 class Board {
-    container: any;
+    container: PIXI.Graphics;
     stickers = Array<Sticker>();
     lastTimeClicked = 0;
+    lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
     _onDoubleClick: (clickPosition: any) => void;
 
     constructor(stage: any, onDoubleClick: (clickPosition: any) => void) {
@@ -12,16 +13,19 @@ class Board {
 
         const board = new PIXI.Graphics();
         board.beginFill(0xf1f1f1);
-        board.drawRect(0, 0, 1000000, 1000000);
+        board.drawRect(-10000, -5000, 20000, 10000);
         board.endFill();
 
         board.interactive = true;
-
-        board.on('mousedown', this.onClick());
+        this.registerMouseEventHandlers(board);
 
         this.container = board;
 
         stage.addChild(board);
+    }
+
+    private registerMouseEventHandlers(board: PIXI.Graphics) {
+        board.on('mousedown', e => this.onClick(e))
     }
 
     addSticker(sticker: Sticker) {
@@ -29,19 +33,16 @@ class Board {
         this.container.addChild(sticker.element);
     }
 
-    onClick() {
-        return (e: any) => {
-            const clickTime = Date.now();
+    private onClick(event) {
+        const clickTime = Date.now();
+        this.lastClickPosition = event.data.getLocalPosition(this.container);
 
-            if (clickTime - this.lastTimeClicked < 300) {
-                this.lastTimeClicked = 0;
-                const clickPosition = e.data.getLocalPosition(this.container.parent);
-
-                this._onDoubleClick(clickPosition);
-            } else {
-                this.lastTimeClicked = clickTime;
-            }
-        };
+        if (clickTime - this.lastTimeClicked < 300) {
+            this.lastTimeClicked = 0;
+            this._onDoubleClick(this.lastClickPosition);
+        } else {
+            this.lastTimeClicked = clickTime;
+        }
     }
 }
 

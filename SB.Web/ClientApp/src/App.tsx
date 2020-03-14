@@ -3,22 +3,20 @@ import './App.scss';
 import * as PIXI from 'pixi.js'
 import { v4 as uuidv4 } from 'uuid';
 import stickerImage from './assets/sticker.png';
-import Sticker from './board/sticker';
-import Board from './board/board';
+import Sticker from './board/Sticker';
+import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
-import { StickerColor } from './board/sticker-color';
+import { StickerColor } from './board/StickerColor';
+import { subscribeToScrollEvents } from './board/BoardNavigation';
 
 function App() {
 
+    let pixiLoader;
+
     const stickersService = ServicesProvider.stickersService;
-
-    const loader = new PIXI.Loader();
-    loader
-        .add('sticker', stickerImage)
-        .load();
-
+    const [initialized, setInitialized] = useState(false);
     const [canvas, setCanvas] = useState();
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
@@ -30,21 +28,39 @@ function App() {
     };
 
     useEffect(() => {
+        if (!initialized) {
+            pixiLoader = new PIXI.Loader();
+            pixiLoader
+                .add('sticker', stickerImage)
+                .load();
+        }
+
+        setInitialized(true);
+    }, [initialized]);
+
+
+    useEffect(() => {
         const canvas = document.getElementById('canvas');
 
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
         let app = new PIXI.Application({
             view: canvas,
-            width: window.innerWidth,
-            height: window.innerHeight - 100
+            width: windowWidth,
+            height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
-        const stage = app.stage;
-        stage.scale.set(0.4);
+        const newBoard = new Board(app.stage, clickPosition => onBoardDoubleClick(clickPosition));
 
-        const newBoard = new Board(stage, clickPosition => onBoardDoubleClick(clickPosition));
+        newBoard.container.scale.set(0.4);
+        newBoard.container.x = windowWidth / 2;
+        newBoard.container.y = windowHeight / 2;
+
         setBoard(newBoard);
 
-        loader.onComplete.add(() => {
+        subscribeToScrollEvents(newBoard);
+
+        pixiLoader.onComplete.add(() => {
             stickersService.stickersGet()
                 .then(stickers => {
                     stickers.forEach(s => {
