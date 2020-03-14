@@ -2,15 +2,13 @@ import * as PIXI from 'pixi.js';
 import { MouseButton } from './MouseButton';
 import Board from './Board';
 
-const permittedScaleRange = { min: 0.2, max: 2 };
+const permittedScaleRange = { min: 0.1, max: 2 };
 let dragData: any;
 let lastClickStagePosition: { x: number, y: number } = { x: 0, y: 0 };
 let boardDragStartPosition: { x: number, y: number } = { x: 0, y: 0 };
 
 export function subscribeToScrollEvents(board: Board) {
-
     const boardContainer = board.container;
-    // todo db don't work with mouse scroll
     let ctrlKeyPressed = false;
 
     registerMouseEventHandlers(boardContainer);
@@ -24,11 +22,12 @@ export function subscribeToScrollEvents(board: Board) {
     // 2017 recommended event
     document.body.addEventListener('wheel', function (event: WheelEvent) {
         if (ctrlKeyPressed) {
-            zoom(boardContainer, event.deltaY);
+            event.preventDefault();
+            zoom(boardContainer, -event.deltaY);
         } else {
             moveBoard(boardContainer, event);
         }
-    }, false);
+    }, { passive: false } as AddEventListenerOptions);
 
     // Before 2017, IE9, Chrome, Safari, Opera
     document.body.addEventListener('mousewheel', function (event) {
@@ -53,7 +52,7 @@ export function subscribeToScrollEvents(board: Board) {
         const actualScale = boardScale.x;
 
         zoomDirection = Math.cbrt(zoomDirection);
-        const newScale = actualScale * (1 + zoomDirection * 0.02);
+        const newScale = actualScale * (1 + zoomDirection * 0.05);
 
         if (newScale < permittedScaleRange.min) {
             boardScale.set(permittedScaleRange.min);
