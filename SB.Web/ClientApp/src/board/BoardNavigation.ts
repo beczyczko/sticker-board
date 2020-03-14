@@ -2,8 +2,9 @@ import * as PIXI from 'pixi.js';
 import { MouseButton } from './MouseButton';
 import Board from './Board';
 
-const permittedScaleRange = { min: 0.1, max: 2 };
+const permittedScaleRange = { min: 0.05, max: 2 };
 let dragData: any;
+let cursorMoveData: any;
 let lastClickStagePosition: { x: number, y: number } = { x: 0, y: 0 };
 let boardDragStartPosition: { x: number, y: number } = { x: 0, y: 0 };
 
@@ -13,10 +14,10 @@ export function subscribeToScrollEvents(board: Board) {
 
     registerMouseEventHandlers(boardContainer);
 
-    const moveBoard = (stage: PIXI.Container, event: any) => {
+    const moveBoard = (board: PIXI.Container, event: any) => {
         const scrollSpeed = 1;
-        stage.position.x -= event.deltaX * scrollSpeed;
-        stage.position.y -= event.deltaY * scrollSpeed;
+        board.position.x -= event.deltaX * scrollSpeed;
+        board.position.y -= event.deltaY * scrollSpeed;
     };
 
     // 2017 recommended event
@@ -47,8 +48,10 @@ export function subscribeToScrollEvents(board: Board) {
         ctrlKeyPressed = false;
     }, false);
 
-    const zoom = (stage: PIXI.Container, zoomDirection: number) => {
-        const boardScale = stage.scale;
+    const zoom = (board: PIXI.Container, zoomDirection: number) => {
+        const cursorPositionBeforeZoom = cursorMoveData.getLocalPosition(boardContainer);
+
+        const boardScale = board.scale;
         const actualScale = boardScale.x;
 
         zoomDirection = Math.cbrt(zoomDirection);
@@ -61,6 +64,19 @@ export function subscribeToScrollEvents(board: Board) {
         } else {
             boardScale.set(newScale);
         }
+        boardContainer.updateTransform();
+
+        const cursorPositionAfterZoom = cursorMoveData.getLocalPosition(boardContainer);
+        const cursorPositionChange = {
+            x: cursorPositionAfterZoom.x - cursorPositionBeforeZoom.x,
+            y: cursorPositionAfterZoom.y - cursorPositionBeforeZoom.y
+        };
+
+        boardContainer.position.set(
+            boardContainer.position.x + cursorPositionChange.x * boardContainer.scale.x,
+            boardContainer.position.y + cursorPositionChange.y * boardContainer.scale.y,
+        );
+        boardContainer.updateTransform();
     };
 
     function onClick(event) {
@@ -86,7 +102,9 @@ export function subscribeToScrollEvents(board: Board) {
         boardContainer.cursor = 'default';
     }
 
-    function onDragMove() {
+    function onDragMove(event) {
+        cursorMoveData = event.data;
+
         if (dragData) {
             const newPosition = dragData.getLocalPosition(boardContainer.parent);
             const mouseMove = {
@@ -108,8 +126,8 @@ export function subscribeToScrollEvents(board: Board) {
             .on('touchend', () => onDragEnd())
             .on('touchendoutside', () => onDragEnd())
             // events for drag move
-            .on('mousemove', () => onDragMove())
-            .on('touchmove', () => onDragMove());
+            .on('mousemove', e => onDragMove(e))
+            .on('touchmove', e => onDragMove(e));
     }
 }
 
