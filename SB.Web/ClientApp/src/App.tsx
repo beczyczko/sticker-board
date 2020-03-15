@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.scss';
 import * as PIXI from 'pixi.js'
 import { v4 as uuidv4 } from 'uuid';
-import stickerImage from './assets/sticker.png';
+import stickerShadowImage from './assets/sticker_shadow.png';
 import Sticker from './board/Sticker';
 import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
@@ -31,7 +31,7 @@ function App() {
         if (!initialized) {
             pixiLoader = new PIXI.Loader();
             pixiLoader
-                .add('sticker', stickerImage)
+                .add('sticker_shadow', stickerShadowImage)
                 .load();
         }
 

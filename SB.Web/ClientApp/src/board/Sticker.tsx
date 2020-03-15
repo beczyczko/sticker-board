@@ -1,4 +1,3 @@
-import { AdjustmentFilter } from '@pixi/filter-adjustment';
 import * as PIXI from 'pixi.js';
 import { PositionDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
@@ -10,12 +9,14 @@ const TextureCache = PIXI.utils.TextureCache;
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
 const stickersServiceProvider = ServicesProvider;
+const stickerShadowAlpha = 0.5;
 
 class Sticker {
     private positionBeforeDrag: PositionDto = { x: 0, y: 0 };
 
     public dragData: any;
-    public element: any;
+    public element: PIXI.Sprite;
+    public dragging : boolean = false;
 
     constructor(
         public id: string,
@@ -23,22 +24,24 @@ class Sticker {
         positionY: number,
         public text: string,
         public color: StickerColor) {
-        const textureCacheElement = TextureCache['sticker'];
 
+        const innerSticker = new PIXI.Graphics();
+        innerSticker.beginFill(this.colorToInt(color));
+
+        innerSticker.drawRect(0, 0, 400, 400);
+
+        const textureCacheElement = TextureCache['sticker_shadow'];
         const sticker = new PIXI.Sprite(textureCacheElement);
         sticker.width = sticker.texture.width;
         sticker.height = sticker.texture.height;
 
-        sticker.filters = [new AdjustmentFilter({
-            red: color.red / 255,
-            green: color.green / 255,
-            blue: color.blue / 255
-        })];
+        innerSticker.interactive = true;
+        innerSticker.buttonMode = true;
 
-        sticker.interactive = true;
-        sticker.buttonMode = true;
+        sticker.alpha = stickerShadowAlpha;
+        innerSticker.alpha = 1 / stickerShadowAlpha;
 
-        sticker
+        innerSticker
             // events for drag start
             .on('mousedown', (e: any) => this.onClick(e))
             .on('touchstart', (e: any) => this.onClick(e))
@@ -64,7 +67,8 @@ class Sticker {
         textElement.x = 30;
         textElement.y = 30;
 
-        sticker.addChild(textElement);
+        innerSticker.addChild(textElement);
+        sticker.addChild(innerSticker);
 
         this.element = sticker;
 
@@ -73,6 +77,10 @@ class Sticker {
             y: positionY
         } as PositionDto;
     }
+
+    colorToInt(color: StickerColor): number {
+        return color.red * 256 * 256 + color.green * 256 + color.blue;
+    };
 
     onClick(event: any) {
         if (event.data.button === MouseButton.left) {
@@ -85,8 +93,8 @@ class Sticker {
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
         this.dragData = event.data;
-        this.element.alpha = 0.6;
-        this.element.dragging = true;
+        this.element.alpha = 0.4;
+        this.dragging = true;
 
         const board = this.element.parent;
         const clickPosition = this.dragData.getLocalPosition(board);
@@ -97,8 +105,8 @@ class Sticker {
     }
 
     async onDragEnd() {
-        this.element.alpha = 1;
-        this.element.dragging = false;
+        this.element.alpha = stickerShadowAlpha;
+        this.dragging = false;
 
         this.dragData = null;
 
@@ -126,7 +134,7 @@ class Sticker {
     }
 
     onDragMove() {
-        if (this.element.dragging) {
+        if (this.dragging) {
             const newPosition = this.dragData.getLocalPosition(this.element.parent);
             this.element.position.x = newPosition.x - dragItemOffsetPosition.x;
             this.element.position.y = newPosition.y - dragItemOffsetPosition.y;
