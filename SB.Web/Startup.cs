@@ -11,6 +11,7 @@ using SB.Boards.Domain;
 using SB.Common.Dispatchers;
 using SB.Common.Mongo;
 using SB.Common.Mvc;
+using SB.SignalR;
 
 namespace SB.Web
 {
@@ -38,6 +39,8 @@ namespace SB.Web
             });
 
             services.AddControllers();
+
+            services.AddSignalR();
 
             services.AddSpaStaticFiles(configuration =>
             {
@@ -76,7 +79,7 @@ namespace SB.Web
                 app.UseHsts();
             }
 
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors(builder => builder.SetIsOriginAllowed(host => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -95,6 +98,7 @@ namespace SB.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<BoardHub>("/board");
             });
 
             app.UseSpa(spa =>

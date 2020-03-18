@@ -23,17 +23,14 @@ namespace SB.Boards.Queries.Stickers
         {
             var stickers = await _repository.FindAsync(s => true);
 
-            return stickers
+            var immutableList = stickers
                 .Select(s => new StickerDto(
                     s.Id,
                     s.Text,
-                    new PositionDto
-                    {
-                        X = s.Position.X,
-                        Y = s.Position.Y
-                    },
+                    new PositionDto(s.Position.X, s.Position.Y),
                     new ColorDto(s.Color.Red, s.Color.Green, s.Color.Blue)))
                 .ToImmutableList();
+            return immutableList;
         }
     }
 }

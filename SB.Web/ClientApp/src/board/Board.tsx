@@ -1,5 +1,7 @@
 import * as PIXI from 'pixi.js';
 import Sticker from './Sticker';
+import { BoardSignalRService } from './signal-r/BoardSignalRService';
+import { tap } from 'rxjs/operators';
 
 class Board {
     container: PIXI.Graphics;
@@ -8,7 +10,7 @@ class Board {
     lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
     _onDoubleClick: (clickPosition: any) => void;
 
-    constructor(stage: any, onDoubleClick: (clickPosition: any) => void) {
+    constructor(stage: any, onDoubleClick: (clickPosition: any) => void, boardSignalRService: BoardSignalRService) {
         this._onDoubleClick = onDoubleClick;
 
         const board = new PIXI.Graphics();
@@ -22,6 +24,14 @@ class Board {
         this.container = board;
 
         stage.addChild(board);
+        boardSignalRService.stickerMoved()
+            .pipe(tap(e => {
+                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                if (sticker) {
+                    sticker.move(e.position);
+                }
+            }))
+            .subscribe();
     }
 
     private registerMouseEventHandlers(board: PIXI.Graphics) {

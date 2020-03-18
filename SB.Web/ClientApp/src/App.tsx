@@ -10,6 +10,8 @@ import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
 import { subscribeToScrollEvents } from './board/BoardNavigation';
+import { BoardSignalRService } from './board/signal-r/BoardSignalRService';
+import { BaseAPIUrl } from './app-settings';
 
 function App() {
 
@@ -50,7 +52,10 @@ function App() {
             height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
-        const newBoard = new Board(app.stage, clickPosition => onBoardDoubleClick(clickPosition));
+        const newBoard = new Board(
+            app.stage,
+            clickPosition => onBoardDoubleClick(clickPosition),
+            new BoardSignalRService(BaseAPIUrl));
 
         newBoard.container.scale.set(0.4);
         newBoard.container.x = windowWidth / 2;
