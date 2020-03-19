@@ -8,4 +8,8 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SB.Boards\SB.Boards.csproj" />
+  </ItemGroup>
+
 </Project>

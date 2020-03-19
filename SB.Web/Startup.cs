@@ -9,9 +9,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SB.Boards.Domain;
 using SB.Common.Dispatchers;
+using SB.Common.MediatR;
 using SB.Common.Mongo;
 using SB.Common.Mvc;
-using SB.SignalR;
+using SB.SignalR.Board;
 
 namespace SB.Web
 {
@@ -42,10 +43,7 @@ namespace SB.Web
 
             services.AddSignalR();
 
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
 
             services.AddOptions();
         }
@@ -56,10 +54,26 @@ namespace SB.Web
             builder.RegisterAssemblyTypes(Assembly.GetEntryAssembly()).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Dispatcher).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Sticker).Assembly).AsImplementedInterfaces();
-            builder.AddDispatchers();
+            builder.RegisterAssemblyTypes(typeof(BoardHub).Assembly).AsImplementedInterfaces();
 
+            builder.AddDispatchers();
+            AddMediatR(builder);
             builder.AddMongo();
             builder.AddMongoRepository<Sticker>("stickers");
+        }
+
+        private void AddMediatR(ContainerBuilder builder)
+        {
+            builder.AddMediatR();
+
+            // how to register mediatr handlers
+            // https://github.com/jbogard/MediatR/tree/master/samples/MediatR.Examples.PublishStrategies
+            // finally register our custom code (individually, or via assembly scanning)
+            // - requests & handlers as transient, i.e. InstancePerDependency()
+            // - pre/post-processors as scoped/per-request, i.e. InstancePerLifetimeScope()
+            // - behaviors as transient, i.e. InstancePerDependency()
+            // builder.RegisterAssemblyTypes(typeof(Startup).GetTypeInfo().Assembly).AsImplementedInterfaces(); // via assembly scan
+            // builder.RegisterType<MyHandler>().AsImplementedInterfaces().InstancePerDependency();
         }
 
         [UsedImplicitly]
@@ -79,17 +93,15 @@ namespace SB.Web
                 app.UseHsts();
             }
 
-            app.UseCors(builder => builder.SetIsOriginAllowed(host => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+            app.UseCors(builder =>
+                builder.SetIsOriginAllowed(host => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "SB API");
-            });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "SB API"); });
 
             app.UseRouting();
 
