@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Mvc;
 using SB.Common.Dispatchers;
 using SB.Common.Messages;
@@ -29,6 +30,16 @@ namespace SB.Web.Controllers
             }
 
             return Ok(data);
+        }
+
+        protected ActionResult<T> Single<T>(Maybe<T> data)
+        {
+            if (data.HasNoValue)
+            {
+                return NotFound();
+            }
+
+            return Ok(data.Value);
         }
 
         protected async Task SendAsync<T>(T command) where T : ICommand

@@ -10,7 +10,7 @@ import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
 import { subscribeToScrollEvents } from './board/BoardNavigation';
-import { BoardSignalRService } from './board/signal-r/BoardSignalRService';
+import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
 
 function App() {
@@ -55,7 +55,8 @@ function App() {
         const newBoard = new Board(
             app.stage,
             clickPosition => onBoardDoubleClick(clickPosition),
-            new BoardSignalRService(BaseAPIUrl));
+            new BoardSignalRService(BaseAPIUrl),
+            stickersService);
 
         newBoard.container.scale.set(0.4);
         newBoard.container.x = windowWidth / 2;
@@ -66,7 +67,7 @@ function App() {
         subscribeToScrollEvents(newBoard);
 
         pixiLoader.onComplete.add(() => {
-            stickersService.stickersGet()
+            stickersService.stickersAll()
                 .then(stickers => {
                     stickers.forEach(s => {
                         if (s.position && s.text && s.color)
@@ -90,7 +91,7 @@ function App() {
                 stickerText,
                 selectedColor);
 
-            stickersService.stickersPost(({
+            stickersService.stickers(({
                 id: sticker.id,
                 positionX: sticker.element.x,
                 positionY: sticker.element.y,

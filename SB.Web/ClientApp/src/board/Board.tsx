@@ -1,7 +1,9 @@
 import * as PIXI from 'pixi.js';
 import Sticker from './Sticker';
-import { BoardSignalRService } from './signal-r/BoardSignalRService';
-import { tap } from 'rxjs/operators';
+import { BoardSignalRService } from '../signal-r/BoardSignalRService';
+import { filter, switchMap, tap } from 'rxjs/operators';
+import { StickerDto, StickersService } from '../services/services';
+import { StickerColor } from './StickerColor';
 
 class Board {
     container: PIXI.Graphics;
@@ -10,7 +12,11 @@ class Board {
     lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
     _onDoubleClick: (clickPosition: any) => void;
 
-    constructor(stage: any, onDoubleClick: (clickPosition: any) => void, boardSignalRService: BoardSignalRService) {
+    constructor(
+        stage: any,
+        onDoubleClick: (clickPosition: any) => void,
+        boardSignalRService: BoardSignalRService,
+        stickersService: StickersService) {
         this._onDoubleClick = onDoubleClick;
 
         const board = new PIXI.Graphics();
@@ -24,6 +30,18 @@ class Board {
         this.container = board;
 
         stage.addChild(board);
+
+        this.subscribeSignalREvents(boardSignalRService, stickersService);
+    }
+
+    public addSticker(sticker: Sticker) {
+        if (!this.stickers.some(s => s.id === sticker.id)) {
+            this.stickers.push(sticker);
+            this.container.addChild(sticker.element);
+        }
+    }
+
+    private subscribeSignalREvents(boardSignalRService: BoardSignalRService, stickersService: StickersService) {
         boardSignalRService.stickerMoved()
             .pipe(tap(e => {
                 const sticker = this.stickers.find(s => s.id === e.stickerId);
@@ -32,15 +50,28 @@ class Board {
                 }
             }))
             .subscribe();
+        boardSignalRService.stickerCreated()
+            .pipe(
+                filter(e => {
+                    return !this.stickers.find(s => s.id === e.stickerId);
+                }),
+                switchMap(e => stickersService.stickers2(e.stickerId)),
+                tap((s: StickerDto) => {
+                    if (s.position && s.text && s.color) {
+                        const newSticker = new Sticker(
+                            s.id,
+                            s.position.x,
+                            s.position.y,
+                            s.text,
+                            StickerColor.create(s.color));
+                        this.addSticker(newSticker);
+                    }
+                }))
+            .subscribe();
     }
 
     private registerMouseEventHandlers(board: PIXI.Graphics) {
         board.on('mousedown', e => this.onClick(e))
-    }
-
-    addSticker(sticker: Sticker) {
-        this.stickers.push(sticker);
-        this.container.addChild(sticker.element);
     }
 
     private onClick(event) {

@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
-import { StickerMovedEvent } from './StickerMovedEvent';
+import { StickerMovedEvent } from './Types/StickerMovedEvent';
+import { StickerCreatedEvent } from './Types/StickerCreatedEvent';
 
 export class BoardSignalRService {
 
@@ -10,6 +11,7 @@ export class BoardSignalRService {
     private hubConnection: HubConnection;
 
     private stickerMoved$ = new Subject<StickerMovedEvent>();
+    private stickerCreated$ = new Subject<StickerCreatedEvent>();
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
@@ -21,6 +23,10 @@ export class BoardSignalRService {
 
     public stickerMoved(): Observable<StickerMovedEvent> {
         return this.stickerMoved$.asObservable();
+    }
+
+    public stickerCreated(): Observable<StickerCreatedEvent> {
+        return this.stickerCreated$.asObservable();
     }
 
     private createConnection(): HubConnection {
@@ -50,6 +56,11 @@ export class BoardSignalRService {
             'StickerMoved',
             (data: StickerMovedEvent) => {
                 this.stickerMoved$.next(data);
+            });
+        this.hubConnection.on(
+            'StickerCreated',
+            (data: StickerCreatedEvent) => {
+                this.stickerCreated$.next(data);
             });
     }
 }
