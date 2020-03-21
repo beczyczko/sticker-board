@@ -38,7 +38,7 @@
       "useTransformOptionsMethod": false,
       "useTransformResultMethod": false,
       "generateDtoTypes": true,
-      "operationGenerationMode": "MultipleClientsFromFirstTagAndPathSegments",
+      "operationGenerationMode": "MultipleClientsFromFirstTagAndOperationId",
       "markOptionalProperties": false,
       "generateCloneMethod": true,
       "typeStyle": "Interface",

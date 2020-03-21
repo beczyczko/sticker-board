@@ -9,6 +9,7 @@ using SB.Boards.Commands.MoveSticker;
 using SB.Boards.Domain;
 using SB.Boards.Dtos;
 using SB.Boards.Queries.Stickers;
+using SB.Boards.Queries.Stickers.StickerById;
 using SB.Common.Dispatchers;
 
 namespace SB.Web.Controllers
@@ -20,10 +21,17 @@ namespace SB.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IImmutableList<StickerDto>>> Get()
+        public async Task<ActionResult<IImmutableList<StickerDto>>> Stickers()
         {
             var stickers = await QueryAsync(new StickersQuery());
             return Ok(stickers);
+        }
+
+        [HttpGet("{stickerId}")]
+        public async Task<ActionResult<StickerDto>> Sticker(Guid stickerId)
+        {
+            var sticker = await QueryAsync(new StickerByIdQuery(stickerId));
+            return Single(sticker);
         }
 
         [HttpPost]

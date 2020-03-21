@@ -10,6 +10,8 @@ import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
 import { subscribeToScrollEvents } from './board/BoardNavigation';
+import { BoardSignalRService } from './signal-r/BoardSignalRService';
+import { BaseAPIUrl } from './app-settings';
 
 function App() {
 
@@ -50,29 +52,20 @@ function App() {
             height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
-        const newBoard = new Board(app.stage, clickPosition => onBoardDoubleClick(clickPosition));
-
-        newBoard.container.scale.set(0.4);
-        newBoard.container.x = windowWidth / 2;
-        newBoard.container.y = windowHeight / 2;
-
-        setBoard(newBoard);
-
-        subscribeToScrollEvents(newBoard);
-
         pixiLoader.onComplete.add(() => {
-            stickersService.stickersGet()
-                .then(stickers => {
-                    stickers.forEach(s => {
-                        if (s.position && s.text && s.color)
-                            newBoard.addSticker(new Sticker(
-                                s.id,
-                                s.position.x,
-                                s.position.y,
-                                s.text,
-                                StickerColor.create(s.color)));
-                    });
-                });
+            const newBoard = new Board(
+                app.stage,
+                clickPosition => onBoardDoubleClick(clickPosition),
+                new BoardSignalRService(BaseAPIUrl),
+                stickersService);
+
+            newBoard.container.scale.set(0.4);
+            newBoard.container.x = windowWidth / 2;
+            newBoard.container.y = windowHeight / 2;
+
+            setBoard(newBoard);
+
+            subscribeToScrollEvents(newBoard);
         });
     }, [canvas]);
 
@@ -85,7 +78,7 @@ function App() {
                 stickerText,
                 selectedColor);
 
-            stickersService.stickersPost(({
+            stickersService.stickers(({
                 id: sticker.id,
                 positionX: sticker.element.x,
                 positionY: sticker.element.y,

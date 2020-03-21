@@ -16,7 +16,7 @@ class Sticker {
 
     public dragData: any;
     public element: PIXI.Sprite;
-    public dragging : boolean = false;
+    public dragging: boolean = false;
 
     constructor(
         public id: string,
@@ -78,17 +78,21 @@ class Sticker {
         } as PositionDto;
     }
 
-    colorToInt(color: StickerColor): number {
+    public move(position: PositionDto): void {
+        this.element.position.set(position.x, position.y);
+    }
+
+    private colorToInt(color: StickerColor): number {
         return color.red * 256 * 256 + color.green * 256 + color.blue;
     };
 
-    onClick(event: any) {
+    private onClick(event: any) {
         if (event.data.button === MouseButton.left) {
             this.onDragStart(event);
         }
     }
 
-    onDragStart(event: any) {
+    private onDragStart(event: any) {
         // store a reference to the dragData
         // the reason for this is because of multitouch
         // we want to track the movement of this particular touch
@@ -104,7 +108,7 @@ class Sticker {
         };
     }
 
-    async onDragEnd() {
+    private async onDragEnd() {
         this.element.alpha = stickerShadowAlpha;
         this.dragging = false;
 
@@ -133,7 +137,7 @@ class Sticker {
         dragItemOffsetPosition = { x: 0, y: 0 };
     }
 
-    onDragMove() {
+    private onDragMove() {
         if (this.dragging) {
             const newPosition = this.dragData.getLocalPosition(this.element.parent);
             this.element.position.x = newPosition.x - dragItemOffsetPosition.x;

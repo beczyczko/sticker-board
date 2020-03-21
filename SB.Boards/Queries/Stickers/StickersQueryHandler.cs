@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -27,11 +28,7 @@ namespace SB.Boards.Queries.Stickers
                 .Select(s => new StickerDto(
                     s.Id,
                     s.Text,
-                    new PositionDto
-                    {
-                        X = s.Position.X,
-                        Y = s.Position.Y
-                    },
+                    new PositionDto(s.Position.X, s.Position.Y),
                     new ColorDto(s.Color.Red, s.Color.Green, s.Color.Blue)))
                 .ToImmutableList();
         }

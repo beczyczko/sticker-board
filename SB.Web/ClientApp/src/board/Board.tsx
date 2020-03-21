@@ -1,15 +1,26 @@
 import * as PIXI from 'pixi.js';
 import Sticker from './Sticker';
+import { BoardSignalRService } from '../signal-r/BoardSignalRService';
+import { filter, switchMap, tap } from 'rxjs/operators';
+import { StickerDto, StickersService } from '../services/services';
+import { StickerColor } from './StickerColor';
 
 class Board {
     container: PIXI.Graphics;
     stickers = Array<Sticker>();
     lastTimeClicked = 0;
     lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
-    _onDoubleClick: (clickPosition: any) => void;
 
-    constructor(stage: any, onDoubleClick: (clickPosition: any) => void) {
-        this._onDoubleClick = onDoubleClick;
+    private readonly stickersService: StickersService;
+    private readonly onDoubleClick: (clickPosition: any) => void;
+
+    constructor(
+        stage: any,
+        onDoubleClick: (clickPosition: any) => void,
+        boardSignalRService: BoardSignalRService,
+        stickersService: StickersService) {
+        this.stickersService = stickersService;
+        this.onDoubleClick = onDoubleClick;
 
         const board = new PIXI.Graphics();
         board.beginFill(0xf1f1f1);
@@ -22,15 +33,64 @@ class Board {
         this.container = board;
 
         stage.addChild(board);
+
+        this.loadStickers();
+        this.subscribeSignalREvents(boardSignalRService, stickersService);
+    }
+
+    public addSticker(sticker: Sticker) {
+        if (!this.stickers.some(s => s.id === sticker.id)) {
+            this.stickers.push(sticker);
+            this.container.addChild(sticker.element);
+        }
+    }
+
+    private loadStickers(): void {
+        this.stickersService.stickersAll()
+            .then(stickers => {
+                stickers.forEach(s => {
+                    if (s.position && s.text && s.color)
+                        this.addSticker(new Sticker(
+                            s.id,
+                            s.position.x,
+                            s.position.y,
+                            s.text,
+                            StickerColor.create(s.color)));
+                });
+            });
+    }
+
+    private subscribeSignalREvents(boardSignalRService: BoardSignalRService, stickersService: StickersService) {
+        boardSignalRService.stickerMoved()
+            .pipe(tap(e => {
+                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                if (sticker) {
+                    sticker.move(e.position);
+                }
+            }))
+            .subscribe();
+        boardSignalRService.stickerCreated()
+            .pipe(
+                filter(e => {
+                    return !this.stickers.find(s => s.id === e.stickerId);
+                }),
+                switchMap(e => stickersService.stickers2(e.stickerId)),
+                tap((s: StickerDto) => {
+                    if (s.position && s.text && s.color) {
+                        const newSticker = new Sticker(
+                            s.id,
+                            s.position.x,
+                            s.position.y,
+                            s.text,
+                            StickerColor.create(s.color));
+                        this.addSticker(newSticker);
+                    }
+                }))
+            .subscribe();
     }
 
     private registerMouseEventHandlers(board: PIXI.Graphics) {
         board.on('mousedown', e => this.onClick(e))
-    }
-
-    addSticker(sticker: Sticker) {
-        this.stickers.push(sticker);
-        this.container.addChild(sticker.element);
     }
 
     private onClick(event) {
@@ -39,7 +99,7 @@ class Board {
 
         if (clickTime - this.lastTimeClicked < 300) {
             this.lastTimeClicked = 0;
-            this._onDoubleClick(this.lastClickPosition);
+            this.onDoubleClick(this.lastClickPosition);
         } else {
             this.lastTimeClicked = clickTime;
         }
