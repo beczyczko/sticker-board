@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -23,14 +24,13 @@ namespace SB.Boards.Queries.Stickers
         {
             var stickers = await _repository.FindAsync(s => true);
 
-            var immutableList = stickers
+            return stickers
                 .Select(s => new StickerDto(
                     s.Id,
                     s.Text,
                     new PositionDto(s.Position.X, s.Position.Y),
                     new ColorDto(s.Color.Red, s.Color.Green, s.Color.Blue)))
                 .ToImmutableList();
-            return immutableList;
         }
     }
 }
