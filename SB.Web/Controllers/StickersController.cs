@@ -21,14 +21,14 @@ namespace SB.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IImmutableList<StickerDto>>> Get()
+        public async Task<ActionResult<IImmutableList<StickerDto>>> Stickers()
         {
             var stickers = await QueryAsync(new StickersQuery());
             return Ok(stickers);
         }
 
         [HttpGet("{stickerId}")]
-        public async Task<ActionResult<StickerDto>> Single(Guid stickerId)
+        public async Task<ActionResult<StickerDto>> Sticker(Guid stickerId)
         {
             var sticker = await QueryAsync(new StickerByIdQuery(stickerId));
             return Single(sticker);

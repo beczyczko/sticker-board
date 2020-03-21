@@ -52,33 +52,20 @@ function App() {
             height: windowHeight - 4 // todo db can't remove that -4 px, fix this
         } as any);
 
-        const newBoard = new Board(
-            app.stage,
-            clickPosition => onBoardDoubleClick(clickPosition),
-            new BoardSignalRService(BaseAPIUrl),
-            stickersService);
-
-        newBoard.container.scale.set(0.4);
-        newBoard.container.x = windowWidth / 2;
-        newBoard.container.y = windowHeight / 2;
-
-        setBoard(newBoard);
-
-        subscribeToScrollEvents(newBoard);
-
         pixiLoader.onComplete.add(() => {
-            stickersService.stickersAll()
-                .then(stickers => {
-                    stickers.forEach(s => {
-                        if (s.position && s.text && s.color)
-                            newBoard.addSticker(new Sticker(
-                                s.id,
-                                s.position.x,
-                                s.position.y,
-                                s.text,
-                                StickerColor.create(s.color)));
-                    });
-                });
+            const newBoard = new Board(
+                app.stage,
+                clickPosition => onBoardDoubleClick(clickPosition),
+                new BoardSignalRService(BaseAPIUrl),
+                stickersService);
+
+            newBoard.container.scale.set(0.4);
+            newBoard.container.x = windowWidth / 2;
+            newBoard.container.y = windowHeight / 2;
+
+            setBoard(newBoard);
+
+            subscribeToScrollEvents(newBoard);
         });
     }, [canvas]);
 
