@@ -107,7 +107,6 @@ class Sticker {
     // }
 
     public showTextField() {
-        console.log('showTextField: ', this.id);
         // todo db clean this
         // todo db sticker move not working
         const position = this.element.position;
@@ -122,20 +121,20 @@ class Sticker {
 
         textHtmlElement.style.border = 'none';
         textHtmlElement.style.background = 'transparent';
-        textHtmlElement.style.padding = '0';
-        textHtmlElement.style.margin = '0';
+        textHtmlElement.style.padding = '24px';
+        textHtmlElement.style.margin = 'auto';
         textHtmlElement.style.textAlign = 'center';
-        textHtmlElement.style.width = 'inherit';
+        textHtmlElement.style.width = 'fit-content';
         textHtmlElement.style.height = 'fit-content';
         textHtmlElement.style.userSelect = 'none';
         textHtmlElement.style.fontSize = `100px`;
-        textHtmlElement.style.wordBreak = `break-word`;
 
         this.stickerTextHtmlElement = textHtmlElement;
 
         const sticker = document.createElement('div');
         sticker.id = `sticker-${this.id}`;
         sticker.style.position = 'fixed';
+        sticker.style.display = 'flex';
         sticker.style.top = `${position.y}px`;
         sticker.style.left = `${position.x}px`;
         sticker.style.width = `${stickerWidth}px`;
@@ -152,27 +151,40 @@ class Sticker {
         const htmlLayer = document.getElementById('board-html-layer');
         htmlLayer?.appendChild(sticker);
 
-        this.fitText(stickerHeight);
+        this.fitText(stickerWidth, stickerHeight);
     }
 
-    private fitText(maxHeight: number): void {
+    private fitText(maxWidth: number, maxHeight: number): void {
         // todo db clean this
         const textArea = this.stickerTextHtmlElement;
         if (!textArea) {
             return;
         }
 
+        const computedStyle = window.getComputedStyle(textArea);
+        const fontSize = Number(computedStyle.fontSize.slice(0, computedStyle.fontSize.indexOf('px')));
+
+        if (this.maxWordLength > 15) {
+            textArea.style.wordBreak = 'break-word';
+        }
+
+        const width = textArea.clientWidth;
         const height = textArea.clientHeight;
-        if (height > maxHeight) {
-            const computedStyle = window.getComputedStyle(textArea);
-            const fontSize = Number(computedStyle.fontSize.slice(0, computedStyle.fontSize.indexOf('px')));
+
+        if (height > maxHeight || width > maxWidth) {
             textArea.style.fontSize = `${(fontSize - 2)}px`;
-            this.fitText(maxHeight);
+            this.fitText(maxWidth, maxHeight);
         }
     }
 
     public move(position: PositionDto): void {
         this.element.position.set(position.x, position.y);
+    }
+
+    private get maxWordLength(): number {
+        const wordsLength = this.text.split(' ')
+            .map(t => t.length);
+        return Math.max(...wordsLength);
     }
 
     private colorToInt(color: StickerColor): number {
