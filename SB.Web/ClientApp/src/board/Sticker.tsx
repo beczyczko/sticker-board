@@ -133,7 +133,7 @@ class Sticker {
 
         const sticker = document.createElement('div');
         sticker.id = `sticker-${stickerId}`;
-        sticker.style.position = 'absolute';
+        sticker.style.position = 'fixed';
         sticker.style.top = `${bounds.top}px`;
         sticker.style.left = `${bounds.left}px`;
         sticker.style.width = `${bounds.width}px`; //todo db it shouldn't be global bounds here

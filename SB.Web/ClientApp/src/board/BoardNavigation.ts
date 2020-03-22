@@ -110,8 +110,10 @@ export function subscribeToScrollEvents(board: Board) {
                 x: newPosition.x - lastClickPositionOnStage.x,
                 y: newPosition.y - lastClickPositionOnStage.y
             };
-            boardContainer.position.x = boardDragStartPositionOnStage.x + mouseMove.x;
-            boardContainer.position.y = boardDragStartPositionOnStage.y + mouseMove.y;
+            board.moveToPosition({
+                x: boardDragStartPositionOnStage.x + mouseMove.x,
+                y: boardDragStartPositionOnStage.y + mouseMove.y
+            });
         }
     }
 

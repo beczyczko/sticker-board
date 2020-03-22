@@ -48,7 +48,7 @@ class Board {
         this.subscribeSignalREvents(boardSignalRService, stickersService);
     }
 
-    public addSticker(sticker: Sticker) {
+    public addSticker(sticker: Sticker): void {
         if (!this.stickers.some(s => s.id === sticker.id)) {
             this.stickers.push(sticker);
             this.container.addChild(sticker.element);
@@ -56,7 +56,7 @@ class Board {
         }
     }
 
-    public setScale(newScale: number) {
+    public setScale(newScale: number): void {
         const boardScale = this.container.scale;
         boardScale.set(newScale);
 
@@ -64,7 +64,7 @@ class Board {
         this.stickers.forEach(s => s.refreshText(newScale));
     }
 
-    public move(positionChange: { dx: number, dy: number }) {
+    public move(positionChange: { dx: number, dy: number }): void {
         const boardScale = this.container.scale;
         const boardPosition = this.container.position;
 
@@ -75,6 +75,13 @@ class Board {
 
         this.container.updateTransform();
         this.stickers.forEach(s => s.refreshText(boardScale.x));
+    }
+
+    public moveToPosition(position: { x: number, y: number }): void {
+        this.container.position.set(position.x, position.y);
+
+        this.container.updateTransform();
+        this.stickers.forEach(s => s.refreshText(this.container.scale.x));
     }
 
     private loadStickers(): void {
