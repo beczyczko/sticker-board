@@ -82,8 +82,6 @@ class Sticker {
             x: positionX,
             y: positionY
         } as PositionDto;
-
-        this.showTextField(this.id);
     }
 
     // private showEditField(elementTag, elementId) {
@@ -108,12 +106,15 @@ class Sticker {
     //     this.fitText(bounds.width);
     // }
 
-    private showTextField(stickerId: string) {
+    public showTextField() {
+        console.log('showTextField: ', this.id);
         // todo db clean this
         // todo db sticker move not working
-        const bounds = this.innerSticker.getBounds();
+        const position = this.element.position;
+        const stickerWidth = this.innerSticker.width;
+        const stickerHeight = this.innerSticker.height;
 
-        const textHtmlElementId = `sticker-text-${stickerId}`;
+        const textHtmlElementId = `sticker-text-${this.id}`;
 
         const textHtmlElement = document.createElement('p');
         textHtmlElement.id = textHtmlElementId;
@@ -128,16 +129,17 @@ class Sticker {
         textHtmlElement.style.height = 'fit-content';
         textHtmlElement.style.userSelect = 'none';
         textHtmlElement.style.fontSize = `100px`;
+        textHtmlElement.style.wordBreak = `break-word`;
 
         this.stickerTextHtmlElement = textHtmlElement;
 
         const sticker = document.createElement('div');
-        sticker.id = `sticker-${stickerId}`;
+        sticker.id = `sticker-${this.id}`;
         sticker.style.position = 'fixed';
-        sticker.style.top = `${bounds.top}px`;
-        sticker.style.left = `${bounds.left}px`;
-        sticker.style.width = `${bounds.width}px`; //todo db it shouldn't be global bounds here
-        sticker.style.height = `${bounds.width}px`; // todo db i used here width for now
+        sticker.style.top = `${position.y}px`;
+        sticker.style.left = `${position.x}px`;
+        sticker.style.width = `${stickerWidth}px`;
+        sticker.style.height = `${stickerHeight}px`;
         sticker.style.border = '1px solid darkorchid';
         sticker.style.margin = '-1px';
         sticker.style.transformOrigin = '0 0';
@@ -147,9 +149,10 @@ class Sticker {
 
         this.stickerHtmlElement = sticker;
 
-        document.body.appendChild(sticker);
+        const htmlLayer = document.getElementById('board-html-layer');
+        htmlLayer?.appendChild(sticker);
 
-        this.fitText(bounds.width);
+        this.fitText(stickerHeight);
     }
 
     private fitText(maxHeight: number): void {
@@ -165,17 +168,6 @@ class Sticker {
             const fontSize = Number(computedStyle.fontSize.slice(0, computedStyle.fontSize.indexOf('px')));
             textArea.style.fontSize = `${(fontSize - 2)}px`;
             this.fitText(maxHeight);
-        }
-    }
-
-    public refreshText(boardScale: number): void {
-        const bounds = this.innerSticker.getBounds();
-
-        const sticker = this.stickerHtmlElement;
-        if (sticker) {
-            sticker.style.top = `${(bounds.top)}px`;
-            sticker.style.left = `${(bounds.left)}px`;
-            sticker.style.transform = `scale(${boardScale})`;
         }
     }
 

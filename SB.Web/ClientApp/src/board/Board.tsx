@@ -52,7 +52,7 @@ class Board {
         if (!this.stickers.some(s => s.id === sticker.id)) {
             this.stickers.push(sticker);
             this.container.addChild(sticker.element);
-            sticker.refreshText(this.container.scale.x);
+            sticker.showTextField();
         }
     }
 
@@ -61,11 +61,10 @@ class Board {
         boardScale.set(newScale);
 
         this.container.updateTransform();
-        this.stickers.forEach(s => s.refreshText(newScale));
+        this.updateBoardHtmlLayer();
     }
 
     public move(positionChange: { dx: number, dy: number }): void {
-        const boardScale = this.container.scale;
         const boardPosition = this.container.position;
 
         this.container.position.set(
@@ -74,14 +73,24 @@ class Board {
         );
 
         this.container.updateTransform();
-        this.stickers.forEach(s => s.refreshText(boardScale.x));
+        this.updateBoardHtmlLayer();
     }
 
     public moveToPosition(position: { x: number, y: number }): void {
         this.container.position.set(position.x, position.y);
 
         this.container.updateTransform();
-        this.stickers.forEach(s => s.refreshText(this.container.scale.x));
+        this.updateBoardHtmlLayer();
+    }
+
+    private updateBoardHtmlLayer() {
+        const htmlLayer = document.getElementById('board-html-layer');
+        if (htmlLayer) {
+            htmlLayer.style.transform = `scale(${this.container.scale.x})`;
+            htmlLayer.style.transformOrigin = '0 0';
+            htmlLayer.style.top = `${this.container.position.y}px`;
+            htmlLayer.style.left = `${this.container.position.x}px`;
+        }
     }
 
     private loadStickers(): void {

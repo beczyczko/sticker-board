@@ -99,6 +99,7 @@ function App() {
                               setOpen={setNewStickerCreating}
                               onSaveCallback={(stickerText: string, color: StickerColor) => handleStickerCreation(stickerText, color)}>
             </AddStickerDialog>
+            <div id="board-html-layer"></div>
         </div>
     );
 }
