@@ -18,7 +18,10 @@ class Board {
         stage: any,
         onDoubleClick: (clickPosition: any) => void,
         boardSignalRService: BoardSignalRService,
-        stickersService: StickersService) {
+        stickersService: StickersService,
+        scale: number,
+        windowWidth: number,
+        windowHeight: number) {
         this.stickersService = stickersService;
         this.onDoubleClick = onDoubleClick;
 
@@ -26,6 +29,11 @@ class Board {
         board.beginFill(0xf1f1f1);
         board.drawRect(-10000, -5000, 20000, 10000);
         board.endFill();
+
+        // todo db clean this
+        // board.scale.set(0.4);
+        // board.x = windowWidth / 2;
+        // board.y = windowHeight / 2;
 
         board.interactive = true;
         this.registerMouseEventHandlers(board);

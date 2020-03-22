@@ -57,11 +57,14 @@ function App() {
                 app.stage,
                 clickPosition => onBoardDoubleClick(clickPosition),
                 new BoardSignalRService(BaseAPIUrl),
-                stickersService);
+                stickersService,
+                0.4,
+                windowWidth,
+                windowHeight);
 
-            newBoard.container.scale.set(0.4);
-            newBoard.container.x = windowWidth / 2;
-            newBoard.container.y = windowHeight / 2;
+            // newBoard.container.scale.set(0.4);
+            // newBoard.container.x = windowWidth / 2;
+            // newBoard.container.y = windowHeight / 2;
 
             setBoard(newBoard);
 
