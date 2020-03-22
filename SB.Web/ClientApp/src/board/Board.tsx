@@ -19,7 +19,7 @@ class Board {
         onDoubleClick: (clickPosition: any) => void,
         boardSignalRService: BoardSignalRService,
         stickersService: StickersService,
-        scale: number,
+        scale: number, // todo db clean this
         windowWidth: number,
         windowHeight: number) {
         this.stickersService = stickersService;
@@ -35,12 +35,14 @@ class Board {
         // board.x = windowWidth / 2;
         // board.y = windowHeight / 2;
 
+
         board.interactive = true;
         this.registerMouseEventHandlers(board);
 
         this.container = board;
 
         stage.addChild(board);
+        board.updateTransform();
 
         this.loadStickers();
         this.subscribeSignalREvents(boardSignalRService, stickersService);
@@ -50,7 +52,29 @@ class Board {
         if (!this.stickers.some(s => s.id === sticker.id)) {
             this.stickers.push(sticker);
             this.container.addChild(sticker.element);
+            sticker.refreshText(this.container.scale.x);
         }
+    }
+
+    public setScale(newScale: number) {
+        const boardScale = this.container.scale;
+        boardScale.set(newScale);
+
+        this.container.updateTransform();
+        this.stickers.forEach(s => s.refreshText(newScale));
+    }
+
+    public move(positionChange: { dx: number, dy: number }) {
+        const boardScale = this.container.scale;
+        const boardPosition = this.container.position;
+
+        this.container.position.set(
+            boardPosition.x + positionChange.dx,
+            boardPosition.y + positionChange.dy
+        );
+
+        this.container.updateTransform();
+        this.stickers.forEach(s => s.refreshText(boardScale.x));
     }
 
     private loadStickers(): void {

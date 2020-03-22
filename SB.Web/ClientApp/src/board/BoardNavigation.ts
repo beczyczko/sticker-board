@@ -14,30 +14,33 @@ export function subscribeToScrollEvents(board: Board) {
 
     registerMouseEventHandlers(boardContainer);
 
-    const moveBoard = (board: PIXI.Container, event: any) => {
+    const moveBoard = (board: Board, event: any) => {
         const scrollSpeed = 1;
-        board.position.x -= event.deltaX * scrollSpeed;
-        board.position.y -= event.deltaY * scrollSpeed;
+        const positionChange = {
+            dx: -event.deltaX * scrollSpeed,
+            dy: -event.deltaY * scrollSpeed
+        };
+        board.move(positionChange);
     };
 
     // 2017 recommended event
     document.body.addEventListener('wheel', function (event: WheelEvent) {
         if (ctrlKeyPressed) {
             event.preventDefault();
-            zoom(boardContainer, -event.deltaY);
+            zoom(board, -event.deltaY);
         } else {
-            moveBoard(boardContainer, event);
+            moveBoard(board, event);
         }
     }, { passive: false } as AddEventListenerOptions);
 
     // Before 2017, IE9, Chrome, Safari, Opera
     document.body.addEventListener('mousewheel', function (event) {
-        moveBoard(boardContainer, event); // not tested this case
+        moveBoard(board, event); // not tested this case
     }, false);
 
     // Old versions of Firefox
     document.body.addEventListener('DOMMouseScroll', function (event) {
-        moveBoard(boardContainer, event); // not tested this case
+        moveBoard(board, event); // not tested this case
     }, false);
 
     document.body.addEventListener('keydown', function (event: KeyboardEvent) {
@@ -48,35 +51,31 @@ export function subscribeToScrollEvents(board: Board) {
         ctrlKeyPressed = false;
     }, false);
 
-    const zoom = (board: PIXI.Container, zoomDirection: number) => {
+    const zoom = (board: Board, zoomDirection: number) => {
+        const boardContainer = board.container;
+
         const cursorPositionBeforeZoom = cursorMoveData.getLocalPosition(boardContainer);
 
-        const boardScale = board.scale;
-        const actualScale = boardScale.x;
+        const actualScale = boardContainer.scale.x;
 
         zoomDirection = Math.cbrt(zoomDirection);
         const newScale = actualScale * (1 + zoomDirection * 0.05);
 
         if (newScale < permittedScaleRange.min) {
-            boardScale.set(permittedScaleRange.min);
+            board.setScale(permittedScaleRange.min);
         } else if (newScale > permittedScaleRange.max) {
-            boardScale.set(permittedScaleRange.max);
+            board.setScale(permittedScaleRange.max);
         } else {
-            boardScale.set(newScale);
+            board.setScale(newScale);
         }
-        boardContainer.updateTransform();
 
         const cursorPositionAfterZoom = cursorMoveData.getLocalPosition(boardContainer);
         const cursorPositionChange = {
-            x: cursorPositionAfterZoom.x - cursorPositionBeforeZoom.x,
-            y: cursorPositionAfterZoom.y - cursorPositionBeforeZoom.y
+            dx: (cursorPositionAfterZoom.x - cursorPositionBeforeZoom.x) * board.container.scale.x,
+            dy: (cursorPositionAfterZoom.y - cursorPositionBeforeZoom.y) * board.container.scale.y
         };
 
-        boardContainer.position.set(
-            boardContainer.position.x + cursorPositionChange.x * boardContainer.scale.x,
-            boardContainer.position.y + cursorPositionChange.y * boardContainer.scale.y,
-        );
-        boardContainer.updateTransform();
+        board.move(cursorPositionChange);
     };
 
     function onClick(event) {
