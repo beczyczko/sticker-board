@@ -81,7 +81,7 @@ function App() {
                 stickerText,
                 selectedColor);
 
-            stickersService.stickers(({
+            stickersService.create(({
                 id: sticker.id,
                 positionX: sticker.element.x,
                 positionY: sticker.element.y,

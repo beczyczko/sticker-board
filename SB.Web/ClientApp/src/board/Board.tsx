@@ -94,7 +94,7 @@ class Board {
     }
 
     private loadStickers(): void {
-        this.stickersService.stickersAll()
+        this.stickersService.stickers()
             .then(stickers => {
                 stickers.forEach(s => {
                     if (s.position && s.text && s.color)
@@ -122,7 +122,7 @@ class Board {
                 filter(e => {
                     return !this.stickers.find(s => s.id === e.stickerId);
                 }),
-                switchMap(e => stickersService.stickers2(e.stickerId)),
+                switchMap(e => stickersService.sticker(e.stickerId)),
                 tap((s: StickerDto) => {
                     if (s.position && s.text && s.color) {
                         const newSticker = new Sticker(
