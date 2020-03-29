@@ -19,4 +19,8 @@ export class StickerColor implements ColorDto {
     public equals(color: StickerColor): boolean {
         return JSON.stringify(color) === JSON.stringify(this);
     }
+
+    public toStyleString(): string {
+        return `rgb(${this.red}, ${this.green}, ${this.blue})`;
+    }
 }

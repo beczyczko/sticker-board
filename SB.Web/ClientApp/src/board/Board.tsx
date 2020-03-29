@@ -1,49 +1,29 @@
-import * as PIXI from 'pixi.js';
-import Sticker from './Sticker';
+import Sticker, { Position } from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { StickerDto, StickersService } from '../services/services';
 import { StickerColor } from './StickerColor';
 
 class Board {
-    container: PIXI.Graphics;
     stickers = Array<Sticker>();
     lastTimeClicked = 0;
-    lastClickPosition: { x: number, y: number } = { x: 0, y: 0 };
+    lastClickPosition: Position = { x: 0, y: 0 };
 
     private readonly stickersService: StickersService;
     private readonly onDoubleClick: (clickPosition: any) => void;
+    scale: number = 1;
+    private position: Position = { x: 0, y: 0 };
 
     constructor(
-        stage: any,
         onDoubleClick: (clickPosition: any) => void,
         boardSignalRService: BoardSignalRService,
         stickersService: StickersService,
-        scale: number, // todo db clean this
         windowWidth: number,
         windowHeight: number) {
         this.stickersService = stickersService;
         this.onDoubleClick = onDoubleClick;
 
-        const board = new PIXI.Graphics();
-        board.beginFill(0xf1f1f1);
-        board.drawRect(-10000, -5000, 20000, 10000);
-        board.endFill();
-
-        // todo db clean this
-        // board.scale.set(0.4);
-        // board.x = windowWidth / 2;
-        // board.y = windowHeight / 2;
-
-
-        board.interactive = true;
-        this.registerMouseEventHandlers(board);
-
-        this.container = board;
-
-        stage.addChild(board);
-        board.updateTransform();
-
+        // this.registerMouseEventHandlers(board);
         this.loadStickers();
         this.subscribeSignalREvents(boardSignalRService, stickersService);
     }
@@ -51,45 +31,38 @@ class Board {
     public addSticker(sticker: Sticker): void {
         if (!this.stickers.some(s => s.id === sticker.id)) {
             this.stickers.push(sticker);
-            this.container.addChild(sticker.element);
             sticker.showTextField();
         }
     }
 
     public setScale(newScale: number): void {
-        const boardScale = this.container.scale;
-        boardScale.set(newScale);
+        this.scale = newScale;
 
-        this.container.updateTransform();
         this.updateBoardHtmlLayer();
     }
 
     public move(positionChange: { dx: number, dy: number }): void {
-        const boardPosition = this.container.position;
+        const boardPosition = this.position;
 
-        this.container.position.set(
-            boardPosition.x + positionChange.dx,
-            boardPosition.y + positionChange.dy
-        );
+        this.position = {
+            x: boardPosition.x + positionChange.dx,
+            y: boardPosition.y + positionChange.dy
+        };
 
-        this.container.updateTransform();
         this.updateBoardHtmlLayer();
     }
 
     public moveToPosition(position: { x: number, y: number }): void {
-        this.container.position.set(position.x, position.y);
-
-        this.container.updateTransform();
         this.updateBoardHtmlLayer();
     }
 
     private updateBoardHtmlLayer() {
         const htmlLayer = document.getElementById('board-html-layer');
         if (htmlLayer) {
-            htmlLayer.style.transform = `scale(${this.container.scale.x})`;
+            htmlLayer.style.transform = `scale(${this.scale})`;
             htmlLayer.style.transformOrigin = '0 0';
-            htmlLayer.style.top = `${this.container.position.y}px`;
-            htmlLayer.style.left = `${this.container.position.x}px`;
+            htmlLayer.style.top = `${this.position.y}px`;
+            htmlLayer.style.left = `${this.position.x}px`;
         }
     }
 
@@ -137,13 +110,14 @@ class Board {
             .subscribe();
     }
 
-    private registerMouseEventHandlers(board: PIXI.Graphics) {
-        board.on('mousedown', e => this.onClick(e))
-    }
+    // private registerMouseEventHandlers(board: PIXI.Graphics) {
+    //     board.on('mousedown', e => this.onClick(e))
+    // }
 
     private onClick(event) {
         const clickTime = Date.now();
-        this.lastClickPosition = event.data.getLocalPosition(this.container);
+        //todo db
+        // this.lastClickPosition = event.data.getLocalPosition(this.container);
 
         if (clickTime - this.lastTimeClicked < 300) {
             this.lastTimeClicked = 0;

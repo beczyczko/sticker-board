@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.scss';
-import * as PIXI from 'pixi.js'
 import { v4 as uuidv4 } from 'uuid';
-import stickerShadowImage from './assets/sticker_shadow.png';
 import Sticker from './board/Sticker';
 import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
@@ -31,10 +29,7 @@ function App() {
 
     useEffect(() => {
         if (!initialized) {
-            pixiLoader = new PIXI.Loader();
-            pixiLoader
-                .add('sticker_shadow', stickerShadowImage)
-                .load();
+            //todo db
         }
 
         setInitialized(true);
@@ -42,34 +37,19 @@ function App() {
 
 
     useEffect(() => {
-        const canvas = document.getElementById('canvas');
 
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        let app = new PIXI.Application({
-            view: canvas,
-            width: windowWidth,
-            height: windowHeight - 4 // todo db can't remove that -4 px, fix this
-        } as any);
 
-        pixiLoader.onComplete.add(() => {
             const newBoard = new Board(
-                app.stage,
                 clickPosition => onBoardDoubleClick(clickPosition),
                 new BoardSignalRService(BaseAPIUrl),
                 stickersService,
-                0.4,
                 windowWidth,
                 windowHeight);
-
-            // newBoard.container.scale.set(0.4);
-            // newBoard.container.x = windowWidth / 2;
-            // newBoard.container.y = windowHeight / 2;
-
             setBoard(newBoard);
 
             subscribeToScrollEvents(newBoard);
-        });
     }, [canvas]);
 
     const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {
@@ -83,8 +63,8 @@ function App() {
 
             stickersService.create(({
                 id: sticker.id,
-                positionX: sticker.element.x,
-                positionY: sticker.element.y,
+                positionX: sticker.position.x,
+                positionY: sticker.position.y,
                 text: sticker.text,
                 color: selectedColor
             } as AddStickerCommand))
