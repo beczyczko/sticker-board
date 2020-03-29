@@ -6,20 +6,21 @@ import { StickerColor } from './StickerColor';
 import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
 import { MouseButton } from './MouseButton';
+import { subscribeToScrollEvents } from './BoardNavigation';
 
 class Board {
+
     private readonly stickersService: StickersService;
     private readonly onDoubleClick: (clickPosition: any) => void;
     private _middleButtonClicked$ = new Subject<void>();
+
     public position: Position = { x: 0, y: 0 };
+    public scale: number = 1;
 
     public stickers = Array<Sticker>();
-    public lastTimeClicked = 0;
-    public lastClickPosition: Position = { x: 0, y: 0 };
 
     public readonly boardHtmlLayer: HTMLElement | null;
     public readonly boardHtmlElementsLayer: HTMLElement | null;
-    public scale: number = 1;
 
     constructor(
         onDoubleClick: (clickPosition: any) => void,
@@ -37,6 +38,7 @@ class Board {
 
         this.loadStickers();
         this.subscribeSignalREvents(boardSignalRService, stickersService);
+        subscribeToScrollEvents(this);
     }
 
     public addSticker(sticker: Sticker): void {
@@ -106,6 +108,7 @@ class Board {
                 }
             }))
             .subscribe();
+
         boardSignalRService.stickerCreated()
             .pipe(
                 filter(e => {

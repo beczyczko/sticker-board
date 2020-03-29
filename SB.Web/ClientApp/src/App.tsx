@@ -7,7 +7,6 @@ import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
-import { subscribeToScrollEvents } from './board/BoardNavigation';
 import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
 
@@ -48,8 +47,6 @@ function App() {
                 windowWidth,
                 windowHeight);
             setBoard(newBoard);
-
-            subscribeToScrollEvents(newBoard);
     }, [canvas]);
 
     const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {

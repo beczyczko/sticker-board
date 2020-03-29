@@ -2,6 +2,7 @@ import Board from './Board';
 import { cursorPosition, cursorPositionValue, mouseUp } from '../services/MouseService';
 import { Subscription } from 'rxjs';
 import { Position } from './Position';
+import { setBoardScale } from './BoardScaleService';
 
 const permittedScaleRange = { min: 0.05, max: 2 };
 let isDragging: boolean;
@@ -71,6 +72,8 @@ export function subscribeToScrollEvents(board: Board) {
         } else {
             board.setScale(newScale);
         }
+
+        setBoardScale(board.scale);
 
         // const cursorPositionAfterZoom = cursorMoveData.getLocalPosition(boardContainer);
         // const cursorPositionChange = {

@@ -5,6 +5,7 @@ import { MouseButton } from './MouseButton';
 import { cursorPosition, mouseUp } from '../services/MouseService';
 import { Subscription } from 'rxjs';
 import { Position } from './Position';
+import { boardScaleValue } from './BoardScaleService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -159,7 +160,6 @@ class Sticker {
     private onClick(event: MouseEvent): void {
         event.stopPropagation();
 
-        //todo db
         if (event.button === MouseButton.left) {
             this.onDragStart(event);
             this.addCursorMoveEventListeners();
@@ -170,10 +170,15 @@ class Sticker {
     private onDragStart(event: any): void {
         this.dragging = true;
 
-        const clickPosition = { x: event.clientX, y: event.clientY };
+        const boardScale = boardScaleValue();
+        const clickPositionInBoardScale = {
+            x: event.clientX / boardScale,
+            y: event.clientY / boardScale
+        };
+
         dragItemOffsetPosition = {
-            x: clickPosition.x - this.position.x,
-            y: clickPosition.y - this.position.y
+            x: (clickPositionInBoardScale.x - this.position.x),
+            y: (clickPositionInBoardScale.y - this.position.y)
         };
     }
 
@@ -206,11 +211,11 @@ class Sticker {
     }
 
     private onDragMove(cursorPosition: Position): void {
-        //todo db board scale matters, include in position calculation
+        const boardScale = boardScaleValue();
         if (this.dragging) {
             const newElementPosition = {
-                x: cursorPosition.x - dragItemOffsetPosition.x,
-                y: cursorPosition.y - dragItemOffsetPosition.y
+                x: cursorPosition.x / boardScale - dragItemOffsetPosition.x,
+                y: cursorPosition.y / boardScale - dragItemOffsetPosition.y
             };
 
             this.updateElementPosition(newElementPosition);
