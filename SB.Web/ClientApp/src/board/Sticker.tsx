@@ -4,17 +4,12 @@ import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
 import { cursorPosition, mouseUp } from '../services/MouseService';
 import { Subscription } from 'rxjs';
+import { Position } from './Position';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
 const stickersServiceProvider = ServicesProvider;
 const stickerShadowAlpha = 0.5;
-
-export type Position = {
-    //todo db move to commons or something
-    x: number;
-    y: number;
-}
 
 class Sticker {
     private cursorSubscriptions = new Array<Subscription>();
@@ -100,7 +95,7 @@ class Sticker {
 
         this.stickerHtmlElement = sticker;
 
-        const htmlLayer = document.getElementById('board-html-layer');
+        const htmlLayer = document.getElementById('board-html-elements-layer');
         htmlLayer?.appendChild(sticker);
 
         this.fitText(this.width, this.height);
@@ -214,8 +209,8 @@ class Sticker {
         //todo db board scale matters, include in position calculation
         if (this.dragging) {
             const newElementPosition = {
-                x: this.position.x = cursorPosition.x - dragItemOffsetPosition.x,
-                y: this.position.y = cursorPosition.y - dragItemOffsetPosition.y
+                x: cursorPosition.x - dragItemOffsetPosition.x,
+                y: cursorPosition.y - dragItemOffsetPosition.y
             };
 
             this.updateElementPosition(newElementPosition);

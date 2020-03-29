@@ -74,12 +74,13 @@ function App() {
 
     return (
         <div className="App">
-            <canvas id="canvas"></canvas>
             <AddStickerDialog open={newStickerCreating}
                               setOpen={setNewStickerCreating}
                               onSaveCallback={(stickerText: string, color: StickerColor) => handleStickerCreation(stickerText, color)}>
             </AddStickerDialog>
-            <div id="board-html-layer"></div>
+            <div id="board-html-layer">
+                <div id="board-html-elements-layer"></div>
+            </div>
         </div>
     );
 }

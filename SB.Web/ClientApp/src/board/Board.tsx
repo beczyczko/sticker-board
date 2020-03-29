@@ -1,8 +1,9 @@
-import Sticker, { Position } from './Sticker';
+import Sticker from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { StickerDto, StickersService } from '../services/services';
 import { StickerColor } from './StickerColor';
+import { Position } from './Position';
 
 class Board {
     stickers = Array<Sticker>();
@@ -57,7 +58,7 @@ class Board {
     }
 
     private updateBoardHtmlLayer() {
-        const htmlLayer = document.getElementById('board-html-layer');
+        const htmlLayer = document.getElementById('board-html-elements-layer');
         if (htmlLayer) {
             htmlLayer.style.transform = `scale(${this.scale})`;
             htmlLayer.style.transformOrigin = '0 0';
