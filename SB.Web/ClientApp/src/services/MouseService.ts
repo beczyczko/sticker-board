@@ -5,7 +5,6 @@ const _cursorPosition = new BehaviorSubject({ x: 0, y: 0 } as Position);
 const _mouseUp = new Subject<void>();
 
 window.addEventListener('mousemove', (e) => {
-    console.log(e);
     _cursorPosition.next({ x: e.clientX, y: e.clientY });
 });
 window.addEventListener('touchmove', (e: TouchEvent) => {

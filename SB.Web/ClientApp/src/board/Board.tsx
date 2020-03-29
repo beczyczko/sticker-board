@@ -4,16 +4,22 @@ import { filter, switchMap, tap } from 'rxjs/operators';
 import { StickerDto, StickersService } from '../services/services';
 import { StickerColor } from './StickerColor';
 import { Position } from './Position';
+import { Observable, Subject } from 'rxjs';
+import { MouseButton } from './MouseButton';
 
 class Board {
-    stickers = Array<Sticker>();
-    lastTimeClicked = 0;
-    lastClickPosition: Position = { x: 0, y: 0 };
-
     private readonly stickersService: StickersService;
     private readonly onDoubleClick: (clickPosition: any) => void;
-    scale: number = 1;
-    private position: Position = { x: 0, y: 0 };
+    private _middleButtonClicked$ = new Subject<void>();
+    public position: Position = { x: 0, y: 0 };
+
+    public stickers = Array<Sticker>();
+    public lastTimeClicked = 0;
+    public lastClickPosition: Position = { x: 0, y: 0 };
+
+    public readonly boardHtmlLayer: HTMLElement | null;
+    public readonly boardHtmlElementsLayer: HTMLElement | null;
+    public scale: number = 1;
 
     constructor(
         onDoubleClick: (clickPosition: any) => void,
@@ -21,10 +27,14 @@ class Board {
         stickersService: StickersService,
         windowWidth: number,
         windowHeight: number) {
+        this.boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
+        this.boardHtmlLayer = document.getElementById('board-html-layer');
+
         this.stickersService = stickersService;
         this.onDoubleClick = onDoubleClick;
 
-        // this.registerMouseEventHandlers(board);
+        this.registerMouseEventHandlers();
+
         this.loadStickers();
         this.subscribeSignalREvents(boardSignalRService, stickersService);
     }
@@ -53,8 +63,13 @@ class Board {
         this.updateBoardHtmlLayer();
     }
 
-    public moveToPosition(position: { x: number, y: number }): void {
+    public moveToPosition(position: Position): void {
+        this.position = position;
         this.updateBoardHtmlLayer();
+    }
+
+    public get middleButtonClicked$(): Observable<void> {
+        return this._middleButtonClicked$.asObservable();
     }
 
     private updateBoardHtmlLayer() {
@@ -111,20 +126,17 @@ class Board {
             .subscribe();
     }
 
-    // private registerMouseEventHandlers(board: PIXI.Graphics) {
-    //     board.on('mousedown', e => this.onClick(e))
-    // }
+    private registerMouseEventHandlers(): void {
+        this.boardHtmlLayer?.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
+        this.boardHtmlLayer?.addEventListener('touchstart', (e: any) => this.onClick(e));
+        this._middleButtonClicked$.next();
+    }
 
-    private onClick(event) {
-        const clickTime = Date.now();
-        //todo db
-        // this.lastClickPosition = event.data.getLocalPosition(this.container);
+    private onClick(event: MouseEvent): void {
+        event.stopPropagation();
 
-        if (clickTime - this.lastTimeClicked < 300) {
-            this.lastTimeClicked = 0;
-            this.onDoubleClick(this.lastClickPosition);
-        } else {
-            this.lastTimeClicked = clickTime;
+        if (event.button === MouseButton.middle) {
+            this._middleButtonClicked$.next();
         }
     }
 }

@@ -1,17 +1,21 @@
-import { MouseButton } from './MouseButton';
 import Board from './Board';
+import { cursorPosition, cursorPositionValue, mouseUp } from '../services/MouseService';
+import { Subscription } from 'rxjs';
+import { Position } from './Position';
 
 const permittedScaleRange = { min: 0.05, max: 2 };
-let dragData: any;
-let cursorMoveData: any;
-let lastClickPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
-let boardDragStartPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
+let isDragging: boolean;
+let lastClickPositionOnStage: Position = { x: 0, y: 0 };
+let boardDragStartPositionOnStage: Position = { x: 0, y: 0 };
 
 export function subscribeToScrollEvents(board: Board) {
-    // const boardContainer = board.container;
+
+    let cursorSubscriptions = new Array<Subscription>();
+
+    const boardHtmlLayer = board.boardHtmlLayer;
     let ctrlKeyPressed = false;
 
-    // registerMouseEventHandlers(boardContainer);
+    addCursorMoveEventListeners();
 
     const moveBoard = (board: Board, event: any) => {
         const scrollSpeed = 1;
@@ -23,7 +27,7 @@ export function subscribeToScrollEvents(board: Board) {
     };
 
     // 2017 recommended event
-    document.body.addEventListener('wheel', function (event: WheelEvent) {
+    boardHtmlLayer?.addEventListener('wheel', function (event: WheelEvent) {
         if (ctrlKeyPressed) {
             event.preventDefault();
             zoom(board, -event.deltaY);
@@ -33,12 +37,12 @@ export function subscribeToScrollEvents(board: Board) {
     }, { passive: false } as AddEventListenerOptions);
 
     // Before 2017, IE9, Chrome, Safari, Opera
-    document.body.addEventListener('mousewheel', function (event) {
+    boardHtmlLayer?.addEventListener('mousewheel', function (event) {
         moveBoard(board, event); // not tested this case
     }, false);
 
     // Old versions of Firefox
-    document.body.addEventListener('DOMMouseScroll', function (event) {
+    boardHtmlLayer?.addEventListener('DOMMouseScroll', function (event) {
         moveBoard(board, event); // not tested this case
     }, false);
 
@@ -76,58 +80,47 @@ export function subscribeToScrollEvents(board: Board) {
 
         // board.move(cursorPositionChange);
     };
-    //
-    // function onClick(event) {
-    //     lastClickPositionOnStage = event.data.getLocalPosition(boardContainer.parent);
-    //
-    //     if (event.data.button === MouseButton.middle) {
-    //         onDragStart(event);
-    //     }
-    // }
 
-    // function onDragStart(event) {
-    //     boardDragStartPositionOnStage = {
-    //         x: boardContainer.position.x,
-    //         y: boardContainer.position.y
-    //     };
-    //     dragData = event.data;
-    //     boardContainer.cursor = 'all-scroll';
-    // }
-    //
-    // function onDragEnd() {
-    //     boardContainer.buttonMode = false;
-    //     dragData = null;
-    //     boardContainer.cursor = 'default';
-    // }
-    //
-    // function onDragMove(event) {
-    //     cursorMoveData = event.data;
-    //
-    //     if (dragData) {
-    //         const newPosition = dragData.getLocalPosition(boardContainer.parent);
-    //         const mouseMove = {
-    //             x: newPosition.x - lastClickPositionOnStage.x,
-    //             y: newPosition.y - lastClickPositionOnStage.y
-    //         };
-    //         board.moveToPosition({
-    //             x: boardDragStartPositionOnStage.x + mouseMove.x,
-    //             y: boardDragStartPositionOnStage.y + mouseMove.y
-    //         });
-    //     }
-    // }
-    //
-    // function registerMouseEventHandlers(board: PIXI.Container) {
-    //     board
-    //         .on('mousedown', e => onClick(e))
-    //         .on('touchstart', e => onDragStart(e))
-    //         // events for drag end
-    //         .on('mouseup', () => onDragEnd())
-    //         .on('mouseupoutside', () => onDragEnd())
-    //         .on('touchend', () => onDragEnd())
-    //         .on('touchendoutside', () => onDragEnd())
-    //         // events for drag move
-    //         .on('mousemove', e => onDragMove(e))
-    //         .on('touchmove', e => onDragMove(e));
-    // }
+    board.middleButtonClicked$.subscribe(() => {
+        lastClickPositionOnStage = cursorPositionValue();
+        onDragStart();
+    });
+
+    function addCursorMoveEventListeners(): void {
+        cursorSubscriptions.push(cursorPosition().subscribe(position => onDragMove(position)));
+        cursorSubscriptions.push(mouseUp().subscribe(() => onDragEnd()));
+    }
+
+    function onDragStart() {
+        if (boardHtmlLayer) {
+            isDragging = true;
+            boardHtmlLayer.style.cursor = 'all-scroll';
+
+            boardDragStartPositionOnStage = {
+                x: board.position.x,
+                y: board.position.y
+            } as Position;
+        }
+    }
+
+    function onDragEnd() {
+        isDragging = false;
+        if (boardHtmlLayer) {
+            boardHtmlLayer.style.cursor = 'default';
+        }
+    }
+
+    function onDragMove(position: Position) {
+        if (isDragging) {
+            const mouseMove = {
+                x: position.x - lastClickPositionOnStage.x,
+                y: position.y - lastClickPositionOnStage.y
+            };
+            board.moveToPosition({
+                x: boardDragStartPositionOnStage.x + mouseMove.x,
+                y: boardDragStartPositionOnStage.y + mouseMove.y
+            });
+        }
+    }
 }
 
