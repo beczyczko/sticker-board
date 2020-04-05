@@ -31,6 +31,8 @@ class Board {
         this.boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
         this.boardHtmlLayer = document.getElementById('board-html-layer');
 
+        this.moveToPosition({ x: windowWidth / 2, y: windowHeight / 2 });
+
         this.stickersService = stickersService;
         this.onDoubleClick = onDoubleClick;
 
@@ -70,17 +72,23 @@ class Board {
         this.updateBoardHtmlLayer();
     }
 
+    public positionOnBoard(screenPosition: Position): Position {
+        const positionOnBoard = {
+            x: (screenPosition.x - this.position.x) / this.scale,
+            y: (screenPosition.y - this.position.y) / this.scale
+        };
+        return positionOnBoard;
+    }
+
     public get middleButtonClicked$(): Observable<void> {
         return this._middleButtonClicked$.asObservable();
     }
 
     private updateBoardHtmlLayer() {
-        const htmlLayer = document.getElementById('board-html-elements-layer');
-        if (htmlLayer) {
-            htmlLayer.style.transform = `scale(${this.scale})`;
-            htmlLayer.style.transformOrigin = '0 0';
-            htmlLayer.style.top = `${this.position.y}px`;
-            htmlLayer.style.left = `${this.position.x}px`;
+        if (this.boardHtmlElementsLayer) {
+            this.boardHtmlElementsLayer.style.transform = `scale(${this.scale})`;
+            this.boardHtmlElementsLayer.style.top = `${this.position.y}px`;
+            this.boardHtmlElementsLayer.style.left = `${this.position.x}px`;
         }
     }
 

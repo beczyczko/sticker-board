@@ -6,7 +6,7 @@ import { setBoardScale } from './BoardScaleService';
 
 const permittedScaleRange = { min: 0.05, max: 2 };
 let isDragging: boolean;
-let lastClickPositionOnStage: Position = { x: 0, y: 0 };
+let lastClickPosition: Position = { x: 0, y: 0 };
 let boardDragStartPositionOnStage: Position = { x: 0, y: 0 };
 
 export function subscribeToScrollEvents(board: Board) {
@@ -56,9 +56,7 @@ export function subscribeToScrollEvents(board: Board) {
     }, false);
 
     const zoom = (board: Board, zoomDirection: number) => {
-        // const boardContainer = board.container;
-        //
-        // const cursorPositionBeforeZoom = cursorMoveData.getLocalPosition(boardContainer);
+        const cursorPositionOnBoardBeforeZoom = cursorBoardPosition();
 
         const actualScale = board.scale;
 
@@ -75,17 +73,23 @@ export function subscribeToScrollEvents(board: Board) {
 
         setBoardScale(board.scale);
 
-        // const cursorPositionAfterZoom = cursorMoveData.getLocalPosition(boardContainer);
-        // const cursorPositionChange = {
-        //     dx: (cursorPositionAfterZoom.x - cursorPositionBeforeZoom.x) * board.scale,
-        //     dy: (cursorPositionAfterZoom.y - cursorPositionBeforeZoom.y) * board.scale
-        // };
+        const cursorPositionOnBoardAfterZoom = cursorBoardPosition();
 
-        // board.move(cursorPositionChange);
+        const cursorPositionChange = {
+            dx: (cursorPositionOnBoardAfterZoom.x - cursorPositionOnBoardBeforeZoom.x) * board.scale,
+            dy: (cursorPositionOnBoardAfterZoom.y - cursorPositionOnBoardBeforeZoom.y) * board.scale
+        };
+
+        board.move(cursorPositionChange);
     };
 
+    function cursorBoardPosition(): Position {
+        const cursorPosition = cursorPositionValue();
+        return board.positionOnBoard(cursorPosition);
+    }
+
     board.middleButtonClicked$.subscribe(() => {
-        lastClickPositionOnStage = cursorPositionValue();
+        lastClickPosition = cursorPositionValue();
         onDragStart();
     });
 
@@ -116,8 +120,8 @@ export function subscribeToScrollEvents(board: Board) {
     function onDragMove(position: Position) {
         if (isDragging) {
             const mouseMove = {
-                x: position.x - lastClickPositionOnStage.x,
-                y: position.y - lastClickPositionOnStage.y
+                x: position.x - lastClickPosition.x,
+                y: position.y - lastClickPosition.y
             };
             board.moveToPosition({
                 x: boardDragStartPositionOnStage.x + mouseMove.x,
