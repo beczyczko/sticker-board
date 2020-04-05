@@ -11,8 +11,8 @@ import { subscribeToScrollEvents } from './BoardNavigation';
 class Board {
 
     private readonly stickersService: StickersService;
-    private readonly onDoubleClick: (clickPosition: any) => void;
     private _middleButtonClicked$ = new Subject<void>();
+    private _doubleClicked$ = new Subject<Position>();
 
     public position: Position = { x: 0, y: 0 };
     public scale: number = 1;
@@ -23,7 +23,6 @@ class Board {
     public readonly boardHtmlElementsLayer: HTMLElement | null;
 
     constructor(
-        onDoubleClick: (clickPosition: any) => void,
         boardSignalRService: BoardSignalRService,
         stickersService: StickersService,
         windowWidth: number,
@@ -34,7 +33,6 @@ class Board {
         this.moveToPosition({ x: windowWidth / 2, y: windowHeight / 2 });
 
         this.stickersService = stickersService;
-        this.onDoubleClick = onDoubleClick;
 
         this.registerMouseEventHandlers();
 
@@ -82,6 +80,10 @@ class Board {
 
     public get middleButtonClicked$(): Observable<void> {
         return this._middleButtonClicked$.asObservable();
+    }
+
+    public get doubleClicked$(): Observable<Position> {
+        return this._doubleClicked$.asObservable();
     }
 
     private updateBoardHtmlLayer() {
@@ -138,17 +140,27 @@ class Board {
     }
 
     private registerMouseEventHandlers(): void {
-        this.boardHtmlLayer?.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
-        this.boardHtmlLayer?.addEventListener('touchstart', (e: any) => this.onClick(e));
-        this._middleButtonClicked$.next();
+        if (this.boardHtmlLayer) {
+            this.boardHtmlLayer.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
+            this.boardHtmlLayer.addEventListener('touchstart', (e: any) => this.onClick(e));
+
+            this.boardHtmlLayer.addEventListener('dblclick', (e: MouseEvent) => this.onDoubleClick(e));
+        }
     }
 
-    private onClick(event: MouseEvent): void {
-        event.stopPropagation();
+    private onClick(e: MouseEvent): void {
+        e.stopPropagation();
 
-        if (event.button === MouseButton.middle) {
+        if (e.button === MouseButton.middle) {
             this._middleButtonClicked$.next();
         }
+    }
+
+    private onDoubleClick(e: MouseEvent) {
+        e.stopPropagation();
+        
+        const cursorScreenPosition = { x: e.clientX, y: e.clientY };
+        this._doubleClicked$.next(this.positionOnBoard(cursorScreenPosition));
     }
 }
 

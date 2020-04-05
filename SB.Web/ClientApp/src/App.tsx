@@ -9,10 +9,10 @@ import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
 import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
+import { tap } from 'rxjs/operators';
+import { Position } from './board/Position';
 
 function App() {
-
-    let pixiLoader;
 
     const stickersService = ServicesProvider.stickersService;
     const [initialized, setInitialized] = useState(false);
@@ -21,7 +21,7 @@ function App() {
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
 
-    const onBoardDoubleClick = (clickPosition: any) => {
+    const onBoardDoubleClick = (clickPosition: Position) => {
         setNewStickerPosition(clickPosition);
         setNewStickerCreating(true);
     };
@@ -40,13 +40,16 @@ function App() {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
-            const newBoard = new Board(
-                clickPosition => onBoardDoubleClick(clickPosition),
-                new BoardSignalRService(BaseAPIUrl),
-                stickersService,
-                windowWidth,
-                windowHeight);
-            setBoard(newBoard);
+        const newBoard = new Board(
+            new BoardSignalRService(BaseAPIUrl),
+            stickersService,
+            windowWidth,
+            windowHeight);
+        setBoard(newBoard);
+
+        newBoard.doubleClicked$
+            .pipe(tap(clickPosition => onBoardDoubleClick(clickPosition)))
+            .subscribe();
     }, [canvas]);
 
     const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {
