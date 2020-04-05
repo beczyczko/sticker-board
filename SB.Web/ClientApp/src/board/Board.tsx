@@ -158,7 +158,7 @@ class Board {
 
     private onDoubleClick(e: MouseEvent) {
         e.stopPropagation();
-        
+
         const cursorScreenPosition = { x: e.clientX, y: e.clientY };
         this._doubleClicked$.next(this.positionOnBoard(cursorScreenPosition));
     }

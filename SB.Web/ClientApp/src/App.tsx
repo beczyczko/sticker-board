@@ -16,27 +16,19 @@ function App() {
 
     const stickersService = ServicesProvider.stickersService;
     const [initialized, setInitialized] = useState(false);
-    const [canvas, setCanvas] = useState();
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
 
-    const onBoardDoubleClick = (clickPosition: Position) => {
-        setNewStickerPosition(clickPosition);
-        setNewStickerCreating(true);
-    };
-
     useEffect(() => {
         if (!initialized) {
-            //todo db
+            initBoard();
         }
 
         setInitialized(true);
     }, [initialized]);
 
-
-    useEffect(() => {
-
+    const initBoard = () => {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
@@ -50,7 +42,12 @@ function App() {
         newBoard.doubleClicked$
             .pipe(tap(clickPosition => onBoardDoubleClick(clickPosition)))
             .subscribe();
-    }, [canvas]);
+    };
+
+    const onBoardDoubleClick = (clickPosition: Position) => {
+        setNewStickerPosition(clickPosition);
+        setNewStickerCreating(true);
+    };
 
     const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {
         if (newStickerPosition && board) {
