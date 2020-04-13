@@ -127,11 +127,14 @@ class Sticker {
     }
 
     private addClickEventListeners(): void {
-        this.stickerHtmlElement?.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
-        this.stickerHtmlElement?.addEventListener('touchstart', (e: any) => this.onClick(e));
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.zIndex = '100';
 
-        this.stickerHtmlElement?.addEventListener('dblclick', () => this.onDoubleClick());
-        this.stickerHtmlElement?.addEventListener('dblclick', () => this.onDoubleClick());
+            this.stickerHtmlElement.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
+            this.stickerHtmlElement.addEventListener('touchstart', (e: any) => this.onClick(e));
+
+            this.stickerHtmlElement.addEventListener('dblclick', (e: MouseEvent) => this.onDoubleClick(e), { passive: false } as AddEventListenerOptions);
+        }
     }
 
     private addCursorMoveEventListeners(): void {
@@ -157,11 +160,11 @@ class Sticker {
         return Math.max(...wordsLength);
     }
 
-    private onClick(event: MouseEvent): void {
-        event.stopPropagation();
+    private onClick(e: MouseEvent): void {
+        e.stopPropagation();
 
-        if (event.button === MouseButton.left) {
-            this.onDragStart(event);
+        if (e.button === MouseButton.left) {
+            this.onDragStart(e);
             this.addCursorMoveEventListeners();
             this.addClickEndEventListeners();
         }
@@ -222,8 +225,12 @@ class Sticker {
         }
     }
 
-    private onDoubleClick(): void {
-        console.log('should edit');
+    private onDoubleClick(e: MouseEvent) {
+        e.stopPropagation();
+
+        if (this.stickerTextHtmlElement) {
+            this.stickerTextHtmlElement.style.visibility = 'hidden';
+        }
         //todo db edit
         // this.showEditField('div', 'edit-sticker-' + this.id);
     }

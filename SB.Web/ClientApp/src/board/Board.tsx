@@ -144,7 +144,7 @@ class Board {
             this.boardHtmlLayer.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
             this.boardHtmlLayer.addEventListener('touchstart', (e: any) => this.onClick(e));
 
-            this.boardHtmlLayer.addEventListener('dblclick', (e: MouseEvent) => this.onDoubleClick(e));
+            this.boardHtmlLayer.addEventListener('dblclick', (e: MouseEvent) => this.onDoubleClick(e), { passive: false } as AddEventListenerOptions);
         }
     }
 
@@ -165,3 +165,4 @@ class Board {
 }
 
 export default Board;
+
