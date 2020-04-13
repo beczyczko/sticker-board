@@ -12,11 +12,18 @@ let dragItemOffsetPosition = { x: 0, y: 0 };
 const stickersServiceProvider = ServicesProvider;
 const stickerShadowAlpha = 0.5;
 
+enum DisplayMode {
+    Read,
+    Modify
+}
+
 class Sticker {
     private cursorSubscriptions = new Array<Subscription>();
     private positionBeforeDrag: Position = { x: 0, y: 0 };
     private stickerHtmlElement: HTMLElement | undefined;
     private stickerTextHtmlElement: HTMLElement | undefined;
+    private stickerTextEditHtmlElement: HTMLElement | undefined;
+    private displayMode: DisplayMode = DisplayMode.Read;
 
     public dragging: boolean = false;
     public selected = false;
@@ -38,28 +45,6 @@ class Sticker {
             y: positionY
         } as PositionDto;
     }
-
-    // private showEditField(elementTag, elementId) {
-    //     // todo db clean this
-    //     const bounds = this.innerSticker.getBounds();
-    //
-    //     //todo db to html element, not .inner html - it would be easier to work with it later
-    //     const textHtmlElementId = `sticker-text-${elementId}`;
-    //     const html = `    <p id="${textHtmlElementId}" style="border: none; background: transparent; padding: 0; text-align: center; width: inherit; height: fit-content;">
-    //                         ${this.text}
-    //                         </p>
-    //                 `;
-    //     const newElement = document.createElement(elementTag);
-    //     newElement.setAttribute('id', elementId);
-    //     const style = ` position: absolute; top: ${bounds.top.toString()}px; left: ${bounds.left.toString()}px;
-    //                     width: ${bounds.width}px;
-    //                     height: ${bounds.width}px;`;
-    //     newElement.setAttribute('style', style);
-    //     newElement.innerHTML = html;
-    //
-    //     document.body.appendChild(newElement);
-    //     this.fitText(bounds.width);
-    // }
 
     public showTextField() {
         // todo db clean this
@@ -99,30 +84,43 @@ class Sticker {
         const htmlLayer = document.getElementById('board-html-elements-layer');
         htmlLayer?.appendChild(sticker);
 
-        this.fitText(this.width, this.height);
+        this.fitText(this.width, this.height, textHtmlElement);
         this.addClickEventListeners();
     }
 
-    private fitText(maxWidth: number, maxHeight: number): void {
+    private fitText(
+        maxWidth: number,
+        maxHeight: number,
+        textElement: HTMLElement | undefined,
+        minimumFontFit: number = 1,
+        maximumFontFit: number = 100): void {
+
         // todo db clean this
-        const textArea = this.stickerTextHtmlElement;
-        if (!textArea) {
+        if (!textElement) {
             return;
         }
 
-        const computedStyle = window.getComputedStyle(textArea);
+        const computedStyle = window.getComputedStyle(textElement);
         const fontSize = Number(computedStyle.fontSize.slice(0, computedStyle.fontSize.indexOf('px')));
 
         if (this.maxWordLength > 15) {
-            textArea.style.wordBreak = 'break-word';
+            textElement.style.wordBreak = 'break-word';
         }
 
-        const width = textArea.clientWidth;
-        const height = textArea.clientHeight;
+        const width = textElement.clientWidth;
+        const height = textElement.scrollHeight;
+        const textIsTooBig = height > maxHeight || width > maxWidth;
 
-        if (height > maxHeight || width > maxWidth) {
-            textArea.style.fontSize = `${(fontSize - 1)}px`;
-            this.fitText(maxWidth, maxHeight);
+        if (minimumFontFit === maximumFontFit) {
+            textElement.style.fontSize = `${(minimumFontFit)}px`;
+        } else if (!textIsTooBig) {
+            minimumFontFit = fontSize;
+            textElement.style.fontSize = `${(fontSize + 1)}px`;
+            this.fitText(maxWidth, maxHeight, textElement, minimumFontFit, maximumFontFit);
+        } else if (textIsTooBig) {
+            maximumFontFit = fontSize - 1;
+            textElement.style.fontSize = `${(fontSize - 1)}px`;
+            this.fitText(maxWidth, maxHeight, textElement, minimumFontFit, maximumFontFit);
         }
     }
 
@@ -228,11 +226,28 @@ class Sticker {
     private onDoubleClick(e: MouseEvent) {
         e.stopPropagation();
 
-        if (this.stickerTextHtmlElement) {
-            this.stickerTextHtmlElement.style.visibility = 'hidden';
+        if (this.displayMode === DisplayMode.Read) {
+            if (this.stickerHtmlElement && this.stickerTextHtmlElement) {
+                this.displayMode = DisplayMode.Modify;
+                this.stickerTextHtmlElement.contentEditable = 'true';
+
+                this.stickerHtmlElement.addEventListener('keydown', (e: KeyboardEvent) => {
+                    setTimeout(() => {
+                        //todo db save after change debounce X ms
+                        this.fitText(this.width, this.height, this.stickerTextHtmlElement);
+                    }, 0);
+                });
+
+                this.stickerHtmlElement.addEventListener('focusout', (e: FocusEvent) => {
+                    console.log(e);
+                    if (this.stickerTextHtmlElement) {
+                        this.displayMode = DisplayMode.Read;
+                        this.stickerTextHtmlElement.contentEditable = 'false';
+                    }
+                    //todo db save on focus lost
+                });
+            }
         }
-        //todo db edit
-        // this.showEditField('div', 'edit-sticker-' + this.id);
     }
 
     private updateElementPosition(position: Position): void {
