@@ -62,7 +62,7 @@ function App() {
                 id: sticker.id,
                 positionX: sticker.position.x,
                 positionY: sticker.position.y,
-                text: sticker.text,
+                text: stickerText,
                 color: selectedColor
             } as AddStickerCommand))
                 .then(() => board.addSticker(sticker));

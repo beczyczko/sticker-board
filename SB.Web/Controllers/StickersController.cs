@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SB.Boards.Commands.AddSticker;
+using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
 using SB.Boards.Domain;
 using SB.Boards.Dtos;
@@ -41,9 +42,15 @@ namespace SB.Web.Controllers
         }
 
         [HttpPost("{stickerId}/[Action]")]
-        public async Task Move(Guid stickerId, PositionDto newPosition)
+        public async Task Position(Guid stickerId, PositionDto newPosition)
         {
             await SendAsync(new MoveStickerCommand(stickerId, newPosition));
+        }
+
+        [HttpPost("{stickerId}/[Action]")]
+        public async Task Text(Guid stickerId, string newText)
+        {
+            await SendAsync(new ChangeStickerTextCommand(stickerId, newText));
         }
 
         [HttpGet("[Action]")]

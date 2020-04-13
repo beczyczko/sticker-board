@@ -3,13 +3,14 @@ import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
 import { cursorPosition, mouseUp } from '../services/MouseService';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { Position } from './Position';
 import { boardScaleValue } from './BoardScaleService';
+import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
-const stickersServiceProvider = ServicesProvider;
+const stickersService = ServicesProvider.stickersService;
 
 enum DisplayMode {
     Read,
@@ -22,6 +23,7 @@ class Sticker {
     private stickerHtmlElement: HTMLElement | undefined;
     private stickerTextHtmlElement: HTMLElement | undefined;
     private displayMode: DisplayMode = DisplayMode.Read;
+    private textChanged = new Subject<string>();
 
     public dragging: boolean = false;
     public selected = false;
@@ -42,10 +44,19 @@ class Sticker {
             x: positionX,
             y: positionY
         } as PositionDto;
+
+        this.textChanged
+            .pipe(
+                debounceTime(200),
+                distinctUntilChanged(),
+                concatMap(t => stickersService
+                    .text(this.id, this.text)
+                    .then())
+            )
+            .subscribe();
     }
 
     public showTextField() {
-        // todo db clean this
         const textHtmlElementId = `sticker-text-${this.id}`;
 
         const textHtmlElement = document.createElement('p');
@@ -53,6 +64,7 @@ class Sticker {
         textHtmlElement.innerText = this.text;
 
         textHtmlElement.style.border = 'none';
+        textHtmlElement.style.outline = 'none';
         textHtmlElement.style.background = 'transparent';
         textHtmlElement.style.padding = '16px';
         textHtmlElement.style.margin = 'auto';
@@ -93,7 +105,6 @@ class Sticker {
         minimumFontFit: number = 1,
         maximumFontFit: number = 100): void {
 
-        // todo db clean this
         if (!textElement) {
             return;
         }
@@ -188,7 +199,7 @@ class Sticker {
 
         const positionChanged = this.positionBeforeDrag.x !== this.position.x || this.positionBeforeDrag.y !== this.position.y;
         if (positionChanged) {
-            stickersServiceProvider.stickersService.move(
+            stickersService.position(
                 this.id,
                 {
                     x: this.position.x,
@@ -222,6 +233,8 @@ class Sticker {
     }
 
     private onDoubleClick(e: MouseEvent) {
+        // todo db show somehow that sticker is in edit mode
+        // todo db make sticker selectable on one click (outline + toolbox in future), after second click enter textEdition (cursor in text + sticker not movable)
         e.stopPropagation();
 
         if (this.displayMode === DisplayMode.Read) {
@@ -231,8 +244,11 @@ class Sticker {
 
                 const onKeyDown = (e: KeyboardEvent) => {
                     setTimeout(() => {
-                        //todo db save after change debounce X ms
-                        this.fitText(this.width, this.height, this.stickerTextHtmlElement);
+                        if (this.stickerTextHtmlElement) {
+                            this.text = this.stickerTextHtmlElement.innerText;
+                            this.textChanged.next(this.text);
+                            this.fitText(this.width, this.height, this.stickerTextHtmlElement);
+                        }
                     }, 0);
                 };
                 this.stickerHtmlElement.addEventListener('keydown', onKeyDown);
@@ -245,7 +261,6 @@ class Sticker {
                         this.stickerHtmlElement.removeEventListener('keydown', onKeyDown);
                         this.stickerHtmlElement.removeEventListener('focusout', onFocusOut);
                     }
-                    //todo db save on focus lost
                 };
                 this.stickerHtmlElement.addEventListener('focusout', onFocusOut);
             }

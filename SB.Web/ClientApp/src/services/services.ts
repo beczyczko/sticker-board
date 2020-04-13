@@ -122,8 +122,8 @@ export class StickersService {
         return Promise.resolve<StickerDto>(<any>null);
     }
 
-    move(stickerId: string, newPosition: PositionDto): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Move";
+    position(stickerId: string, newPosition: PositionDto): Promise<void> {
+        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Position";
         if (stickerId === undefined || stickerId === null)
             throw new Error("The parameter 'stickerId' must be defined.");
         url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId)); 
@@ -140,11 +140,46 @@ export class StickersService {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processMove(_response);
+            return this.processPosition(_response);
         });
     }
 
-    protected processMove(response: Response): Promise<void> {
+    protected processPosition(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+
+    text(stickerId: string, newText: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Text?";
+        if (stickerId === undefined || stickerId === null)
+            throw new Error("The parameter 'stickerId' must be defined.");
+        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId)); 
+        if (newText !== undefined)
+            url_ += "newText=" + encodeURIComponent("" + newText) + "&"; 
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processText(_response);
+        });
+    }
+
+    protected processText(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
