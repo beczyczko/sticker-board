@@ -10,7 +10,6 @@ import { boardScaleValue } from './BoardScaleService';
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
 const stickersServiceProvider = ServicesProvider;
-const stickerShadowAlpha = 0.5;
 
 enum DisplayMode {
     Read,
@@ -22,7 +21,6 @@ class Sticker {
     private positionBeforeDrag: Position = { x: 0, y: 0 };
     private stickerHtmlElement: HTMLElement | undefined;
     private stickerTextHtmlElement: HTMLElement | undefined;
-    private stickerTextEditHtmlElement: HTMLElement | undefined;
     private displayMode: DisplayMode = DisplayMode.Read;
 
     public dragging: boolean = false;
@@ -231,21 +229,25 @@ class Sticker {
                 this.displayMode = DisplayMode.Modify;
                 this.stickerTextHtmlElement.contentEditable = 'true';
 
-                this.stickerHtmlElement.addEventListener('keydown', (e: KeyboardEvent) => {
+                const onKeyDown = (e: KeyboardEvent) => {
                     setTimeout(() => {
                         //todo db save after change debounce X ms
                         this.fitText(this.width, this.height, this.stickerTextHtmlElement);
                     }, 0);
-                });
+                };
+                this.stickerHtmlElement.addEventListener('keydown', onKeyDown);
 
-                this.stickerHtmlElement.addEventListener('focusout', (e: FocusEvent) => {
-                    console.log(e);
-                    if (this.stickerTextHtmlElement) {
+                const onFocusOut = (e: FocusEvent) => {
+                    if (this.stickerTextHtmlElement && this.stickerHtmlElement) {
                         this.displayMode = DisplayMode.Read;
                         this.stickerTextHtmlElement.contentEditable = 'false';
+
+                        this.stickerHtmlElement.removeEventListener('keydown', onKeyDown);
+                        this.stickerHtmlElement.removeEventListener('focusout', onFocusOut);
                     }
                     //todo db save on focus lost
-                });
+                };
+                this.stickerHtmlElement.addEventListener('focusout', onFocusOut);
             }
         }
     }
