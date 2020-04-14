@@ -177,6 +177,21 @@ class Sticker {
         }
     }
 
+    private select(): void {
+        if (this.stickerHtmlElement) {
+            this.selected = true;
+            this.stickerHtmlElement.style.outline = '2px dashed rgb(17, 95, 221)';
+        }
+    }
+
+    private removeSelection(): void {
+        console.log('removeSelection');
+        if (this.stickerHtmlElement) {
+            this.selected = false;
+            this.stickerHtmlElement.style.outline = '';
+        }
+    }
+
     private onDragStart(event: any): void {
         this.dragging = true;
 
@@ -242,6 +257,9 @@ class Sticker {
                 this.displayMode = DisplayMode.Modify;
                 this.stickerTextHtmlElement.contentEditable = 'true';
 
+                placeCaretAtEnd(this.stickerTextHtmlElement);
+                this.select();
+
                 const onKeyDown = (e: KeyboardEvent) => {
                     setTimeout(() => {
                         if (this.stickerTextHtmlElement) {
@@ -257,6 +275,8 @@ class Sticker {
                     if (this.stickerTextHtmlElement && this.stickerHtmlElement) {
                         this.displayMode = DisplayMode.Read;
                         this.stickerTextHtmlElement.contentEditable = 'false';
+
+                        this.removeSelection();
 
                         this.stickerHtmlElement.removeEventListener('keydown', onKeyDown);
                         this.stickerHtmlElement.removeEventListener('focusout', onFocusOut);
@@ -275,6 +295,17 @@ class Sticker {
             this.stickerHtmlElement.style.left = `${this.position.x}px`;
         }
     }
+}
+
+function placeCaretAtEnd(element: HTMLElement) {
+    // https://stackoverflow.com/questions/28270302/jquery-how-to-focus-on-last-character-of-div
+    element.focus();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
 }
 
 export default Sticker;
