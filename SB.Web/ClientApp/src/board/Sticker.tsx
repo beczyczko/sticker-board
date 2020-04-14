@@ -193,18 +193,20 @@ class Sticker {
     }
 
     private onDragStart(event: any): void {
-        this.dragging = true;
+        if (!this.selected) {
+            this.dragging = true;
 
-        const boardScale = boardScaleValue();
-        const clickPositionInBoardScale = {
-            x: event.clientX / boardScale,
-            y: event.clientY / boardScale
-        };
+            const boardScale = boardScaleValue();
+            const clickPositionInBoardScale = {
+                x: event.clientX / boardScale,
+                y: event.clientY / boardScale
+            };
 
-        dragItemOffsetPosition = {
-            x: (clickPositionInBoardScale.x - this.position.x),
-            y: (clickPositionInBoardScale.y - this.position.y)
-        };
+            dragItemOffsetPosition = {
+                x: (clickPositionInBoardScale.x - this.position.x),
+                y: (clickPositionInBoardScale.y - this.position.y)
+            };
+        }
     }
 
     private onDragEnd(): void {
@@ -248,8 +250,6 @@ class Sticker {
     }
 
     private onDoubleClick(e: MouseEvent) {
-        // todo db show somehow that sticker is in edit mode
-        // todo db make sticker selectable on one click (outline + toolbox in future), after second click enter textEdition (cursor in text + sticker not movable)
         e.stopPropagation();
 
         if (this.displayMode === DisplayMode.Read) {
