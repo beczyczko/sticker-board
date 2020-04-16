@@ -1,43 +1,50 @@
-import * as PIXI from 'pixi.js';
-import { MouseButton } from './MouseButton';
 import Board from './Board';
+import { cursorPosition, cursorPositionValue, mouseUp } from '../services/MouseService';
+import { Subscription } from 'rxjs';
+import { Position } from './Position';
+import { setBoardScale } from './BoardScaleService';
 
 const permittedScaleRange = { min: 0.05, max: 2 };
-let dragData: any;
-let cursorMoveData: any;
-let lastClickPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
-let boardDragStartPositionOnStage: { x: number, y: number } = { x: 0, y: 0 };
+let isDragging: boolean;
+let lastClickPosition: Position = { x: 0, y: 0 };
+let boardDragStartPositionOnStage: Position = { x: 0, y: 0 };
 
 export function subscribeToScrollEvents(board: Board) {
-    const boardContainer = board.container;
+
+    let cursorSubscriptions = new Array<Subscription>();
+
+    const boardHtmlLayer = board.boardHtmlLayer;
     let ctrlKeyPressed = false;
 
-    registerMouseEventHandlers(boardContainer);
+    addCursorMoveEventListeners();
 
-    const moveBoard = (board: PIXI.Container, event: any) => {
+    const moveBoard = (board: Board, event: any) => {
         const scrollSpeed = 1;
-        board.position.x -= event.deltaX * scrollSpeed;
-        board.position.y -= event.deltaY * scrollSpeed;
+        const positionChange = {
+            dx: -event.deltaX * scrollSpeed,
+            dy: -event.deltaY * scrollSpeed
+        };
+        board.move(positionChange);
     };
 
     // 2017 recommended event
-    document.body.addEventListener('wheel', function (event: WheelEvent) {
+    boardHtmlLayer?.addEventListener('wheel', function (event: WheelEvent) {
         if (ctrlKeyPressed) {
             event.preventDefault();
-            zoom(boardContainer, -event.deltaY);
+            zoom(board, -event.deltaY);
         } else {
-            moveBoard(boardContainer, event);
+            moveBoard(board, event);
         }
     }, { passive: false } as AddEventListenerOptions);
 
     // Before 2017, IE9, Chrome, Safari, Opera
-    document.body.addEventListener('mousewheel', function (event) {
-        moveBoard(boardContainer, event); // not tested this case
+    boardHtmlLayer?.addEventListener('mousewheel', function (event) {
+        moveBoard(board, event); // not tested this case
     }, false);
 
     // Old versions of Firefox
-    document.body.addEventListener('DOMMouseScroll', function (event) {
-        moveBoard(boardContainer, event); // not tested this case
+    boardHtmlLayer?.addEventListener('DOMMouseScroll', function (event) {
+        moveBoard(board, event); // not tested this case
     }, false);
 
     document.body.addEventListener('keydown', function (event: KeyboardEvent) {
@@ -48,86 +55,79 @@ export function subscribeToScrollEvents(board: Board) {
         ctrlKeyPressed = false;
     }, false);
 
-    const zoom = (board: PIXI.Container, zoomDirection: number) => {
-        const cursorPositionBeforeZoom = cursorMoveData.getLocalPosition(boardContainer);
+    const zoom = (board: Board, zoomDirection: number) => {
+        const cursorPositionOnBoardBeforeZoom = cursorBoardPosition();
 
-        const boardScale = board.scale;
-        const actualScale = boardScale.x;
+        const actualScale = board.scale;
 
         zoomDirection = Math.cbrt(zoomDirection);
         const newScale = actualScale * (1 + zoomDirection * 0.05);
 
         if (newScale < permittedScaleRange.min) {
-            boardScale.set(permittedScaleRange.min);
+            board.setScale(permittedScaleRange.min);
         } else if (newScale > permittedScaleRange.max) {
-            boardScale.set(permittedScaleRange.max);
+            board.setScale(permittedScaleRange.max);
         } else {
-            boardScale.set(newScale);
+            board.setScale(newScale);
         }
-        boardContainer.updateTransform();
 
-        const cursorPositionAfterZoom = cursorMoveData.getLocalPosition(boardContainer);
+        setBoardScale(board.scale);
+
+        const cursorPositionOnBoardAfterZoom = cursorBoardPosition();
+
         const cursorPositionChange = {
-            x: cursorPositionAfterZoom.x - cursorPositionBeforeZoom.x,
-            y: cursorPositionAfterZoom.y - cursorPositionBeforeZoom.y
+            dx: (cursorPositionOnBoardAfterZoom.x - cursorPositionOnBoardBeforeZoom.x) * board.scale,
+            dy: (cursorPositionOnBoardAfterZoom.y - cursorPositionOnBoardBeforeZoom.y) * board.scale
         };
 
-        boardContainer.position.set(
-            boardContainer.position.x + cursorPositionChange.x * boardContainer.scale.x,
-            boardContainer.position.y + cursorPositionChange.y * boardContainer.scale.y,
-        );
-        boardContainer.updateTransform();
+        board.move(cursorPositionChange);
     };
 
-    function onClick(event) {
-        lastClickPositionOnStage = event.data.getLocalPosition(boardContainer.parent);
-
-        if (event.data.button === MouseButton.middle) {
-            onDragStart(event);
-        }
+    function cursorBoardPosition(): Position {
+        const cursorPosition = cursorPositionValue();
+        return board.positionOnBoard(cursorPosition);
     }
 
-    function onDragStart(event) {
-        boardDragStartPositionOnStage = {
-            x: boardContainer.position.x,
-            y: boardContainer.position.y
-        };
-        dragData = event.data;
-        boardContainer.cursor = 'all-scroll';
+    board.middleButtonClicked$.subscribe(() => {
+        lastClickPosition = cursorPositionValue();
+        onDragStart();
+    });
+
+    function addCursorMoveEventListeners(): void {
+        cursorSubscriptions.push(cursorPosition().subscribe(position => onDragMove(position)));
+        cursorSubscriptions.push(mouseUp().subscribe(() => onDragEnd()));
+    }
+
+    function onDragStart() {
+        if (boardHtmlLayer) {
+            isDragging = true;
+            boardHtmlLayer.style.cursor = 'all-scroll';
+
+            boardDragStartPositionOnStage = {
+                x: board.position.x,
+                y: board.position.y
+            } as Position;
+        }
     }
 
     function onDragEnd() {
-        boardContainer.buttonMode = false;
-        dragData = null;
-        boardContainer.cursor = 'default';
-    }
-
-    function onDragMove(event) {
-        cursorMoveData = event.data;
-
-        if (dragData) {
-            const newPosition = dragData.getLocalPosition(boardContainer.parent);
-            const mouseMove = {
-                x: newPosition.x - lastClickPositionOnStage.x,
-                y: newPosition.y - lastClickPositionOnStage.y
-            };
-            boardContainer.position.x = boardDragStartPositionOnStage.x + mouseMove.x;
-            boardContainer.position.y = boardDragStartPositionOnStage.y + mouseMove.y;
+        isDragging = false;
+        if (boardHtmlLayer) {
+            boardHtmlLayer.style.cursor = 'default';
         }
     }
 
-    function registerMouseEventHandlers(board: PIXI.Container) {
-        board
-            .on('mousedown', e => onClick(e))
-            .on('touchstart', e => onDragStart(e))
-            // events for drag end
-            .on('mouseup', () => onDragEnd())
-            .on('mouseupoutside', () => onDragEnd())
-            .on('touchend', () => onDragEnd())
-            .on('touchendoutside', () => onDragEnd())
-            // events for drag move
-            .on('mousemove', e => onDragMove(e))
-            .on('touchmove', e => onDragMove(e));
+    function onDragMove(position: Position) {
+        if (isDragging) {
+            const mouseMove = {
+                x: position.x - lastClickPosition.x,
+                y: position.y - lastClickPosition.y
+            };
+            board.moveToPosition({
+                x: boardDragStartPositionOnStage.x + mouseMove.x,
+                y: boardDragStartPositionOnStage.y + mouseMove.y
+            });
+        }
     }
 }
 

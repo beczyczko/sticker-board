@@ -1,4 +1,5 @@
 ﻿using SB.Boards.Commands.AddSticker;
+using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
 using SB.Common.Mongo;
 
@@ -23,6 +24,11 @@ namespace SB.Boards.Domain
         public void Move(MoveStickerCommand command)
         {
             Position = new Position(command.Position);
+        }
+
+        public void ChangeText(ChangeStickerTextCommand command)
+        {
+            Text = command.NewText;
         }
     }
 }

@@ -1,0 +1,16 @@
+#canvas {
+  position: fixed;
+  visibility: hidden;
+}
+
+#board-html-layer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: #f1f1f1;
+
+  #board-html-elements-layer {
+    position: absolute;
+    transform-origin: 0 0;
+  }
+}

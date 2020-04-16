@@ -1,22 +1,38 @@
-import * as PIXI from 'pixi.js';
-import { PositionDto } from '../services/services';
+import { PositionDto, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
-
-const TextureCache = PIXI.utils.TextureCache;
+import { cursorPosition, mouseUp } from '../services/MouseService';
+import { Subject, Subscription } from 'rxjs';
+import { Position } from './Position';
+import { boardScaleValue } from './BoardScaleService';
+import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
-const stickersServiceProvider = ServicesProvider;
-const stickerShadowAlpha = 0.5;
+const stickersService = ServicesProvider.stickersService;
+
+enum DisplayMode {
+    Read,
+    Modify
+}
 
 class Sticker {
-    private positionBeforeDrag: PositionDto = { x: 0, y: 0 };
+    private commandCorrelationIds = new Set<string>();
 
-    public dragData: any;
-    public element: PIXI.Sprite;
+    private cursorSubscriptions = new Array<Subscription>();
+    private positionBeforeDrag: Position = { x: 0, y: 0 };
+    private stickerHtmlElement: HTMLElement | undefined;
+    private stickerTextHtmlElement: HTMLElement | undefined;
+    private displayMode: DisplayMode = DisplayMode.Read;
+    private textChanged = new Subject<string>();
+
     public dragging: boolean = false;
+    public selected = false;
+    public width = 200;
+    public height = 200;
+    public position: Position;
 
     constructor(
         public id: string,
@@ -25,125 +41,302 @@ class Sticker {
         public text: string,
         public color: StickerColor) {
 
-        const innerSticker = new PIXI.Graphics();
-        innerSticker.beginFill(this.colorToInt(color));
-
-        innerSticker.drawRect(0, 0, 400, 400);
-
-        const textureCacheElement = TextureCache['sticker_shadow'];
-        const sticker = new PIXI.Sprite(textureCacheElement);
-        sticker.width = sticker.texture.width;
-        sticker.height = sticker.texture.height;
-
-        innerSticker.interactive = true;
-        innerSticker.buttonMode = true;
-
-        sticker.alpha = stickerShadowAlpha;
-        innerSticker.alpha = 1 / stickerShadowAlpha;
-
-        innerSticker
-            // events for drag start
-            .on('mousedown', (e: any) => this.onClick(e))
-            .on('touchstart', (e: any) => this.onClick(e))
-            // events for drag end
-            .on('mouseup', () => this.onDragEnd())
-            .on('mouseupoutside', () => this.onDragEnd())
-            .on('touchend', () => this.onDragEnd())
-            .on('touchendoutside', () => this.onDragEnd())
-            // events for drag move
-            .on('mousemove', () => this.onDragMove())
-            .on('touchmove', () => this.onDragMove());
-
-        sticker.x = positionX;
-        sticker.y = positionY;
-
-        const textStyle = {
-            wordWrap: true,
-            wordWrapWidth: 340,
-            fontSize: 36,
-            align: 'center',
-        };
-        const textElement = new PIXI.Text(text, textStyle);
-        textElement.x = 30;
-        textElement.y = 30;
-
-        innerSticker.addChild(textElement);
-        sticker.addChild(innerSticker);
-
-        this.element = sticker;
+        this.position = { x: positionX, y: positionY };
 
         this.positionBeforeDrag = {
             x: positionX,
             y: positionY
         } as PositionDto;
+
+        this.textChanged
+            .pipe(
+                debounceTime(200),
+                distinctUntilChanged(),
+                concatMap(t => {
+                    const correlationId = uuidv4();
+                    this.commandCorrelationIds.add(correlationId);
+                    return stickersService
+                        .text(this.id, this.text, correlationId)
+                        .then()
+                })
+            )
+            .subscribe();
     }
 
-    public move(position: PositionDto): void {
-        this.element.position.set(position.x, position.y);
-    }
-
-    private colorToInt(color: StickerColor): number {
-        return color.red * 256 * 256 + color.green * 256 + color.blue;
-    };
-
-    private onClick(event: any) {
-        if (event.data.button === MouseButton.left) {
-            this.onDragStart(event);
+    public static create(stickerDto: StickerDto): Sticker | undefined {
+        if (stickerDto && stickerDto.position && stickerDto.text && stickerDto.color) {
+            return new Sticker(
+                stickerDto.id,
+                stickerDto.position.x,
+                stickerDto.position.y,
+                stickerDto.text,
+                StickerColor.create(stickerDto.color)
+            );
+        } else {
+            return undefined;
         }
     }
 
-    private onDragStart(event: any) {
-        // store a reference to the dragData
-        // the reason for this is because of multitouch
-        // we want to track the movement of this particular touch
-        this.dragData = event.data;
-        this.element.alpha = 0.4;
-        this.dragging = true;
+    public showTextField() {
+        const textHtmlElementId = `sticker-text-${this.id}`;
 
-        const board = this.element.parent;
-        const clickPosition = this.dragData.getLocalPosition(board);
-        dragItemOffsetPosition = {
-            x: clickPosition.x - this.element.x,
-            y: clickPosition.y - this.element.y
-        };
+        const textHtmlElement = document.createElement('p');
+        textHtmlElement.id = textHtmlElementId;
+        textHtmlElement.innerText = this.text;
+
+        textHtmlElement.style.border = 'none';
+        textHtmlElement.style.outline = 'none';
+        textHtmlElement.style.background = 'transparent';
+        textHtmlElement.style.padding = '16px';
+        textHtmlElement.style.margin = 'auto';
+        textHtmlElement.style.textAlign = 'center';
+        textHtmlElement.style.width = 'fit-content';
+        textHtmlElement.style.height = 'fit-content';
+        textHtmlElement.style.userSelect = 'none';
+        textHtmlElement.style.fontSize = `100px`;
+
+        this.stickerTextHtmlElement = textHtmlElement;
+
+        const sticker = document.createElement('div');
+        sticker.id = `sticker-${this.id}`;
+        sticker.style.position = 'fixed';
+        sticker.style.display = 'flex';
+        sticker.style.top = `${this.position.y}px`;
+        sticker.style.left = `${this.position.x}px`;
+        sticker.style.width = `${(this.width)}px`;
+        sticker.style.height = `${(this.height)}px`;
+        sticker.style.background = this.color.toStyleString();
+        sticker.style.boxShadow = '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)';
+
+        sticker.appendChild(textHtmlElement);
+
+        this.stickerHtmlElement = sticker;
+
+        const htmlLayer = document.getElementById('board-html-elements-layer');
+        htmlLayer?.appendChild(sticker);
+
+        this.fitText(textHtmlElement);
+        this.addClickEventListeners();
     }
 
-    private async onDragEnd() {
-        this.element.alpha = stickerShadowAlpha;
+    public updateElementPosition(position: Position): void {
+        this.position = position;
+
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.top = `${this.position.y}px`;
+            this.stickerHtmlElement.style.left = `${this.position.x}px`;
+        }
+    }
+
+    public updateText(newText: string, correlationId: string): void {
+        if (this.commandCorrelationIds.has(correlationId)) {
+            this.commandCorrelationIds.delete(correlationId);
+            return;
+        }
+
+        if (newText !== this.text) {
+            this.text = newText;
+            if (this.stickerTextHtmlElement) {
+                this.stickerTextHtmlElement.innerText = newText;
+                this.fitText(this.stickerTextHtmlElement);
+            }
+        }
+    }
+
+    private fitText(
+        textElement: HTMLElement | undefined,
+        minimumFontFit: number = 1,
+        maximumFontFit: number = 100): void {
+        const maxHeight = this.height;
+        const maxWidth = this.width;
+
+        if (!textElement) {
+            return;
+        }
+
+        const computedStyle = window.getComputedStyle(textElement);
+        const fontSize = Number(computedStyle.fontSize.slice(0, computedStyle.fontSize.indexOf('px')));
+
+        if (this.maxWordLength > 15) {
+            textElement.style.wordBreak = 'break-word';
+        }
+
+        const width = textElement.clientWidth;
+        const height = textElement.scrollHeight;
+        const textIsTooBig = height > maxHeight || width > maxWidth;
+
+        if (minimumFontFit === maximumFontFit) {
+            textElement.style.fontSize = `${(minimumFontFit)}px`;
+        } else if (!textIsTooBig) {
+            minimumFontFit = fontSize;
+            textElement.style.fontSize = `${(fontSize + 1)}px`;
+            this.fitText(textElement, minimumFontFit, maximumFontFit);
+        } else if (textIsTooBig) {
+            maximumFontFit = fontSize - 1;
+            textElement.style.fontSize = `${(fontSize - 1)}px`;
+            this.fitText(textElement, minimumFontFit, maximumFontFit);
+        }
+    }
+
+    private addClickEventListeners(): void {
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.zIndex = '100';
+
+            this.stickerHtmlElement.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
+            this.stickerHtmlElement.addEventListener('touchstart', (e: any) => this.onClick(e));
+
+            this.stickerHtmlElement.addEventListener('dblclick', (e: MouseEvent) => this.onDoubleClick(e), { passive: false } as AddEventListenerOptions);
+        }
+    }
+
+    private addCursorMoveEventListeners(): void {
+        this.cursorSubscriptions.push(cursorPosition().subscribe(position => this.onDragMove(position)));
+    }
+
+    private addClickEndEventListeners(): void {
+        this.cursorSubscriptions.push(mouseUp().subscribe(() => this.onDragEnd()));
+    }
+
+    private removeMouseSubscriptions() {
+        this.cursorSubscriptions.forEach(s => s.unsubscribe());
+        this.cursorSubscriptions = new Array<Subscription>();
+    }
+
+    private get maxWordLength(): number {
+        const wordsLength = this.text.split(' ')
+            .map(t => t.length);
+        return Math.max(...wordsLength);
+    }
+
+    private onClick(e: MouseEvent): void {
+        e.stopPropagation();
+
+        if (e.button === MouseButton.left) {
+            this.onDragStart(e);
+            this.addCursorMoveEventListeners();
+            this.addClickEndEventListeners();
+        }
+    }
+
+    private select(): void {
+        if (this.stickerHtmlElement) {
+            this.selected = true;
+            this.stickerHtmlElement.style.outline = '2px dashed rgb(17, 95, 221)';
+        }
+    }
+
+    private removeSelection(): void {
+        if (this.stickerHtmlElement) {
+            this.selected = false;
+            this.stickerHtmlElement.style.outline = '';
+        }
+    }
+
+    private onDragStart(event: any): void {
+        if (!this.selected) {
+            this.dragging = true;
+
+            const boardScale = boardScaleValue();
+            const clickPositionInBoardScale = {
+                x: event.clientX / boardScale,
+                y: event.clientY / boardScale
+            };
+
+            dragItemOffsetPosition = {
+                x: (clickPositionInBoardScale.x - this.position.x),
+                y: (clickPositionInBoardScale.y - this.position.y)
+            };
+        }
+    }
+
+    private onDragEnd(): void {
         this.dragging = false;
 
-        this.dragData = null;
+        this.removeMouseSubscriptions();
 
-        const positionChanged = this.positionBeforeDrag.x !== this.element.x || this.positionBeforeDrag.y !== this.element.y;
+        const positionChanged = this.positionBeforeDrag.x !== this.position.x || this.positionBeforeDrag.y !== this.position.y;
         if (positionChanged) {
-            stickersServiceProvider.stickersService.move(
+            stickersService.position(
                 this.id,
                 {
-                    x: this.element.x,
-                    y: this.element.y
+                    x: this.position.x,
+                    y: this.position.y
                 } as PositionDto)
                 .then(() => {
                     this.positionBeforeDrag = {
-                        x: this.element.x,
-                        y: this.element.y
-                    } as PositionDto
+                        x: this.position.x,
+                        y: this.position.y
+                    } as PositionDto;
                 })
                 .catch(() => {
-                    this.element.x = this.positionBeforeDrag.x;
-                    this.element.y = this.positionBeforeDrag.y;
+                    this.position.x = this.positionBeforeDrag.x;
+                    this.position.y = this.positionBeforeDrag.y;
                 });
         }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
     }
 
-    private onDragMove() {
+    private onDragMove(cursorPosition: Position): void {
+        const boardScale = boardScaleValue();
         if (this.dragging) {
-            const newPosition = this.dragData.getLocalPosition(this.element.parent);
-            this.element.position.x = newPosition.x - dragItemOffsetPosition.x;
-            this.element.position.y = newPosition.y - dragItemOffsetPosition.y;
+            const newElementPosition = {
+                x: cursorPosition.x / boardScale - dragItemOffsetPosition.x,
+                y: cursorPosition.y / boardScale - dragItemOffsetPosition.y
+            };
+
+            this.updateElementPosition(newElementPosition);
         }
     }
+
+    private onDoubleClick(e: MouseEvent) {
+        e.stopPropagation();
+
+        if (this.displayMode === DisplayMode.Read) {
+            if (this.stickerHtmlElement && this.stickerTextHtmlElement) {
+                this.displayMode = DisplayMode.Modify;
+                this.stickerTextHtmlElement.contentEditable = 'true';
+
+                placeCaretAtEnd(this.stickerTextHtmlElement);
+                this.select();
+
+                const onKeyDown = (e: KeyboardEvent) => {
+                    setTimeout(() => {
+                        if (this.stickerTextHtmlElement) {
+                            this.text = this.stickerTextHtmlElement.innerText;
+                            this.textChanged.next(this.text);
+                            this.fitText(this.stickerTextHtmlElement);
+                        }
+                    }, 0);
+                };
+                this.stickerHtmlElement.addEventListener('keydown', onKeyDown);
+
+                const onFocusOut = (e: FocusEvent) => {
+                    if (this.stickerTextHtmlElement && this.stickerHtmlElement) {
+                        this.displayMode = DisplayMode.Read;
+                        this.stickerTextHtmlElement.contentEditable = 'false';
+
+                        this.removeSelection();
+
+                        this.stickerHtmlElement.removeEventListener('keydown', onKeyDown);
+                        this.stickerHtmlElement.removeEventListener('focusout', onFocusOut);
+                    }
+                };
+                this.stickerHtmlElement.addEventListener('focusout', onFocusOut);
+            }
+        }
+    }
+}
+
+function placeCaretAtEnd(element: HTMLElement) {
+    // https://stackoverflow.com/questions/28270302/jquery-how-to-focus-on-last-character-of-div
+    element.focus();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
 }
 
 export default Sticker;

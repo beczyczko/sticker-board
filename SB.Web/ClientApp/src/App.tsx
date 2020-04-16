@@ -1,73 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import './App.scss';
-import * as PIXI from 'pixi.js'
 import { v4 as uuidv4 } from 'uuid';
-import stickerShadowImage from './assets/sticker_shadow.png';
 import Sticker from './board/Sticker';
 import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
-import { subscribeToScrollEvents } from './board/BoardNavigation';
 import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
+import { tap } from 'rxjs/operators';
+import { Position } from './board/Position';
 
 function App() {
 
-    let pixiLoader;
-
     const stickersService = ServicesProvider.stickersService;
     const [initialized, setInitialized] = useState(false);
-    const [canvas, setCanvas] = useState();
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
 
-    const onBoardDoubleClick = (clickPosition: any) => {
-        setNewStickerPosition(clickPosition);
-        setNewStickerCreating(true);
-    };
-
     useEffect(() => {
         if (!initialized) {
-            pixiLoader = new PIXI.Loader();
-            pixiLoader
-                .add('sticker_shadow', stickerShadowImage)
-                .load();
+            initBoard();
         }
 
         setInitialized(true);
     }, [initialized]);
 
-
-    useEffect(() => {
-        const canvas = document.getElementById('canvas');
-
+    const initBoard = () => {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        let app = new PIXI.Application({
-            view: canvas,
-            width: windowWidth,
-            height: windowHeight - 4 // todo db can't remove that -4 px, fix this
-        } as any);
 
-        pixiLoader.onComplete.add(() => {
-            const newBoard = new Board(
-                app.stage,
-                clickPosition => onBoardDoubleClick(clickPosition),
-                new BoardSignalRService(BaseAPIUrl),
-                stickersService);
+        const newBoard = new Board(
+            new BoardSignalRService(BaseAPIUrl),
+            stickersService,
+            windowWidth,
+            windowHeight);
+        setBoard(newBoard);
 
-            newBoard.container.scale.set(0.4);
-            newBoard.container.x = windowWidth / 2;
-            newBoard.container.y = windowHeight / 2;
+        newBoard.doubleClicked$
+            .pipe(tap(clickPosition => onBoardDoubleClick(clickPosition)))
+            .subscribe();
+    };
 
-            setBoard(newBoard);
-
-            subscribeToScrollEvents(newBoard);
-        });
-    }, [canvas]);
+    const onBoardDoubleClick = (clickPosition: Position) => {
+        setNewStickerPosition(clickPosition);
+        setNewStickerCreating(true);
+    };
 
     const handleStickerCreation = (stickerText: string, selectedColor: StickerColor) => {
         if (newStickerPosition && board) {
@@ -78,11 +58,11 @@ function App() {
                 stickerText,
                 selectedColor);
 
-            stickersService.stickers(({
+            stickersService.create(({
                 id: sticker.id,
-                positionX: sticker.element.x,
-                positionY: sticker.element.y,
-                text: sticker.text,
+                positionX: sticker.position.x,
+                positionY: sticker.position.y,
+                text: stickerText,
                 color: selectedColor
             } as AddStickerCommand))
                 .then(() => board.addSticker(sticker));
@@ -91,11 +71,13 @@ function App() {
 
     return (
         <div className="App">
-            <canvas id="canvas"></canvas>
             <AddStickerDialog open={newStickerCreating}
                               setOpen={setNewStickerCreating}
                               onSaveCallback={(stickerText: string, color: StickerColor) => handleStickerCreation(stickerText, color)}>
             </AddStickerDialog>
+            <div id="board-html-layer">
+                <div id="board-html-elements-layer"></div>
+            </div>
         </div>
     );
 }

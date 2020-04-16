@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using SB.Boards.Domain;
 using SB.Common.Dispatchers;
 using SB.Common.MediatR;
@@ -30,13 +29,10 @@ namespace SB.Web
         {
             services.AddCustomMvc();
 
-            services.AddSwaggerGen(c =>
+            services.AddOpenApiDocument(configure =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "Sticker Board API",
-                });
+                configure.DocumentName = "v1";
+                configure.Title = "Sticker Board API";
             });
 
             services.AddControllers();
@@ -100,8 +96,8 @@ namespace SB.Web
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "SB API"); });
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseRouting();
 
