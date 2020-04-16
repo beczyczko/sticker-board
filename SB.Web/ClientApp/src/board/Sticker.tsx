@@ -7,6 +7,7 @@ import { Subject, Subscription } from 'rxjs';
 import { Position } from './Position';
 import { boardScaleValue } from './BoardScaleService';
 import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -18,6 +19,8 @@ enum DisplayMode {
 }
 
 class Sticker {
+    private commandCorrelationIds = new Set<string>();
+
     private cursorSubscriptions = new Array<Subscription>();
     private positionBeforeDrag: Position = { x: 0, y: 0 };
     private stickerHtmlElement: HTMLElement | undefined;
@@ -49,9 +52,13 @@ class Sticker {
             .pipe(
                 debounceTime(200),
                 distinctUntilChanged(),
-                concatMap(t => stickersService
-                    .text(this.id, this.text)
-                    .then())
+                concatMap(t => {
+                    const correlationId = uuidv4();
+                    this.commandCorrelationIds.add(correlationId);
+                    return stickersService
+                        .text(this.id, this.text, correlationId)
+                        .then()
+                })
             )
             .subscribe();
     }
@@ -94,16 +101,40 @@ class Sticker {
         const htmlLayer = document.getElementById('board-html-elements-layer');
         htmlLayer?.appendChild(sticker);
 
-        this.fitText(this.width, this.height, textHtmlElement);
+        this.fitText(textHtmlElement);
         this.addClickEventListeners();
     }
 
+    public updateElementPosition(position: Position): void {
+        this.position = position;
+
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.top = `${this.position.y}px`;
+            this.stickerHtmlElement.style.left = `${this.position.x}px`;
+        }
+    }
+
+    public updateText(newText: string, correlationId: string): void {
+        if (this.commandCorrelationIds.has(correlationId)) {
+            this.commandCorrelationIds.delete(correlationId);
+            return;
+        }
+
+        if (newText !== this.text) {
+            this.text = newText;
+            if (this.stickerTextHtmlElement) {
+                this.stickerTextHtmlElement.innerText = newText;
+                this.fitText(this.stickerTextHtmlElement);
+            }
+        }
+    }
+
     private fitText(
-        maxWidth: number,
-        maxHeight: number,
         textElement: HTMLElement | undefined,
         minimumFontFit: number = 1,
         maximumFontFit: number = 100): void {
+        const maxHeight = this.height;
+        const maxWidth = this.width;
 
         if (!textElement) {
             return;
@@ -125,11 +156,11 @@ class Sticker {
         } else if (!textIsTooBig) {
             minimumFontFit = fontSize;
             textElement.style.fontSize = `${(fontSize + 1)}px`;
-            this.fitText(maxWidth, maxHeight, textElement, minimumFontFit, maximumFontFit);
+            this.fitText(textElement, minimumFontFit, maximumFontFit);
         } else if (textIsTooBig) {
             maximumFontFit = fontSize - 1;
             textElement.style.fontSize = `${(fontSize - 1)}px`;
-            this.fitText(maxWidth, maxHeight, textElement, minimumFontFit, maximumFontFit);
+            this.fitText(textElement, minimumFontFit, maximumFontFit);
         }
     }
 
@@ -157,10 +188,6 @@ class Sticker {
         this.cursorSubscriptions = new Array<Subscription>();
     }
 
-    public move(position: PositionDto): void {
-        this.position = { x: position.x, y: position.y };
-    }
-
     private get maxWordLength(): number {
         const wordsLength = this.text.split(' ')
             .map(t => t.length);
@@ -185,7 +212,6 @@ class Sticker {
     }
 
     private removeSelection(): void {
-        console.log('removeSelection');
         if (this.stickerHtmlElement) {
             this.selected = false;
             this.stickerHtmlElement.style.outline = '';
@@ -265,7 +291,7 @@ class Sticker {
                         if (this.stickerTextHtmlElement) {
                             this.text = this.stickerTextHtmlElement.innerText;
                             this.textChanged.next(this.text);
-                            this.fitText(this.width, this.height, this.stickerTextHtmlElement);
+                            this.fitText(this.stickerTextHtmlElement);
                         }
                     }, 0);
                 };
@@ -284,15 +310,6 @@ class Sticker {
                 };
                 this.stickerHtmlElement.addEventListener('focusout', onFocusOut);
             }
-        }
-    }
-
-    private updateElementPosition(position: Position): void {
-        this.position = position;
-
-        if (this.stickerHtmlElement) {
-            this.stickerHtmlElement.style.top = `${this.position.y}px`;
-            this.stickerHtmlElement.style.left = `${this.position.x}px`;
         }
     }
 }

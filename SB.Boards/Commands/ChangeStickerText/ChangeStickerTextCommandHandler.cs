@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
 using SB.Boards.Domain;
+using SB.Boards.Events;
 using SB.Common.Handlers;
 using SB.Common.MediatR;
 using SB.Common.Mongo;
@@ -25,10 +26,9 @@ namespace SB.Boards.Commands.ChangeStickerText
             sticker.ChangeText(command);
             await _repository.UpdateAsync(sticker);
 
-            //todo db signalR event
-            // var stickerMovedEvent =
-                // new StickerMovedEvent("testId", sticker.Id, new PositionDto(sticker.Position.X, sticker.Position.Y)); //todo db boardId unhardcode
-            // await _publisher.Publish(stickerMovedEvent, PublishStrategy.ParallelNoWait);
+            var stickerMovedEvent =
+                new StickerTextChangedEvent("testId", sticker.Id, sticker.Text, command.CorrelationId); //todo db boardId unhardcode
+            await _publisher.Publish(stickerMovedEvent, PublishStrategy.ParallelNoWait);
         }
     }
 }

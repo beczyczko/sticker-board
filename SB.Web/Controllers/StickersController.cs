@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using NSwag.Annotations;
 using SB.Boards.Commands.AddSticker;
 using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
@@ -48,9 +50,12 @@ namespace SB.Web.Controllers
         }
 
         [HttpPost("{stickerId}/[Action]")]
-        public async Task Text(Guid stickerId, string newText)
+        [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
+        public async Task<ActionResult> Text(Guid stickerId, string newText, Guid correlationId)
         {
-            await SendAsync(new ChangeStickerTextCommand(stickerId, newText));
+            //todo db find out how to pass correlationId in a proper way
+            await SendAsync(new ChangeStickerTextCommand(stickerId, newText, correlationId));
+            return Accepted();
         }
 
         [HttpGet("[Action]")]

@@ -159,13 +159,17 @@ export class StickersService {
         return Promise.resolve<void>(<any>null);
     }
 
-    text(stickerId: string, newText: string | null | undefined): Promise<void> {
+    text(stickerId: string, newText: string | null | undefined, correlationId: string | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Text?";
         if (stickerId === undefined || stickerId === null)
             throw new Error("The parameter 'stickerId' must be defined.");
         url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId)); 
         if (newText !== undefined)
             url_ += "newText=" + encodeURIComponent("" + newText) + "&"; 
+        if (correlationId === null)
+            throw new Error("The parameter 'correlationId' cannot be null.");
+        else if (correlationId !== undefined)
+            url_ += "correlationId=" + encodeURIComponent("" + correlationId) + "&"; 
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -182,7 +186,7 @@ export class StickersService {
     protected processText(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 202) {
             return response.text().then((_responseText) => {
             return;
             });

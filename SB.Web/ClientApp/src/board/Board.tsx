@@ -114,7 +114,20 @@ class Board {
             .pipe(tap(e => {
                 const sticker = this.stickers.find(s => s.id === e.stickerId);
                 if (sticker) {
-                    sticker.move(e.position);
+                    sticker.updateElementPosition(e.position);
+                } else {
+                    //todo db fetch sticker from api
+                }
+            }))
+            .subscribe();
+
+        boardSignalRService.stickerTextChanged()
+            .pipe(tap(e => {
+                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                if (sticker) {
+                    sticker.updateText(e.text, e.correlationId);
+                } else {
+                    //todo db fetch sticker from api
                 }
             }))
             .subscribe();
