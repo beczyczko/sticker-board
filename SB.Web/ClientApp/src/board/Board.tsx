@@ -1,6 +1,6 @@
 import Sticker from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
-import { filter, switchMap, tap } from 'rxjs/operators';
+import { concatMap, filter, tap } from 'rxjs/operators';
 import { StickerDto, StickersService } from '../services/services';
 import { StickerColor } from './StickerColor';
 import { Position } from './Position';
@@ -9,10 +9,10 @@ import { MouseButton } from './MouseButton';
 import { subscribeToScrollEvents } from './BoardNavigation';
 
 class Board {
-
     private readonly stickersService: StickersService;
     private _middleButtonClicked$ = new Subject<void>();
     private _doubleClicked$ = new Subject<Position>();
+    private stickerToLoad$ = new Subject<StickerId>();
 
     public position: Position = { x: 0, y: 0 };
     public scale: number = 1;
@@ -37,8 +37,24 @@ class Board {
         this.registerMouseEventHandlers();
 
         this.loadStickers();
-        this.subscribeSignalREvents(boardSignalRService, stickersService);
+        this.subscribeSignalREvents(boardSignalRService);
         subscribeToScrollEvents(this);
+
+        this.stickerToLoad$
+            .pipe(
+                concatMap(id => {
+                    return this.stickersService.sticker(id.value)
+                        .then((stickerDto: StickerDto) => {
+                            if (!this.stickers.some(s => s.id === stickerDto.id)) {
+                                const sticker = Sticker.create(stickerDto);
+                                if (sticker) {
+                                    this.addSticker(sticker);
+                                }
+                            }
+                        });
+                })
+            )
+            .subscribe();
     }
 
     public addSticker(sticker: Sticker): void {
@@ -109,14 +125,14 @@ class Board {
             });
     }
 
-    private subscribeSignalREvents(boardSignalRService: BoardSignalRService, stickersService: StickersService) {
+    private subscribeSignalREvents(boardSignalRService: BoardSignalRService) {
         boardSignalRService.stickerMoved()
             .pipe(tap(e => {
                 const sticker = this.stickers.find(s => s.id === e.stickerId);
                 if (sticker) {
                     sticker.updateElementPosition(e.position);
                 } else {
-                    //todo db fetch sticker from api
+                    this.stickerToLoad$.next(new StickerId(e.stickerId));
                 }
             }))
             .subscribe();
@@ -127,7 +143,7 @@ class Board {
                 if (sticker) {
                     sticker.updateText(e.text, e.correlationId);
                 } else {
-                    //todo db fetch sticker from api
+                    this.stickerToLoad$.next(new StickerId(e.stickerId));
                 }
             }))
             .subscribe();
@@ -137,18 +153,7 @@ class Board {
                 filter(e => {
                     return !this.stickers.find(s => s.id === e.stickerId);
                 }),
-                switchMap(e => stickersService.sticker(e.stickerId)),
-                tap((s: StickerDto) => {
-                    if (s.position && s.text && s.color) {
-                        const newSticker = new Sticker(
-                            s.id,
-                            s.position.x,
-                            s.position.y,
-                            s.text,
-                            StickerColor.create(s.color));
-                        this.addSticker(newSticker);
-                    }
-                }))
+                tap(s => this.stickerToLoad$.next(new StickerId(s.stickerId))))
             .subscribe();
     }
 
@@ -174,6 +179,11 @@ class Board {
 
         const cursorScreenPosition = { x: e.clientX, y: e.clientY };
         this._doubleClicked$.next(this.positionOnBoard(cursorScreenPosition));
+    }
+}
+
+class StickerId {
+    constructor(public value: string) {
     }
 }
 

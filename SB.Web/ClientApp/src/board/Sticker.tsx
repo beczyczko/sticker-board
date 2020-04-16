@@ -1,4 +1,4 @@
-import { PositionDto } from '../services/services';
+import { PositionDto, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -61,6 +61,20 @@ class Sticker {
                 })
             )
             .subscribe();
+    }
+
+    public static create(stickerDto: StickerDto): Sticker | undefined {
+        if (stickerDto && stickerDto.position && stickerDto.text && stickerDto.color) {
+            return new Sticker(
+                stickerDto.id,
+                stickerDto.position.x,
+                stickerDto.position.y,
+                stickerDto.text,
+                StickerColor.create(stickerDto.color)
+            );
+        } else {
+            return undefined;
+        }
     }
 
     public showTextField() {
