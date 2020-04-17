@@ -7,6 +7,9 @@ import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
 import { MouseButton } from './MouseButton';
 import { subscribeToScrollEvents } from './BoardNavigation';
+import { SelectionService } from '../services/SelectionService';
+
+const selectionService = SelectionService.instance;
 
 class Board {
     private readonly stickersService: StickersService;
@@ -171,6 +174,8 @@ class Board {
 
         if (e.button === MouseButton.middle) {
             this._middleButtonClicked$.next();
+        } else {
+            selectionService.clearSelection();
         }
     }
 

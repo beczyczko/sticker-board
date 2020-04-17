@@ -8,10 +8,12 @@ import { Position } from './Position';
 import { boardScaleValue } from './BoardScaleService';
 import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import { SelectionService } from '../services/SelectionService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
 const stickersService = ServicesProvider.stickersService;
+const selectionService = SelectionService.instance;
 
 enum DisplayMode {
     Read,
@@ -126,6 +128,8 @@ class Sticker {
             this.stickerHtmlElement.style.top = `${this.position.y}px`;
             this.stickerHtmlElement.style.left = `${this.position.x}px`;
         }
+
+        //todo db move its selection marker
     }
 
     public updateText(newText: string, correlationId: string): void {
@@ -219,17 +223,11 @@ class Sticker {
     }
 
     private select(): void {
-        if (this.stickerHtmlElement) {
-            this.selected = true;
-            this.stickerHtmlElement.style.outline = '2px dashed rgb(17, 95, 221)';
-        }
+        this.selected = true;
     }
 
     private removeSelection(): void {
-        if (this.stickerHtmlElement) {
-            this.selected = false;
-            this.stickerHtmlElement.style.outline = '';
-        }
+        this.selected = false;
     }
 
     private onDragStart(event: any): void {
@@ -254,6 +252,7 @@ class Sticker {
 
         this.removeMouseSubscriptions();
 
+        // todo db problem with not rounded values
         const positionChanged = this.positionBeforeDrag.x !== this.position.x || this.positionBeforeDrag.y !== this.position.y;
         if (positionChanged) {
             stickersService.position(
@@ -272,6 +271,16 @@ class Sticker {
                     this.position.x = this.positionBeforeDrag.x;
                     this.position.y = this.positionBeforeDrag.y;
                 });
+        } else {
+            if (this.stickerHtmlElement) {
+                selectionService.elementSelected(
+                    this.stickerHtmlElement?.id,
+                    true,
+                    () => {
+                        console.log('todo db show edit sticker toolbar 🚄');
+                        // todo db show edit sticker toolbar
+                    });
+            }
         }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
