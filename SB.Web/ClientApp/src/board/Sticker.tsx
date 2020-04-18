@@ -13,7 +13,6 @@ import { SelectionService } from '../services/SelectionService';
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
 const stickersService = ServicesProvider.stickersService;
-const selectionService = SelectionService.instance;
 
 enum DisplayMode {
     Read,
@@ -21,6 +20,7 @@ enum DisplayMode {
 }
 
 class Sticker {
+    private readonly selectionService = SelectionService.instance;
     private commandCorrelationIds = new Set<string>();
 
     private cursorSubscriptions = new Array<Subscription>();
@@ -273,7 +273,7 @@ class Sticker {
                 });
         } else {
             if (this.stickerHtmlElement) {
-                selectionService.elementSelected(
+                this.selectionService.elementSelected(
                     this.stickerHtmlElement?.id,
                     true,
                     () => {

@@ -12,12 +12,27 @@ export class SelectionService {
     private selectionMarkers = new Set<HTMLElement>();
     private selectedElements = new Set<string>();
 
+    private selectionLayer: HTMLElement;
+
+    constructor() {
+        const selectionLayer = document.createElement('div');
+        selectionLayer.id = 'selection-layer';
+        selectionLayer.style.zIndex = '9999'; //todo db find out what is max
+        selectionLayer.style.position = 'fixed';
+        selectionLayer.style.width = '100%';
+        selectionLayer.style.height = '100%';
+        selectionLayer.style.pointerEvents = 'none';
+
+        const boardHtmlElementsLayer = document.getElementById('board-html-layer');
+        boardHtmlElementsLayer?.appendChild(selectionLayer);
+
+        this.selectionLayer = selectionLayer;
+    }
+
     public clearSelection(): void {
 
-        const boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
-
         this.selectionMarkers.forEach(m => {
-            boardHtmlElementsLayer?.removeChild(m);
+            this.selectionLayer.removeChild(m);
         });
 
         this.selectedElements.clear();
@@ -57,23 +72,22 @@ export class SelectionService {
             const selectionElement = document.createElement('div');
             selectionElement.id = htmlElementId;
 
-            //todo db style - make it prettier
             selectionElement.style.border = '2px dashed rgb(17, 95, 221)';
             selectionElement.style.background = 'transparent';
             selectionElement.style.pointerEvents = 'none';
             selectionElement.style.marginTop = '-2px';
             selectionElement.style.marginLeft = '-2px';
 
-            selectionElement.style.width = selectedElement.style.width;
-            selectionElement.style.height = selectedElement.style.height;
+            const boundingClientRect = selectedElement.getBoundingClientRect();
 
-            selectionElement.style.zIndex = '9999'; //todo db find out what is max
+            selectionElement.style.width = `${boundingClientRect.width}px`;
+            selectionElement.style.height = `${boundingClientRect.height}px`;
+
             selectionElement.style.position = 'fixed';
-            selectionElement.style.top = selectedElement.style.top;
-            selectionElement.style.left = selectedElement.style.left;
+            selectionElement.style.top = `${boundingClientRect.y}px`;
+            selectionElement.style.left = `${boundingClientRect.x}px`;
 
-            const boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
-            boardHtmlElementsLayer?.appendChild(selectionElement);
+            this.selectionLayer.appendChild(selectionElement);
             this.selectionMarkers.add(selectionElement)
         }
     }

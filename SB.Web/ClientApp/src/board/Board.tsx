@@ -9,9 +9,9 @@ import { MouseButton } from './MouseButton';
 import { subscribeToScrollEvents } from './BoardNavigation';
 import { SelectionService } from '../services/SelectionService';
 
-const selectionService = SelectionService.instance;
-
 class Board {
+    private readonly selectionService = SelectionService.instance;
+
     private readonly stickersService: StickersService;
     private _middleButtonClicked$ = new Subject<void>();
     private _doubleClicked$ = new Subject<Position>();
@@ -175,7 +175,7 @@ class Board {
         if (e.button === MouseButton.middle) {
             this._middleButtonClicked$.next();
         } else {
-            selectionService.clearSelection();
+            this.selectionService.clearSelection();
         }
     }
 
