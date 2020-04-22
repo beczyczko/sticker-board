@@ -1,3 +1,7 @@
+import { Observable, Subject } from 'rxjs';
+import { ElementSelected } from './ElementSelected';
+import Sticker from '../board/Sticker';
+
 export class SelectionService {
     private static selectionService: SelectionService;
 
@@ -11,6 +15,12 @@ export class SelectionService {
 
     private selectionMarkers = new Set<HTMLElement>();
     private selectedElements = new Set<string>();
+
+    private _singleSelectedElement$ = new Subject<ElementSelected | null>();
+
+    public get singleSelectedElement$(): Observable<ElementSelected | null> {
+        return this._singleSelectedElement$.asObservable();
+    }
 
     private selectionLayer: HTMLElement;
 
@@ -30,16 +40,16 @@ export class SelectionService {
     }
 
     public clearSelection(): void {
-
         this.selectionMarkers.forEach(m => {
             this.selectionLayer.removeChild(m);
         });
 
         this.selectedElements.clear();
         this.selectionMarkers.clear();
+        this._singleSelectedElement$.next(null);
     }
 
-    public elementSelected(elementId: string, singleSelection: boolean, showToolbarAction: () => void): void {
+    public elementSelected(elementId: string, singleSelection: boolean, selectedElementData: Sticker): void {
         if (singleSelection) {
             console.log('addSelectedElement singleSelection', elementId);
 
@@ -50,25 +60,28 @@ export class SelectionService {
 
             this.clearSelection();
 
-            showToolbarAction();
-        }
+            const selectionMarker = this.addSelectionMarker(elementId);
+            if (selectionMarker) {
+                this._singleSelectedElement$.next(new ElementSelected(selectedElementData, selectionMarker));
+            }
+        } else {
 
-        if (!this.selectedElements.has(elementId)) {
-            this.addSelectionMarker(elementId);
+            if (!this.selectedElements.has(elementId)) {
+                this.addSelectionMarker(elementId);
+            }
         }
     }
 
-    private addSelectionMarker(elementId: string) {
+    private addSelectionMarker(elementId: string): HTMLElement | null {
         this.selectedElements.add(elementId);
 
-        this.showSelectionMarker(elementId);
+        return this.showSelectionMarker(elementId);
     }
 
-    public showSelectionMarker(elementId: string) {
+    public showSelectionMarker(elementId: string): HTMLElement | null {
         const htmlElementId = `selection-${elementId}`;
         const selectedElement = document.getElementById(elementId);
         if (selectedElement) {
-
             const selectionElement = document.createElement('div');
             selectionElement.id = htmlElementId;
 
@@ -88,7 +101,10 @@ export class SelectionService {
             selectionElement.style.left = `${boundingClientRect.x}px`;
 
             this.selectionLayer.appendChild(selectionElement);
-            this.selectionMarkers.add(selectionElement)
+            this.selectionMarkers.add(selectionElement);
+            return selectionElement;
         }
+
+        return null;
     }
 }

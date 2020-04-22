@@ -11,14 +11,21 @@ import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
 import { tap } from 'rxjs/operators';
 import { Position } from './board/Position';
+import { SelectionService } from './services/SelectionService';
+import { Popper } from '@material-ui/core';
 
 function App() {
 
+    let initBoard: () => void;
     const stickersService = ServicesProvider.stickersService;
     const [initialized, setInitialized] = useState(false);
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
+
+    const [toolboxOpen, setToolboxOpen] = React.useState(false);
+
+    const [toolboxAnchorEl, setToolboxAnchorEl] = React.useState<HTMLElement | null>(null);
 
     useEffect(() => {
         if (!initialized) {
@@ -28,7 +35,7 @@ function App() {
         setInitialized(true);
     }, [initialized]);
 
-    const initBoard = () => {
+    initBoard = () => {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
@@ -41,6 +48,22 @@ function App() {
 
         newBoard.doubleClicked$
             .pipe(tap(clickPosition => onBoardDoubleClick(clickPosition)))
+            .subscribe();
+
+        SelectionService.instance
+            .singleSelectedElement$
+            .pipe(
+                tap(element => {
+                    if (element) {
+                        setToolboxOpen(true);
+                        setToolboxAnchorEl(element.htmlElement);
+                    } else {
+                        setToolboxOpen(false);
+                        setToolboxAnchorEl(null);
+                    }
+                    //todo db handle console error on first selection
+                    console.log('toolboxAnchorEl', toolboxAnchorEl);
+                }))
             .subscribe();
     };
 
@@ -69,6 +92,7 @@ function App() {
         }
     };
 
+    //todo db move popper logic to Toolbox component
     return (
         <div className="App">
             <AddStickerDialog open={newStickerCreating}
@@ -78,6 +102,13 @@ function App() {
             <div id="board-html-layer">
                 <div id="board-html-elements-layer"></div>
             </div>
+            <Popper
+                id="toolbox-popper"
+                placement="top"
+                open={toolboxOpen}
+                anchorEl={toolboxAnchorEl}
+            >TEST
+            </Popper>
         </div>
     );
 }

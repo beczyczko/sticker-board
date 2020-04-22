@@ -276,10 +276,7 @@ class Sticker {
                 this.selectionService.elementSelected(
                     this.stickerHtmlElement?.id,
                     true,
-                    () => {
-                        console.log('todo db show edit sticker toolbar 🚄');
-                        // todo db show edit sticker toolbar
-                    });
+                    this);
             }
         }
 
