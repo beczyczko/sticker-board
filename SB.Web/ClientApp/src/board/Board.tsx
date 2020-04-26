@@ -10,8 +10,7 @@ import { subscribeToScrollEvents } from './BoardNavigation';
 import { SelectionService } from '../services/SelectionService';
 
 class Board {
-    private readonly selectionService = SelectionService.instance;
-
+    private readonly selectionService: SelectionService | undefined;
     private readonly stickersService: StickersService;
     private _middleButtonClicked$ = new Subject<void>();
     private _doubleClicked$ = new Subject<Position>();
@@ -32,6 +31,9 @@ class Board {
         windowHeight: number) {
         this.boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
         this.boardHtmlLayer = document.getElementById('board-html-layer');
+        if (this.boardHtmlLayer) {
+            this.selectionService = SelectionService.initialize(this.boardHtmlLayer);
+        }
 
         this.moveToPosition({ x: windowWidth / 2, y: windowHeight / 2 });
 
@@ -175,7 +177,7 @@ class Board {
         if (e.button === MouseButton.middle) {
             this._middleButtonClicked$.next();
         } else {
-            this.selectionService.clearSelection();
+            this.selectionService?.clearSelection();
         }
     }
 

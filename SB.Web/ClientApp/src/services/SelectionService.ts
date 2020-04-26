@@ -1,16 +1,18 @@
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ElementSelected } from './ElementSelected';
 import Sticker from '../board/Sticker';
 
 export class SelectionService {
-    private static selectionService: SelectionService;
+    private static selectionService$ = new BehaviorSubject<SelectionService | undefined>(undefined);
 
-    public static get instance(): SelectionService {
-        if (!this.selectionService) {
-            this.selectionService = new SelectionService();
-        }
+    public static initialize(boardHtmlLayer: HTMLElement): SelectionService {
+        const selectionService = new SelectionService(boardHtmlLayer);
+        this.selectionService$.next(selectionService);
+        return selectionService;
+    }
 
-        return this.selectionService;
+    public static get instance$(): Observable<SelectionService | undefined> {
+        return this.selectionService$.asObservable();
     }
 
     private selectionMarkers = new Set<HTMLElement>();
@@ -24,7 +26,7 @@ export class SelectionService {
 
     private selectionLayer: HTMLElement;
 
-    constructor() {
+    private constructor(private readonly boardHtmlLayer: HTMLElement) {
         const selectionLayer = document.createElement('div');
         selectionLayer.id = 'selection-layer';
         selectionLayer.style.zIndex = '9999'; //todo db find out what is max
@@ -33,8 +35,7 @@ export class SelectionService {
         selectionLayer.style.height = '100%';
         selectionLayer.style.pointerEvents = 'none';
 
-        const boardHtmlElementsLayer = document.getElementById('board-html-layer');
-        boardHtmlElementsLayer?.appendChild(selectionLayer);
+        boardHtmlLayer.appendChild(selectionLayer);
 
         this.selectionLayer = selectionLayer;
     }
@@ -51,10 +52,8 @@ export class SelectionService {
 
     public elementSelected(elementId: string, singleSelection: boolean, selectedElementData: Sticker): void {
         if (singleSelection) {
-            console.log('addSelectedElement singleSelection', elementId);
 
             if (this.selectedElements.size === 1 && this.selectedElements.has(elementId)) {
-                console.log('already selected');
                 return;
             }
 

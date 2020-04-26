@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Sticker from './board/Sticker';
 import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
+import ElementToolbox from './ElementToolbox';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
@@ -11,8 +12,6 @@ import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { BaseAPIUrl } from './app-settings';
 import { tap } from 'rxjs/operators';
 import { Position } from './board/Position';
-import { SelectionService } from './services/SelectionService';
-import { Popper } from '@material-ui/core';
 
 function App() {
 
@@ -22,10 +21,6 @@ function App() {
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);
     const [newStickerPosition, setNewStickerPosition] = useState<{ x: number, y: number } | undefined>(undefined);
-
-    const [toolboxOpen, setToolboxOpen] = React.useState(false);
-
-    const [toolboxAnchorEl, setToolboxAnchorEl] = React.useState<HTMLElement | null>(null);
 
     useEffect(() => {
         if (!initialized) {
@@ -48,22 +43,6 @@ function App() {
 
         newBoard.doubleClicked$
             .pipe(tap(clickPosition => onBoardDoubleClick(clickPosition)))
-            .subscribe();
-
-        SelectionService.instance
-            .singleSelectedElement$
-            .pipe(
-                tap(element => {
-                    if (element) {
-                        setToolboxOpen(true);
-                        setToolboxAnchorEl(element.htmlElement);
-                    } else {
-                        setToolboxOpen(false);
-                        setToolboxAnchorEl(null);
-                    }
-                    //todo db handle console error on first selection
-                    console.log('toolboxAnchorEl', toolboxAnchorEl);
-                }))
             .subscribe();
     };
 
@@ -102,13 +81,8 @@ function App() {
             <div id="board-html-layer">
                 <div id="board-html-elements-layer"></div>
             </div>
-            <Popper
-                id="toolbox-popper"
-                placement="top"
-                open={toolboxOpen}
-                anchorEl={toolboxAnchorEl}
-            >TEST
-            </Popper>
+            <ElementToolbox>
+            </ElementToolbox>
         </div>
     );
 }

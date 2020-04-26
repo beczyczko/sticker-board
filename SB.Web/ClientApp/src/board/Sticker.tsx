@@ -20,7 +20,7 @@ enum DisplayMode {
 }
 
 class Sticker {
-    private readonly selectionService = SelectionService.instance;
+    private selectionService: SelectionService | undefined;
     private commandCorrelationIds = new Set<string>();
 
     private cursorSubscriptions = new Array<Subscription>();
@@ -63,6 +63,7 @@ class Sticker {
                 })
             )
             .subscribe();
+        SelectionService.instance$.subscribe(ss => this.selectionService = ss);
     }
 
     public static create(stickerDto: StickerDto): Sticker | undefined {
@@ -273,7 +274,7 @@ class Sticker {
                 });
         } else {
             if (this.stickerHtmlElement) {
-                this.selectionService.elementSelected(
+                this.selectionService?.elementSelected(
                     this.stickerHtmlElement?.id,
                     true,
                     this);
