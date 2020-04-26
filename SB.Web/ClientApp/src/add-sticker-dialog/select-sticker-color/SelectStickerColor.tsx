@@ -6,10 +6,11 @@ import { StickerColor } from '../../board/StickerColor';
 
 interface SelectStickerColorProps {
     children: never[],
+    initialColor: StickerColor | undefined,
     onColorSelected: (color: StickerColor | undefined) => void
 }
 
-const SelectStickerColor = ({ onColorSelected }: SelectStickerColorProps) => {
+const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColorProps) => {
     const latestSelectedColorStorageKey = 'latestSelectedColor';
 
     const [initialized, setInitialized] = useState(false);
@@ -33,17 +34,22 @@ const SelectStickerColor = ({ onColorSelected }: SelectStickerColorProps) => {
     }, [selectedColor]);
 
     useEffect(() => {
-        const latestSelectedColorAsString = localStorage.getItem('latestSelectedColor');
-        if (latestSelectedColorAsString) {
-            const latestSelectedColor = JSON.parse(latestSelectedColorAsString) as StickerColor;
-            const color = stickerColors.find(c => c.equals(latestSelectedColor));
-            if (color) {
-                setSelectedColor(color);
+        if (initialColor) {
+            const color = stickerColors.find(c => c.equals(initialColor));
+            setSelectedColor(color);
+        } else {
+            const latestSelectedColorAsString = localStorage.getItem('latestSelectedColor');
+            if (latestSelectedColorAsString) {
+                const latestSelectedColor = JSON.parse(latestSelectedColorAsString) as StickerColor;
+                const color = stickerColors.find(c => c.equals(latestSelectedColor));
+                if (color) {
+                    setSelectedColor(color);
+                } else {
+                    setSelectedColor(stickerColors[0]);
+                }
             } else {
                 setSelectedColor(stickerColors[0]);
             }
-        } else {
-            setSelectedColor(stickerColors[0]);
         }
     }, [stickerColors]);
 

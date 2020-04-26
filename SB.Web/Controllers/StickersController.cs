@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using SB.Boards.Commands.AddSticker;
+using SB.Boards.Commands.ChangeStickerColor;
 using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
-using SB.Boards.Domain;
 using SB.Boards.Dtos;
 using SB.Boards.Queries.Stickers;
 using SB.Boards.Queries.Stickers.StickerById;
@@ -58,10 +58,19 @@ namespace SB.Web.Controllers
             return Accepted();
         }
 
+        [HttpPost("{stickerId}/[Action]")]
+        [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
+        public async Task<ActionResult> Color(Guid stickerId, ColorDto newColor, Guid correlationId)
+        {
+            //todo db find out how to pass correlationId in a proper way
+            await SendAsync(new ChangeStickerColorCommand(stickerId, newColor, correlationId));
+            return Accepted();
+        }
+
         [HttpGet("[Action]")]
         public async Task<ActionResult<IEnumerable<ColorDto>>> Colors()
         {
-            return Collection(Color.DefaultColors.Select(c => new ColorDto(c.Red, c.Green, c.Blue)));
+            return Collection(Boards.Domain.Color.DefaultColors.Select(c => new ColorDto(c.Red, c.Green, c.Blue)));
         }
     }
 }

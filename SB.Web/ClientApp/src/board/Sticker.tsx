@@ -1,4 +1,4 @@
-import { PositionDto, StickerDto } from '../services/services';
+import { ColorDto, PositionDto, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -9,6 +9,7 @@ import { boardScaleValue } from './BoardScaleService';
 import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectionService } from '../services/SelectionService';
+import { StickerColorChangedEvent } from '../signal-r/Types/StickerColorChangedEvent';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -77,6 +78,41 @@ class Sticker {
             );
         } else {
             return undefined;
+        }
+    }
+
+    public updateColor(newColor: StickerColor): void {
+        const oldColor = this.color;
+        this.color = newColor;
+
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.background = newColor.toStyleString();
+        }
+
+        const correlationId = uuidv4();
+        this.commandCorrelationIds.add(correlationId);
+        stickersService
+            .color(this.id, correlationId, newColor as ColorDto)
+            .then()
+            .catch(() => {
+                this.color = oldColor;
+                if (this.stickerHtmlElement) {
+                    this.stickerHtmlElement.style.background = oldColor.toStyleString();
+                }
+            });
+    }
+
+    public updateColorFromExternalDevice($event: StickerColorChangedEvent): void {
+        if (this.commandCorrelationIds.has($event.correlationId)) {
+            this.commandCorrelationIds.delete($event.correlationId);
+            return;
+        }
+
+        const newColor = StickerColor.create($event.newColor);
+
+        this.color = newColor;
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.background = newColor.toStyleString();
         }
     }
 

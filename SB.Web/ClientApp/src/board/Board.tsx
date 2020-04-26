@@ -153,6 +153,17 @@ class Board {
             }))
             .subscribe();
 
+        boardSignalRService.stickerColorChanged()
+            .pipe(tap(e => {
+                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                if (sticker) {
+                    sticker.updateColorFromExternalDevice(e);
+                } else {
+                    this.stickerToLoad$.next(new StickerId(e.stickerId));
+                }
+            }))
+            .subscribe();
+
         boardSignalRService.stickerCreated()
             .pipe(
                 filter(e => {

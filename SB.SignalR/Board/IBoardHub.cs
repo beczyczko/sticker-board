@@ -7,6 +7,7 @@ namespace SB.SignalR.Board
     {
         Task StickerMoved(StickerMovedEvent @event);
         Task StickerTextChanged(StickerTextChangedEvent @event);
+        Task StickerColorChanged(StickerColorChangedEvent @event);
         Task StickerCreated(StickerCreatedEvent @event);
     }
 }
