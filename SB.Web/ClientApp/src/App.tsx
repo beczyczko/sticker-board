@@ -71,7 +71,6 @@ function App() {
         }
     };
 
-    //todo db move popper logic to Toolbox component
     return (
         <div className="App">
             <AddStickerDialog open={newStickerCreating}

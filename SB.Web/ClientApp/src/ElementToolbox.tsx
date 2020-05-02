@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SelectionService } from './services/SelectionService';
-import { filter, map, tap } from 'rxjs/operators';
+import { debounceTime, filter, map, tap } from 'rxjs/operators';
 import SelectStickerColor from './add-sticker-dialog/select-sticker-color/SelectStickerColor';
 import { StickerColor } from './board/StickerColor';
 import Paper from '@material-ui/core/Paper';
@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) =>
 );
 
 const ElementToolbox = ({ props }: any) => {
+    // todo db prevent from default browser zoom when cursor is on toolbox
     const classes = useStyles();
 
     const [initialized, setInitialized] = useState(false);
@@ -44,16 +45,21 @@ const ElementToolbox = ({ props }: any) => {
                         ss.singleSelectedElement$
                             .pipe(
                                 tap(element => {
+                                    setToolboxOpen(false);
+                                    setToolboxAnchorEl(null);
+                                    setSelectedElementData(null);
+                                }),
+                                debounceTime(300),
+                                tap(element => {
                                     if (element) {
                                         setToolboxOpen(true);
                                         setToolboxAnchorEl(element.htmlElement);
-                                        setSelectedElementData(element.element);
+                                        setSelectedElementData(element.elementData);
                                     } else {
                                         setToolboxOpen(false);
                                         setToolboxAnchorEl(null);
                                         setSelectedElementData(null);
                                     }
-                                    // todo db handle console error on first selection
                                 }))
                             .subscribe();
                     })

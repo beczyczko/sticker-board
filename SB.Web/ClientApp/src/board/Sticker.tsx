@@ -10,6 +10,7 @@ import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectionService } from '../services/SelectionService';
 import { StickerColorChangedEvent } from '../signal-r/Types/StickerColorChangedEvent';
+import { ElementChangedService } from '../services/ElementChangedService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -81,6 +82,10 @@ class Sticker {
         }
     }
 
+    public get htmlElementId(): string {
+        return `sticker-${this.id}`;
+    }
+
     public updateColor(newColor: StickerColor): void {
         const oldColor = this.color;
         this.color = newColor;
@@ -137,7 +142,7 @@ class Sticker {
         this.stickerTextHtmlElement = textHtmlElement;
 
         const sticker = document.createElement('div');
-        sticker.id = `sticker-${this.id}`;
+        sticker.id = this.htmlElementId;
         sticker.style.position = 'fixed';
         sticker.style.display = 'flex';
         sticker.style.top = `${this.position.y}px`;
@@ -166,7 +171,7 @@ class Sticker {
             this.stickerHtmlElement.style.left = `${this.position.x}px`;
         }
 
-        //todo db move its selection marker
+        ElementChangedService.emitElementChanged$(this);
     }
 
     public updateText(newText: string, correlationId: string): void {
@@ -310,8 +315,7 @@ class Sticker {
                 });
         } else {
             if (this.stickerHtmlElement) {
-                this.selectionService?.elementSelected(
-                    this.stickerHtmlElement?.id,
+                this.selectionService?.selectElement(
                     true,
                     this);
             }

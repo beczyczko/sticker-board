@@ -1,12 +1,17 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { ElementSelected } from './ElementSelected';
+import { SelectionMarker } from './SelectionMarker';
 import Sticker from '../board/Sticker';
+import { ElementChangedService } from './ElementChangedService';
+import { ViewChangedService } from './ViewChangedService';
+import { filter, tap } from 'rxjs/operators';
 
 export class SelectionService {
     private static selectionService$ = new BehaviorSubject<SelectionService | undefined>(undefined);
 
-    public static initialize(boardHtmlLayer: HTMLElement): SelectionService {
-        const selectionService = new SelectionService(boardHtmlLayer);
+    public static initialize(
+        boardHtmlLayer: HTMLElement,
+        viewChangedService: ViewChangedService): SelectionService {
+        const selectionService = new SelectionService(boardHtmlLayer, viewChangedService);
         this.selectionService$.next(selectionService);
         return selectionService;
     }
@@ -15,18 +20,20 @@ export class SelectionService {
         return this.selectionService$.asObservable();
     }
 
-    private selectionMarkers = new Set<HTMLElement>();
-    private selectedElements = new Set<string>();
+    private selectionMarkers = new BehaviorSubject<Array<SelectionMarker>>(new Array<SelectionMarker>());
+    private selectedElements = new BehaviorSubject<Array<Sticker>>(new Array<Sticker>());
 
-    private _singleSelectedElement$ = new Subject<ElementSelected | null>();
+    private _singleSelectedElement$ = new Subject<SelectionMarker | null>();
 
-    public get singleSelectedElement$(): Observable<ElementSelected | null> {
+    public get singleSelectedElement$(): Observable<SelectionMarker | null> {
         return this._singleSelectedElement$.asObservable();
     }
 
     private selectionLayer: HTMLElement;
 
-    private constructor(private readonly boardHtmlLayer: HTMLElement) {
+    private constructor(
+        private readonly boardHtmlLayer: HTMLElement,
+        private readonly viewChangedService: ViewChangedService) {
         const selectionLayer = document.createElement('div');
         selectionLayer.id = 'selection-layer';
         selectionLayer.style.zIndex = '9999'; //todo db find out what is max
@@ -36,50 +43,89 @@ export class SelectionService {
         selectionLayer.style.pointerEvents = 'none';
 
         boardHtmlLayer.appendChild(selectionLayer);
-
         this.selectionLayer = selectionLayer;
+
+        this.configureSelectionFlow();
     }
 
-    public clearSelection(): void {
-        this.selectionMarkers.forEach(m => {
-            this.selectionLayer.removeChild(m);
+    private configureSelectionFlow() {
+        ElementChangedService.elementChanged$
+            .pipe(filter(element => this.selectedElements.value.some(e => e.id === element.id)))
+            .subscribe(() => {
+                this.showSelectionMarkers(this.selectedElements.value);
+            });
+
+        this.viewChangedService.viewChanged$.subscribe(() => {
+            this.showSelectionMarkers(this.selectedElements.value);
         });
 
-        this.selectedElements.clear();
-        this.selectionMarkers.clear();
-        this._singleSelectedElement$.next(null);
+        this.selectedElements
+            .pipe(
+                filter(elements => elements.length === 1),
+                tap(elements => this.showSelectionMarkers(elements))
+            )
+            .subscribe();
+
+        this.selectedElements
+            .pipe(
+                filter(elements => elements.length === 0),
+                tap(() => this.removeSelectionMarkers())
+            )
+            .subscribe();
+
+        this.selectionMarkers
+            .pipe(
+                filter(elements => elements.length === 1),
+                tap(elements => this._singleSelectedElement$.next(elements[0]))
+            )
+            .subscribe();
     }
 
-    public elementSelected(elementId: string, singleSelection: boolean, selectedElementData: Sticker): void {
+    public selectElement(singleSelection: boolean, selectedElementData: Sticker): void {
         if (singleSelection) {
 
-            if (this.selectedElements.size === 1 && this.selectedElements.has(elementId)) {
+            const selectedElements = this.selectedElements.value;
+            const elementAlreadySelected = selectedElements.find(s => s === selectedElementData);
+            if (this.selectedElements.value.length === 1 && elementAlreadySelected) {
                 return;
             }
 
-            this.clearSelection();
-
-            const selectionMarker = this.addSelectionMarker(elementId);
-            if (selectionMarker) {
-                this._singleSelectedElement$.next(new ElementSelected(selectedElementData, selectionMarker));
-            }
+            this.selectedElements.next(new Array<Sticker>(selectedElementData));
         } else {
-
-            if (!this.selectedElements.has(elementId)) {
-                this.addSelectionMarker(elementId);
+            // todo db not supported at this point
+            const elementAlreadySelected = this.selectedElements.value.find(s => s === selectedElementData);
+            if (!elementAlreadySelected) {
+                this.showSelectionMarker(selectedElementData);
             }
         }
     }
 
-    private addSelectionMarker(elementId: string): HTMLElement | null {
-        this.selectedElements.add(elementId);
-
-        return this.showSelectionMarker(elementId);
+    public clearSelection(): void {
+        this.selectedElements.next(new Array<Sticker>());
+        this.removeSelectionMarkers();
     }
 
-    public showSelectionMarker(elementId: string): HTMLElement | null {
-        const htmlElementId = `selection-${elementId}`;
-        const selectedElement = document.getElementById(elementId);
+    private showSelectionMarkers(elements: Array<Sticker>): void {
+        this.removeSelectionMarkers();
+        const selectionMarkers = elements
+            .map(element => this.showSelectionMarker(element))
+            .filter(m => !!m)
+            .map(m => m as SelectionMarker);
+        this.selectionMarkers.next(selectionMarkers);
+    }
+
+    private removeSelectionMarkers() {
+        this.selectionMarkers.value.forEach(m => {
+            this.selectionLayer.removeChild(m.htmlElement);
+        });
+
+        this.selectionMarkers.next(new Array<SelectionMarker>());
+        this._singleSelectedElement$.next(null);
+    }
+
+    private showSelectionMarker(element: Sticker): SelectionMarker | null {
+        const htmlElementId = `selection-${element.htmlElementId}`;
+        const selectedElement = document.getElementById(element.htmlElementId);
         if (selectedElement) {
             const selectionElement = document.createElement('div');
             selectionElement.id = htmlElementId;
@@ -100,8 +146,7 @@ export class SelectionService {
             selectionElement.style.left = `${boundingClientRect.x}px`;
 
             this.selectionLayer.appendChild(selectionElement);
-            this.selectionMarkers.add(selectionElement);
-            return selectionElement;
+            return new SelectionMarker(element, selectionElement);
         }
 
         return null;
