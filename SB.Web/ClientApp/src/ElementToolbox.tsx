@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme) =>
 );
 
 const ElementToolbox = ({ props }: any) => {
-    // todo db prevent from default browser zoom when cursor is on toolbox
     const classes = useStyles();
 
     const [initialized, setInitialized] = useState(false);

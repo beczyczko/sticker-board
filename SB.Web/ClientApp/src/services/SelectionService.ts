@@ -92,7 +92,7 @@ export class SelectionService {
 
             this.selectedElements.next(new Array<Sticker>(selectedElementData));
         } else {
-            // todo db not supported at this point
+            // not supported at this point
             const elementAlreadySelected = this.selectedElements.value.find(s => s === selectedElementData);
             if (!elementAlreadySelected) {
                 this.showSelectionMarker(selectedElementData);

@@ -294,7 +294,6 @@ class Sticker {
 
         this.removeMouseSubscriptions();
 
-        // todo db problem with not rounded values
         const positionChanged = this.positionBeforeDrag.x !== this.position.x || this.positionBeforeDrag.y !== this.position.y;
         if (positionChanged) {
             stickersService.position(
@@ -328,8 +327,8 @@ class Sticker {
         const boardScale = boardScaleValue();
         if (this.dragging) {
             const newElementPosition = {
-                x: cursorPosition.x / boardScale - dragItemOffsetPosition.x,
-                y: cursorPosition.y / boardScale - dragItemOffsetPosition.y
+                x: parseFloat((cursorPosition.x / boardScale - dragItemOffsetPosition.x).toFixed(4)),
+                y: parseFloat((cursorPosition.y / boardScale - dragItemOffsetPosition.y).toFixed(4))
             };
 
             this.updateElementPosition(newElementPosition);
