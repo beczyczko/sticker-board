@@ -1,4 +1,5 @@
 ﻿using SB.Boards.Commands.AddSticker;
+using SB.Boards.Commands.ChangeStickerColor;
 using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
 using SB.Common.Mongo;
@@ -29,6 +30,11 @@ namespace SB.Boards.Domain
         public void ChangeText(ChangeStickerTextCommand command)
         {
             Text = command.NewText;
+        }
+
+        public void ChangeColor(ChangeStickerColorCommand command)
+        {
+            Color = new Color(command.NewColor);
         }
     }
 }

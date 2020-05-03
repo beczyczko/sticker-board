@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Sticker from './board/Sticker';
 import Board from './board/Board';
 import AddStickerDialog from './add-sticker-dialog/AddStickerDialog';
+import ElementToolbox from './ElementToolbox';
 import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
@@ -78,6 +79,8 @@ function App() {
             <div id="board-html-layer">
                 <div id="board-html-elements-layer"></div>
             </div>
+            <ElementToolbox>
+            </ElementToolbox>
         </div>
     );
 }

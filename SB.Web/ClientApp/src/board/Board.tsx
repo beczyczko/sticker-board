@@ -7,9 +7,13 @@ import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
 import { MouseButton } from './MouseButton';
 import { subscribeToScrollEvents } from './BoardNavigation';
+import { SelectionService } from '../services/SelectionService';
+import { ViewChangedService } from '../services/ViewChangedService';
 
 class Board {
+    private readonly selectionService: SelectionService | undefined;
     private readonly stickersService: StickersService;
+    private readonly viewChangedService: ViewChangedService;
     private _middleButtonClicked$ = new Subject<void>();
     private _doubleClicked$ = new Subject<Position>();
     private stickerToLoad$ = new Subject<StickerId>();
@@ -29,6 +33,11 @@ class Board {
         windowHeight: number) {
         this.boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
         this.boardHtmlLayer = document.getElementById('board-html-layer');
+
+        this.viewChangedService = new ViewChangedService();
+        if (this.boardHtmlLayer) {
+            this.selectionService = SelectionService.initialize(this.boardHtmlLayer, this.viewChangedService);
+        }
 
         this.moveToPosition({ x: windowWidth / 2, y: windowHeight / 2 });
 
@@ -91,6 +100,7 @@ class Board {
             x: (screenPosition.x - this.position.x) / this.scale,
             y: (screenPosition.y - this.position.y) / this.scale
         };
+
         return positionOnBoard;
     }
 
@@ -107,6 +117,8 @@ class Board {
             this.boardHtmlElementsLayer.style.transform = `scale(${this.scale})`;
             this.boardHtmlElementsLayer.style.top = `${this.position.y}px`;
             this.boardHtmlElementsLayer.style.left = `${this.position.x}px`;
+            
+            this.viewChangedService.emitViewChanged$();
         }
     }
 
@@ -148,6 +160,17 @@ class Board {
             }))
             .subscribe();
 
+        boardSignalRService.stickerColorChanged()
+            .pipe(tap(e => {
+                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                if (sticker) {
+                    sticker.updateColorFromExternalDevice(e);
+                } else {
+                    this.stickerToLoad$.next(new StickerId(e.stickerId));
+                }
+            }))
+            .subscribe();
+
         boardSignalRService.stickerCreated()
             .pipe(
                 filter(e => {
@@ -171,6 +194,8 @@ class Board {
 
         if (e.button === MouseButton.middle) {
             this._middleButtonClicked$.next();
+        } else {
+            this.selectionService?.clearSelection();
         }
     }
 

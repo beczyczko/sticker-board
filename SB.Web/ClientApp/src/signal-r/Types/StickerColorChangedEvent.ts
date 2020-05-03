@@ -1,8 +1,10 @@
-export class StickerTextChangedEvent {
+import { ColorDto } from '../../services/services';
+
+export class StickerColorChangedEvent {
     constructor(
         public boardId: string,
         public stickerId: string,
-        public text: string,
+        public newColor: ColorDto,
         public correlationId: string) {
     }
 }

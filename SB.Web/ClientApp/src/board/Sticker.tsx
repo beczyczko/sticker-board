@@ -1,4 +1,4 @@
-import { PositionDto, StickerDto } from '../services/services';
+import { ColorDto, PositionDto, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -8,6 +8,9 @@ import { Position } from './Position';
 import { boardScaleValue } from './BoardScaleService';
 import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import { SelectionService } from '../services/SelectionService';
+import { StickerColorChangedEvent } from '../signal-r/Types/StickerColorChangedEvent';
+import { ElementChangedService } from '../services/ElementChangedService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -19,6 +22,7 @@ enum DisplayMode {
 }
 
 class Sticker {
+    private selectionService: SelectionService | undefined;
     private commandCorrelationIds = new Set<string>();
 
     private cursorSubscriptions = new Array<Subscription>();
@@ -61,6 +65,7 @@ class Sticker {
                 })
             )
             .subscribe();
+        SelectionService.instance$.subscribe(ss => this.selectionService = ss);
     }
 
     public static create(stickerDto: StickerDto): Sticker | undefined {
@@ -74,6 +79,45 @@ class Sticker {
             );
         } else {
             return undefined;
+        }
+    }
+
+    public get htmlElementId(): string {
+        return `sticker-${this.id}`;
+    }
+
+    public updateColor(newColor: StickerColor): void {
+        const oldColor = this.color;
+        this.color = newColor;
+
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.background = newColor.toStyleString();
+        }
+
+        const correlationId = uuidv4();
+        this.commandCorrelationIds.add(correlationId);
+        stickersService
+            .color(this.id, correlationId, newColor as ColorDto)
+            .then()
+            .catch(() => {
+                this.color = oldColor;
+                if (this.stickerHtmlElement) {
+                    this.stickerHtmlElement.style.background = oldColor.toStyleString();
+                }
+            });
+    }
+
+    public updateColorFromExternalDevice($event: StickerColorChangedEvent): void {
+        if (this.commandCorrelationIds.has($event.correlationId)) {
+            this.commandCorrelationIds.delete($event.correlationId);
+            return;
+        }
+
+        const newColor = StickerColor.create($event.newColor);
+
+        this.color = newColor;
+        if (this.stickerHtmlElement) {
+            this.stickerHtmlElement.style.background = newColor.toStyleString();
         }
     }
 
@@ -98,7 +142,7 @@ class Sticker {
         this.stickerTextHtmlElement = textHtmlElement;
 
         const sticker = document.createElement('div');
-        sticker.id = `sticker-${this.id}`;
+        sticker.id = this.htmlElementId;
         sticker.style.position = 'fixed';
         sticker.style.display = 'flex';
         sticker.style.top = `${this.position.y}px`;
@@ -126,6 +170,8 @@ class Sticker {
             this.stickerHtmlElement.style.top = `${this.position.y}px`;
             this.stickerHtmlElement.style.left = `${this.position.x}px`;
         }
+
+        ElementChangedService.emitElementChanged$(this);
     }
 
     public updateText(newText: string, correlationId: string): void {
@@ -219,17 +265,11 @@ class Sticker {
     }
 
     private select(): void {
-        if (this.stickerHtmlElement) {
-            this.selected = true;
-            this.stickerHtmlElement.style.outline = '2px dashed rgb(17, 95, 221)';
-        }
+        this.selected = true;
     }
 
     private removeSelection(): void {
-        if (this.stickerHtmlElement) {
-            this.selected = false;
-            this.stickerHtmlElement.style.outline = '';
-        }
+        this.selected = false;
     }
 
     private onDragStart(event: any): void {
@@ -272,6 +312,10 @@ class Sticker {
                     this.position.x = this.positionBeforeDrag.x;
                     this.position.y = this.positionBeforeDrag.y;
                 });
+        } else {
+            if (this.stickerHtmlElement) {
+                this.selectionService?.selectElement(true, this);
+            }
         }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
@@ -281,8 +325,8 @@ class Sticker {
         const boardScale = boardScaleValue();
         if (this.dragging) {
             const newElementPosition = {
-                x: cursorPosition.x / boardScale - dragItemOffsetPosition.x,
-                y: cursorPosition.y / boardScale - dragItemOffsetPosition.y
+                x: parseFloat((cursorPosition.x / boardScale - dragItemOffsetPosition.x).toFixed(4)),
+                y: parseFloat((cursorPosition.y / boardScale - dragItemOffsetPosition.y).toFixed(4))
             };
 
             this.updateElementPosition(newElementPosition);

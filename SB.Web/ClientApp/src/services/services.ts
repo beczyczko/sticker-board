@@ -198,6 +198,47 @@ export class StickersService {
         return Promise.resolve<void>(<any>null);
     }
 
+    color(stickerId: string, correlationId: string | undefined, newColor: ColorDto): Promise<void> {
+        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Color?";
+        if (stickerId === undefined || stickerId === null)
+            throw new Error("The parameter 'stickerId' must be defined.");
+        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId)); 
+        if (correlationId === null)
+            throw new Error("The parameter 'correlationId' cannot be null.");
+        else if (correlationId !== undefined)
+            url_ += "correlationId=" + encodeURIComponent("" + correlationId) + "&"; 
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(newColor);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processColor(_response);
+        });
+    }
+
+    protected processColor(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 202) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+
     colors(): Promise<ColorDto[]> {
         let url_ = this.baseUrl + "/api/Stickers/Colors";
         url_ = url_.replace(/[?&]$/, "");

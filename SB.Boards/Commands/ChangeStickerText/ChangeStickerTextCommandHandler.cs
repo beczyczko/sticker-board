@@ -26,9 +26,9 @@ namespace SB.Boards.Commands.ChangeStickerText
             sticker.ChangeText(command);
             await _repository.UpdateAsync(sticker);
 
-            var stickerMovedEvent =
+            var stickerTextChangedEvent =
                 new StickerTextChangedEvent("testId", sticker.Id, sticker.Text, command.CorrelationId); //todo db boardId unhardcode
-            await _publisher.Publish(stickerMovedEvent, PublishStrategy.ParallelNoWait);
+            await _publisher.Publish(stickerTextChangedEvent, PublishStrategy.ParallelNoWait);
         }
     }
 }

@@ -67,7 +67,7 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
                 </DialogTitle>
 
                 <DialogContent>
-                    <SelectStickerColor onColorSelected={c => onColorSelected(c)}>
+                    <SelectStickerColor onColorSelected={c => onColorSelected(c)} initialColor={undefined}>
                     </SelectStickerColor>
                     <TextField
                         autoFocus

@@ -3,6 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { StickerMovedEvent } from './Types/StickerMovedEvent';
 import { StickerCreatedEvent } from './Types/StickerCreatedEvent';
 import { StickerTextChangedEvent } from './Types/StickerTextChangedEvent';
+import { StickerColorChangedEvent } from './Types/StickerColorChangedEvent';
 
 export class BoardSignalRService {
 
@@ -13,6 +14,7 @@ export class BoardSignalRService {
 
     private stickerMoved$ = new Subject<StickerMovedEvent>();
     private stickerTextChanged$ = new Subject<StickerTextChangedEvent>();
+    private stickerColorChanged$ = new Subject<StickerColorChangedEvent>();
     private stickerCreated$ = new Subject<StickerCreatedEvent>();
 
     constructor(baseUrl: string) {
@@ -29,6 +31,10 @@ export class BoardSignalRService {
 
     public stickerTextChanged(): Observable<StickerTextChangedEvent> {
         return this.stickerTextChanged$.asObservable();
+    }
+
+    public stickerColorChanged(): Observable<StickerColorChangedEvent> {
+        return this.stickerColorChanged$.asObservable();
     }
 
     public stickerCreated(): Observable<StickerCreatedEvent> {
@@ -72,6 +78,11 @@ export class BoardSignalRService {
             'StickerCreated',
             (data: StickerCreatedEvent) => {
                 this.stickerCreated$.next(data);
+            });
+        this.hubConnection.on(
+            'StickerColorChanged',
+            (data: StickerColorChangedEvent) => {
+                this.stickerColorChanged$.next(data);
             });
     }
 }
