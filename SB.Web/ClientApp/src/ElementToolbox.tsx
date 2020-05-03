@@ -20,7 +20,11 @@ const useStyles = makeStyles((theme) =>
             height: 76,
             marginTop: theme.spacing(6),
             marginBottom: theme.spacing(6),
+            pointerEvents: 'initial',
         },
+        popper: {
+            pointerEvents: 'none',
+        }
     }),
 );
 
@@ -80,6 +84,7 @@ const ElementToolbox = ({ props }: any) => {
         <div>
             <Popper
                 id="toolbox-popper"
+                className={classes.popper}
                 placement="top"
                 open={toolboxOpen}
                 anchorEl={toolboxAnchorEl}>

@@ -14,7 +14,6 @@ export function subscribeToScrollEvents(board: Board) {
     let cursorSubscriptions = new Array<Subscription>();
 
     const boardHtmlLayer = board.boardHtmlLayer;
-    let ctrlKeyPressed = false;
 
     addCursorMoveEventListeners();
 
@@ -27,33 +26,38 @@ export function subscribeToScrollEvents(board: Board) {
         board.move(positionChange);
     };
 
-    // 2017 recommended event
-    boardHtmlLayer?.addEventListener('wheel', function (event: WheelEvent) {
-        if (ctrlKeyPressed) {
-            event.preventDefault();
-            zoom(board, -event.deltaY);
+    function navigateOnBoard(e) {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            zoom(board, -e.deltaY);
         } else {
-            moveBoard(board, event);
+            moveBoard(board, e);
         }
-    }, { passive: false } as AddEventListenerOptions);
+    }
+
+    document.addEventListener("wheel", navigateOnBoard, { passive: false });
 
     // Before 2017, IE9, Chrome, Safari, Opera
-    boardHtmlLayer?.addEventListener('mousewheel', function (event) {
-        moveBoard(board, event); // not tested this case
-    }, false);
+    document.addEventListener('mousewheel', navigateOnBoard, { passive: false });
 
     // Old versions of Firefox
-    boardHtmlLayer?.addEventListener('DOMMouseScroll', function (event) {
-        moveBoard(board, event); // not tested this case
-    }, false);
+    document.addEventListener('DOMMouseScroll', navigateOnBoard, { passive: false });
 
-    document.body.addEventListener('keydown', function (event: KeyboardEvent) {
-        ctrlKeyPressed = event.ctrlKey;
-    }, false);
+    function keyZoom(e) {
+        console.log(e);
+        if (e.ctrlKey && e.code === 'Minus') {
+            e.preventDefault();
+            zoom(board, -100);
+        } else if (e.ctrlKey && e.code === 'Equal') {
+            e.preventDefault();
+            zoom(board, 100);
+            //todo db check with numpad
+        } else if (e.ctrlKey && [48, 61, 96].indexOf(e.keyCode) > -1) {
+            e.preventDefault();
+        }
+    }
 
-    document.body.addEventListener('keyup', function (event: KeyboardEvent) {
-        ctrlKeyPressed = false;
-    }, false);
+    document.addEventListener("keydown", keyZoom, { passive: false });
 
     const zoom = (board: Board, zoomDirection: number) => {
         const cursorPositionOnBoardBeforeZoom = cursorBoardPosition();
