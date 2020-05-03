@@ -43,21 +43,19 @@ export function subscribeToScrollEvents(board: Board) {
     // Old versions of Firefox
     document.addEventListener('DOMMouseScroll', navigateOnBoard, { passive: false });
 
-    function keyZoom(e) {
-        console.log(e);
-        if (e.ctrlKey && e.code === 'Minus') {
+    function keyboardZoom(e) {
+        if (e.ctrlKey && ['Minus', 'NumpadSubtract'].indexOf(e.code) > -1) {
             e.preventDefault();
             zoom(board, -100);
-        } else if (e.ctrlKey && e.code === 'Equal') {
+        } else if (e.ctrlKey && ['Equal', 'NumpadAdd'].indexOf(e.code) > -1) {
             e.preventDefault();
             zoom(board, 100);
-            //todo db check with numpad
-        } else if (e.ctrlKey && [48, 61, 96].indexOf(e.keyCode) > -1) {
+        } else if (e.ctrlKey && ['Digit0'].indexOf(e.code) > -1) {
             e.preventDefault();
         }
     }
 
-    document.addEventListener("keydown", keyZoom, { passive: false });
+    document.addEventListener("keydown", keyboardZoom, { passive: false });
 
     const zoom = (board: Board, zoomDirection: number) => {
         const cursorPositionOnBoardBeforeZoom = cursorBoardPosition();
