@@ -36,7 +36,7 @@ export class SelectionService {
         private readonly viewChangedService: ViewChangedService) {
         const selectionLayer = document.createElement('div');
         selectionLayer.id = 'selection-layer';
-        selectionLayer.style.zIndex = '9999'; //todo db find out what is max
+        selectionLayer.style.zIndex = '2147483647';
         selectionLayer.style.position = 'fixed';
         selectionLayer.style.width = '100%';
         selectionLayer.style.height = '100%';
