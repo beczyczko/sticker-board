@@ -314,9 +314,7 @@ class Sticker {
                 });
         } else {
             if (this.stickerHtmlElement) {
-                this.selectionService?.selectElement(
-                    true,
-                    this);
+                this.selectionService?.selectElement(true, this);
             }
         }
 

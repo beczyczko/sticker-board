@@ -15,7 +15,6 @@ import { Position } from './board/Position';
 
 function App() {
 
-    let initBoard: () => void;
     const stickersService = ServicesProvider.stickersService;
     const [initialized, setInitialized] = useState(false);
     const [board, setBoard] = useState<Board | undefined>(undefined);
@@ -30,7 +29,7 @@ function App() {
         setInitialized(true);
     }, [initialized]);
 
-    initBoard = () => {
+    const initBoard = () => {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 

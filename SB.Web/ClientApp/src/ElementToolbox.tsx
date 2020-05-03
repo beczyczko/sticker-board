@@ -44,34 +44,36 @@ const ElementToolbox = ({ props }: any) => {
                 .pipe(
                     filter(ss => !!ss),
                     map(ss => ss as SelectionService),
-                    tap((ss: SelectionService) => {
-                        ss.singleSelectedElement$
-                            .pipe(
-                                tap(element => {
-                                    setToolboxOpen(false);
-                                    setToolboxAnchorEl(null);
-                                    setSelectedElementData(null);
-                                }),
-                                debounceTime(300),
-                                tap(element => {
-                                    if (element) {
-                                        setToolboxOpen(true);
-                                        setToolboxAnchorEl(element.htmlElement);
-                                        setSelectedElementData(element.elementData);
-                                    } else {
-                                        setToolboxOpen(false);
-                                        setToolboxAnchorEl(null);
-                                        setSelectedElementData(null);
-                                    }
-                                }))
-                            .subscribe();
-                    })
+                    tap((ss: SelectionService) => subscribeToSelectionElementChanged(ss))
                 )
                 .subscribe()
         }
 
         setInitialized(true);
     }, [initialized]);
+
+    const subscribeToSelectionElementChanged = (selectionService: SelectionService) => {
+        selectionService.singleSelectedElement$
+            .pipe(
+                tap(element => {
+                    setToolboxOpen(false);
+                    setToolboxAnchorEl(null);
+                    setSelectedElementData(null);
+                }),
+                debounceTime(300),
+                tap(element => {
+                    if (element) {
+                        setToolboxOpen(true);
+                        setToolboxAnchorEl(element.htmlElement);
+                        setSelectedElementData(element.elementData);
+                    } else {
+                        setToolboxOpen(false);
+                        setToolboxAnchorEl(null);
+                        setSelectedElementData(null);
+                    }
+                }))
+            .subscribe();
+    };
 
     const onColorSelected = (c: StickerColor | undefined) => {
         if (c && selectedElementData && !c.equals(selectedElementData.color)) {
