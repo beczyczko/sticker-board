@@ -16,20 +16,20 @@ jobs:
       with:
         dotnet-version: 3.1.100
     
-    # dotnet build and publish
+    # dotnet build
     - name: Build with dotnet
       run: dotnet build --configuration Release
 
+    # dotnet publish - release artifacts
     - name: dotnet publish
       run: |
-        dotnet publish -p:PublishProfile=Properties\PublishProfiles\FolderRelease.pubxml -o artifacts/releasewebapi
+        sh SB.Web/scripts/publish.sh
 
     - uses: actions/upload-artifact@v2
       with:
         name: releasewebapi
-        path: artifacts/releasewebapi/
-
-        
+        path: SB.Web/artifacts/releasewebapi/
+      
     # - name: dotnet publish
     # run: |
     #   dotnet publish -c Release -o dotnetcorewebapp 
