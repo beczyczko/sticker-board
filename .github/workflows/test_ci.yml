@@ -20,10 +20,19 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release
 
-    # - name: dotnet publish
-    #   run: |
-    #     dotnet publish -c Release -o dotnetcorewebapp 
+    - name: dotnet publish
+      run: |
+        dotnet publish -p:PublishProfile=Properties\PublishProfiles\FolderRelease.pubxml -o artifacts/releasewebapi
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: releasewebapi
+        path: artifacts/releasewebapi/
+
+        
+    # - name: dotnet publish
+    # run: |
+    #   dotnet publish -c Release -o dotnetcorewebapp 
     # - name: 'Run Azure webapp deploy action using publish profile credentials'
     #   uses: azure/webapps-deploy@v1
     #   with: 
