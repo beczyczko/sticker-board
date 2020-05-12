@@ -17,8 +17,16 @@ steps:
   displayName: 'dotnet build $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: "Publish"
   inputs:
     command: 'publish'
     publishWebProjects: false
     projects: 'SB.Web/*.csproj'
     configuration: $(buildConfiguration)'
+    arguments: '--output $(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: "Upload Artifacts"
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'SB.Web'
