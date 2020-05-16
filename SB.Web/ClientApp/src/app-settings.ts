@@ -1,2 +1,9 @@
-export const BaseAPIUrl = 'http://localhost:3000';
- 
+const dev = {
+    BASE_API_URL: 'https://localhost:44301',
+};
+
+const prod = {
+    BASE_API_URL: 'http://localhost:3000',
+};
+
+export const config = process.env.NODE_ENV === 'development' ? dev : prod;
