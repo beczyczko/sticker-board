@@ -1,0 +1,42 @@
+version: "3.5"
+
+services:
+    api: 
+        image: sticker-board/api:prod
+        ports:
+            - 3000:80
+        networks:
+            sticker-board:
+                aliases:
+                    - sb-api
+            
+    frontend: 
+        image: sticker-board/frontend:prod
+        ports:
+            - 3001:80
+        networks:
+            sticker-board:
+                aliases:
+                    - sb-frontend
+    
+    mongo:
+        image: mongo:4.2.6
+        container_name: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        networks:
+            sticker-board:
+                aliases:
+                    - sb-mongo
+        volumes:
+            - mongo:/data/db
+        
+networks:
+    sticker-board:
+        name: sb-network
+        external: true
+
+volumes:
+    mongo:
+        driver: local
