@@ -1,0 +1,1 @@
+docker build -t sticker-board/frontend:local .

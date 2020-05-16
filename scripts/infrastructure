@@ -1,0 +1,1 @@
+docker run -d --name mongo -p 27017:27017 -v /etc/docker-storage/mongo:/etc/mongo mongo:4.2.6

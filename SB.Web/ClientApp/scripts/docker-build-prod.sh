@@ -1,0 +1,1 @@
+docker build -f Dockerfile.prod -t sticker-board/frontend:prod .
