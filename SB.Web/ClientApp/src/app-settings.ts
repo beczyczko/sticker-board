@@ -3,7 +3,7 @@ const dev = {
 };
 
 const prod = {
-    BASE_API_URL: 'http://localhost:3000',
+    BASE_API_URL: 'https://sticker-board-api.azurewebsites.net',
 };
 
 export const config = process.env.NODE_ENV === 'development' ? dev : prod;
