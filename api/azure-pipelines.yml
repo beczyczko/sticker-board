@@ -17,7 +17,7 @@ variables:
 steps:
   - script: echo $(Build.SourceBranchName) \
             echo $(Build.BuildId)
-    displayName: 'Build tag: Build.SourceBranchName: $(Build.SourceBranchName), Build.SourceBranch: $(Build.SourceBranch)'
+    displayName: 'Build tag: Build.SourceBranchName: $(Build.SourceBranchName), Build.SourceBranch: $(Build.SourceBranch), System.PullRequest.SourceBranch: $(System.PullRequest.SourceBranch)'
 
   # - task: Docker@2
   #   displayName: Login to Azure Container Registry
