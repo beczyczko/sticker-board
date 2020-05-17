@@ -13,20 +13,32 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+# - script: dotnet build --configuration $(buildConfiguration)
+#   displayName: 'dotnet build $(buildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  displayName: "Publish"
-  inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: 'SB.Web/*.csproj'
-    configuration: $(buildConfiguration)'
-    arguments: '--output $(Build.ArtifactStagingDirectory)'
+# - task: DotNetCoreCLI@2
+#   displayName: "Publish"
+#   inputs:
+#     command: 'publish'
+#     publishWebProjects: false
+#     projects: 'SB.Web/*.csproj'
+#     configuration: $(buildConfiguration)'
+#     arguments: '--output $(Build.ArtifactStagingDirectory)'
 
-- task: PublishBuildArtifacts@1
-  displayName: "Upload Artifacts"
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'SB.Web'
+# - task: PublishBuildArtifacts@1
+#   displayName: "Upload Artifacts"
+#   inputs:
+#     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+#     ArtifactName: 'SB.Web'
+
+
+
+    
+    # - task: DockerInstaller@0
+    #   inputs:
+    #     dockerVersion: '17.09.0-ce'
+    - task: Docker@2
+      inputs:
+        command: 'build'
+        Dockerfile: '**/api/Dockerfile.prod'
+    
