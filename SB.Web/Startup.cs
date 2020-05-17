@@ -108,17 +108,7 @@ namespace SB.Web
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<BoardHub>("/board");
             });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000/");
-                }
-            });
-
+            
             mongoDbInitializer.InitializeAsync();
         }
     }
