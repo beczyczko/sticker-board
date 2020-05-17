@@ -15,23 +15,19 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-  - script: echo $(Build.SourceBranchName) \
-            echo $(Build.BuildId)
-    displayName: 'Build tag: Build.SourceBranchName: $(Build.SourceBranchName), Build.SourceBranch: $(Build.SourceBranch), System.PullRequest.SourceBranch: $(System.PullRequest.SourceBranch)'
+  - task: Docker@2
+    displayName: Login to Azure Container Registry
+    inputs:
+      command: login
+      containerRegistry: azureContainerRegistryStickerBoard
 
-  # - task: Docker@2
-  #   displayName: Login to Azure Container Registry
-  #   inputs:
-  #     command: login
-  #     containerRegistry: azureContainerRegistryStickerBoard
-
-  # - task: Docker@2
-  #   inputs:
-  #     containerRegistry: 'azureContainerRegistryStickerBoard'
-  #     repository: 'sb.api'
-  #     command: 'buildAndPush'
-  #     Dockerfile: '**/api/Dockerfile.prod'
-  #     tags: |
-  #       $(Build.BuildId)
-  #       $(Build.SourceBranchName)
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'azureContainerRegistryStickerBoard'
+      repository: 'sb.api'
+      command: 'buildAndPush'
+      Dockerfile: '**/api/Dockerfile.prod'
+      tags: |
+        $(Build.BuildId)
+        $(System.PullRequest.SourceBranch)
   
