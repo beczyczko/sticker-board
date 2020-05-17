@@ -39,8 +39,6 @@ namespace SB.Web
 
             services.AddSignalR();
 
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
-
             services.AddOptions();
         }
 
@@ -93,8 +91,6 @@ namespace SB.Web
                 builder.SetIsOriginAllowed(host => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             app.UseOpenApi();
             app.UseSwaggerUi3();
