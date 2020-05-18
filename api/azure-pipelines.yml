@@ -8,12 +8,15 @@ trigger:
     include:
       - master
 
-name: test
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   buildConfiguration: 'Release'
+  branchName: $(System.PullRequest.SourceBranch)
+  buildName: $(branchName).$(Build.BuildId)
+
+name: $(buildName)
+
+pool:
+  vmImage: 'ubuntu-latest'
 
 steps:
   - task: Docker@2
@@ -29,6 +32,6 @@ steps:
       command: 'buildAndPush'
       Dockerfile: '**/api/Dockerfile.prod'
       tags: |
-        $(Build.BuildId)
-        $(System.PullRequest.SourceBranch)
+        $(buildName)
+        $(branchName)
   
