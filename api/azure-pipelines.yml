@@ -11,9 +11,9 @@ trigger:
 variables:
   buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
-  buildName: '$(branchName)_$(Build.BuildId)'
+  buildName: '$(branchName)-$(Build.BuildId)'
 
-name: $(System.PullRequest.SourceBranch)_$(Build.BuildId)
+name: $(System.PullRequest.SourceBranch)-$(Build.BuildId)
 
 pool:
   vmImage: 'ubuntu-latest'
