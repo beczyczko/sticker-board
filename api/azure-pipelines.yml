@@ -13,7 +13,7 @@ variables:
   branchName: $(System.PullRequest.SourceBranch)
   buildName: '$(branchName).$(Build.BuildId)'
 
-name: $(System.PullRequest.SourceBranch)_$(TeamProject)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+name: $(System.PullRequest.SourceBranch)_$(Build.BuildId)
 
 pool:
   vmImage: 'ubuntu-latest'
