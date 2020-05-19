@@ -4,13 +4,19 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
-
-pool:
-  vmImage: 'ubuntu-latest'
+  branches:
+    include:
+      - master
 
 variables:
   buildConfiguration: 'Release'
+  branchName: $(System.PullRequest.SourceBranch)
+  buildName: '$(branchName)-$(Build.BuildId)'
+
+name: $(System.PullRequest.SourceBranch)-$(Build.BuildId)
+
+pool:
+  vmImage: 'ubuntu-latest'
 
 steps:
   - task: Docker@2
@@ -21,9 +27,11 @@ steps:
 
   - task: Docker@2
     inputs:
+      containerRegistry: 'azureContainerRegistryStickerBoard'
+      repository: 'sb.api'
       command: 'buildAndPush'
       Dockerfile: '**/api/Dockerfile.prod'
       tags: |
-        $(Build.BuildId)
-        $(Build.SourceBranchName)
-    
+        $(buildName)
+        $(branchName)
+  
