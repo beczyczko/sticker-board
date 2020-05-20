@@ -26,3 +26,4 @@ steps:
       tags: |
         $(buildName)
         $(branchName)
+        
