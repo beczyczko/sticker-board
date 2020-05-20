@@ -22,7 +22,7 @@ steps:
       containerRegistry: 'azureContainerRegistryStickerBoard'
       repository: 'sb.frontend'
       command: 'buildAndPush'
-      Dockerfile: 'Dockerfile.prod'
+      Dockerfile: 'frontend/Dockerfile.prod'
       tags: |
         $(buildName)
         $(branchName)
