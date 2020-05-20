@@ -30,9 +30,7 @@ steps:
       containerRegistry: 'azureContainerRegistryStickerBoard'
       repository: 'sb.api'
       command: 'buildAndPush'
-      Dockerfile: '**/api/Dockerfile.prod'
+      Dockerfile: 'Dockerfile.prod'
       tags: |
         $(buildName)
         $(branchName)
-  
-        
