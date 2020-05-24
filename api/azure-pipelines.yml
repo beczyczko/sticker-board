@@ -1,7 +1,10 @@
 trigger:
-- master
+  branches:
+    include:
+      - master
 
 variables:
+  buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
   buildName: '$(branchName)-$(Build.BuildId)'
 
@@ -20,9 +23,9 @@ steps:
   - task: Docker@2
     inputs:
       containerRegistry: 'azureContainerRegistryStickerBoard'
-      repository: 'sb.frontend'
+      repository: 'sb.api'
       command: 'buildAndPush'
-      Dockerfile: 'frontend/Dockerfile.prod'
+      Dockerfile: 'api/Dockerfile.prod'
       tags: |
         $(buildName)
         $(branchName)

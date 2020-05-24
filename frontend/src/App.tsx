@@ -9,7 +9,7 @@ import { AddStickerCommand } from './services/services';
 import { ServicesProvider } from './services/services-provider';
 import { StickerColor } from './board/StickerColor';
 import { BoardSignalRService } from './signal-r/BoardSignalRService';
-import { BaseAPIUrl } from './app-settings';
+import { config } from './app-settings';
 import { tap } from 'rxjs/operators';
 import { Position } from './board/Position';
 
@@ -34,7 +34,7 @@ function App() {
         const windowHeight = window.innerHeight;
 
         const newBoard = new Board(
-            new BoardSignalRService(BaseAPIUrl),
+            new BoardSignalRService(config.BASE_API_URL),
             stickersService,
             windowWidth,
             windowHeight);

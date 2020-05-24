@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
+WORKDIR /app
+
+# Copy everything else and build
+COPY . ./
+RUN sh SB.Web/scripts/publish.sh
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+WORKDIR /app
+COPY --from=build-env /app/SB.Web/out .
+ENTRYPOINT ["dotnet", "SB.Web.dll"]

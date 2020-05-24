@@ -39,8 +39,6 @@ namespace SB.Web
 
             services.AddSignalR();
 
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
-
             services.AddOptions();
         }
 
@@ -93,8 +91,6 @@ namespace SB.Web
                 builder.SetIsOriginAllowed(host => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             app.UseOpenApi();
             app.UseSwaggerUi3();
@@ -108,17 +104,7 @@ namespace SB.Web
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<BoardHub>("/board");
             });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000/");
-                }
-            });
-
+            
             mongoDbInitializer.InitializeAsync();
         }
     }
