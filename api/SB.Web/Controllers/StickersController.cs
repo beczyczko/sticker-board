@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using SB.Boards.Commands.AddSticker;
@@ -17,6 +18,7 @@ using SB.Common.Dispatchers;
 
 namespace SB.Web.Controllers
 {
+    [Authorize] //todo db make it right
     public class StickersController : BaseController
     {
         public StickersController(IDispatcher dispatcher) : base(dispatcher)

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Autofac;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,18 @@ namespace SB.Web
         [UsedImplicitly]
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(defaultScheme: CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddGoogle(options =>
+                {
+                    var googleAuthNSection = Configuration.GetSection("Authentication:Google");
+
+                    options.ClientId = googleAuthNSection["ClientId"];
+                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.CallbackPath = "/auth/google/callback"; //todo find out how it works
+                });
             services.AddCustomMvc();
 
             services.AddOpenApiDocument(configure =>
@@ -96,6 +109,9 @@ namespace SB.Web
             app.UseSwaggerUi3();
 
             app.UseRouting();
+
+            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
