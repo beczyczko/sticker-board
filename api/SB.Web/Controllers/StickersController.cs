@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
@@ -18,7 +19,8 @@ using SB.Common.Dispatchers;
 
 namespace SB.Web.Controllers
 {
-    [Authorize] //todo db make it right
+    //todo db move it to BaseController?
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StickersController : BaseController
     {
         public StickersController(IDispatcher dispatcher) : base(dispatcher)

@@ -12,6 +12,8 @@ import { BoardSignalRService } from './signal-r/BoardSignalRService';
 import { config } from './app-settings';
 import { tap } from 'rxjs/operators';
 import { Position } from './board/Position';
+import axios from 'axios';
+
 
 function App() {
 

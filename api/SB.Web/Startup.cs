@@ -1,12 +1,13 @@
 using System.Reflection;
+using System.Text;
 using Autofac;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using SB.Boards.Domain;
 using SB.Common.Dispatchers;
 using SB.Common.MediatR;
@@ -28,18 +29,29 @@ namespace SB.Web
         [UsedImplicitly]
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(defaultScheme: CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddGoogle(options =>
+            services.AddAuthentication(options =>
                 {
+                    options.DefaultAuthenticateScheme = "Bearer";
+                    options.DefaultChallengeScheme = "Bearer";
+                })
+                .AddJwtBearer(cfg =>
+                {
+                    //todo db fix schema and names in configuration
                     var googleAuthNSection = Configuration.GetSection("Authentication:Google");
+                    var jwtSecret = googleAuthNSection["JwtSecret"];
 
-                    options.ClientId = googleAuthNSection["ClientId"];
-                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
 
-                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.CallbackPath = "/auth/google/callback"; //todo find out how it works
+                    cfg.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
                 });
+
             services.AddCustomMvc();
 
             services.AddOpenApiDocument(configure =>
@@ -110,8 +122,8 @@ namespace SB.Web
 
             app.UseRouting();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -120,7 +132,7 @@ namespace SB.Web
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<BoardHub>("/board");
             });
-            
+
             mongoDbInitializer.InitializeAsync();
         }
     }

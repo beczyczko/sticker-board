@@ -45,7 +45,10 @@ class Board {
 
         this.registerMouseEventHandlers();
 
-        this.loadStickers();
+        //todo db temp fix that can't stay here, it was made for waiting to token save in storage
+        setTimeout(() => {
+            this.loadStickers();
+        }, 2000);
         this.subscribeSignalREvents(boardSignalRService);
         subscribeToScrollEvents(this);
 
