@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using SB.Common;
+using SB.Web.Auth;
 
 namespace SB.Web.Controllers
 {
@@ -30,7 +32,10 @@ namespace SB.Web.Controllers
         //todo db if not logged in redirect to login page
         //todo db redirect to returnUrl after login
         //todo db prepare basic login page with information that only google auth is available and create there LoginWithGoogle button
-        public AuthenticationController(ILogger<AuthenticationController> logger, IAuthService authService, IConfiguration configuration)
+        public AuthenticationController(
+            ILogger<AuthenticationController> logger,
+            IAuthService authService,
+            IConfiguration configuration)
         {
             _logger = logger;
             _authService = authService;
@@ -46,26 +51,25 @@ namespace SB.Web.Controllers
 
         [AllowAnonymous]
         [HttpPost("google")]
-        public async Task<IActionResult> Google([FromBody]UserView userView)
+        public async Task<IActionResult> Google([FromBody] UserView userView)
         {
-            var authSection = _configuration.GetSection("Authentication:Google");
-            var clientId = authSection["ClientId"];
-            var jwtEmailEncryption = authSection["JwtEmailEncryption"];
-            var jwtSecret = authSection["JwtSecret"];
+            //todo db why Google auth ClientId and ClientSecret is not in use?
 
-            var chars = authSection["ClientSecret"];
-
+            var authJwtOptions = _configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
+            var jwtEmailEncryptionSecret = authJwtOptions.EmailEncryptionSecret;
+            var jwtSecret = authJwtOptions.Secret;
 
             try
             {
                 _logger.LogInformation("userView = " + userView.tokenId);
-                var payload = GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
+                var payload = GoogleJsonWebSignature
+                    .ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
                 var user = await _authService.Authenticate(payload);
                 _logger.LogInformation(payload.ExpirationTimeSeconds.ToString());
 
                 var claims = new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtEmailEncryption,user.email)),
+                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtEmailEncryptionSecret, user.email)),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
@@ -87,6 +91,7 @@ namespace SB.Web.Controllers
                 // Helpers.SimpleLogger.Log(ex);
                 BadRequest(ex.Message);
             }
+
             return BadRequest();
         }
     }
@@ -100,18 +105,20 @@ namespace SB.Web.Controllers
     {
         public AuthService()
         {
-            this.Refresh();
+            Refresh();
         }
+
         private static IList<User> _users = new List<User>();
+
         public async Task<User> Authenticate(GoogleJsonWebSignature.Payload payload)
         {
             await Task.Delay(1);
-            return this.FindUserOrAdd(payload);
+            return FindUserOrAdd(payload);
         }
 
         private User FindUserOrAdd(GoogleJsonWebSignature.Payload payload)
         {
-            var u = _users.Where(x => x.email == payload.Email).FirstOrDefault();
+            var u = _users.FirstOrDefault(x => x.email == payload.Email);
             if (u == null)
             {
                 u = new User()
@@ -124,6 +131,7 @@ namespace SB.Web.Controllers
                 };
                 _users.Add(u);
             }
+
             return u;
         }
 
@@ -131,13 +139,14 @@ namespace SB.Web.Controllers
         {
             if (_users.Count == 0)
             {
-                _users.Add(new User() { id = Guid.NewGuid(), name = "Test Person1", email = "test@gmail.com" });
+                _users.Add(new User() {id = Guid.NewGuid(), name = "Test Person1", email = "test@gmail.com"});
             }
         }
     }
+
     public class User
     {
-        public System.Guid id { get; set; }
+        public Guid id { get; set; }
         public string name { get; set; }
         public string email { get; set; }
         public string oauthSubject { get; set; }
@@ -178,12 +187,12 @@ namespace SB.Web.Controllers
                     ICryptoTransform cTransform = tdes.CreateEncryptor();
                     resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
                 }
-
             }
             catch (Exception ex)
             {
                 // SimpleLogger.Log(ex);
             }
+
             return Convert.ToBase64String(resultArray, 0, resultArray.Length);
         }
 
@@ -215,15 +224,13 @@ namespace SB.Web.Controllers
                     ICryptoTransform cTransform = tdes.CreateDecryptor();
                     resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
                 }
-
-
             }
             catch (Exception ex)
             {
                 // SimpleLogger.Log(ex);
             }
+
             return UTF8Encoding.UTF8.GetString(resultArray);
         }
     }
-
 }

@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using Autofac;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,11 +10,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using SB.Boards.Domain;
+using SB.Common;
 using SB.Common.Dispatchers;
 using SB.Common.MediatR;
 using SB.Common.Mongo;
 using SB.Common.Mvc;
 using SB.SignalR.Board;
+using SB.Web.Auth;
 
 namespace SB.Web
 {
@@ -31,22 +34,19 @@ namespace SB.Web
         {
             services.AddAuthentication(options =>
                 {
-                    options.DefaultAuthenticateScheme = "Bearer";
-                    options.DefaultChallengeScheme = "Bearer";
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
                 .AddJwtBearer(cfg =>
                 {
-                    //todo db fix schema and names in configuration
-                    var googleAuthNSection = Configuration.GetSection("Authentication:Google");
-                    var jwtSecret = googleAuthNSection["JwtSecret"];
+                    var authJwtOptions = Configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
 
-                    cfg.RequireHttpsMetadata = false;
-                    cfg.SaveToken = true;
+                    cfg.SaveToken = true; //todo db what is that?
 
                     cfg.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authJwtOptions.Secret)),
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };
