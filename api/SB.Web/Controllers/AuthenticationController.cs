@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,8 @@ using SB.Web.Auth;
 namespace SB.Web.Controllers
 {
     [ApiController]
-    [Route("auth")] //todo db make it api/[controller] like in every controller?
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AuthenticationController : ControllerBase
     {
         //todo db clean everything
@@ -42,16 +44,15 @@ namespace SB.Web.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("/Account/Login")]
-        public async Task<IActionResult> Login(string returnUrl)
+        [HttpGet]
+        public async Task<IActionResult> IsAuthenticated()
         {
-            // todo db show something better than string
-            return Ok("login page");
+            return Ok();
         }
 
         [AllowAnonymous]
-        [HttpPost("google")]
-        public async Task<IActionResult> Google([FromBody] UserView userView)
+        [HttpPost("[Action]")]
+        public async Task<IActionResult> Google([FromBody] GoogleAuthToken googleAuthToken)
         {
             var authJwtOptions = _configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
             var jwtEmailEncryptionSecret = authJwtOptions.EmailEncryptionSecret;
@@ -61,9 +62,9 @@ namespace SB.Web.Controllers
 
             try
             {
-                _logger.LogInformation("userView = " + userView.tokenId);
+                _logger.LogInformation("id_token = " + googleAuthToken.IdToken);
                 var payload = GoogleJsonWebSignature
-                    .ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()
+                    .ValidateAsync(googleAuthToken.IdToken, new GoogleJsonWebSignature.ValidationSettings()
                     {
                         Audience = new[] { authGoogleOptions.ClientId },
                     }).Result;
@@ -156,9 +157,9 @@ namespace SB.Web.Controllers
         public string oauthIssuer { get; set; }
     }
 
-    public class UserView
+    public class GoogleAuthToken
     {
-        public string tokenId { get; set; }
+        public string IdToken { get; set; }
     }
 
     public class Security

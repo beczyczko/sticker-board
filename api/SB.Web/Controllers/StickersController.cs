@@ -19,8 +19,6 @@ using SB.Common.Dispatchers;
 
 namespace SB.Web.Controllers
 {
-    //todo db move it to BaseController?
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StickersController : BaseController
     {
         public StickersController(IDispatcher dispatcher) : base(dispatcher)
