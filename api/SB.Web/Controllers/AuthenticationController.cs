@@ -53,17 +53,20 @@ namespace SB.Web.Controllers
         [HttpPost("google")]
         public async Task<IActionResult> Google([FromBody] UserView userView)
         {
-            //todo db why Google auth ClientId and ClientSecret is not in use?
-
             var authJwtOptions = _configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
             var jwtEmailEncryptionSecret = authJwtOptions.EmailEncryptionSecret;
             var jwtSecret = authJwtOptions.Secret;
+
+            var authGoogleOptions = _configuration.GetOptions<GoogleAuthOptions>(GoogleAuthOptions.SectionName);
 
             try
             {
                 _logger.LogInformation("userView = " + userView.tokenId);
                 var payload = GoogleJsonWebSignature
-                    .ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
+                    .ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()
+                    {
+                        Audience = new[] { authGoogleOptions.ClientId },
+                    }).Result;
                 var user = await _authService.Authenticate(payload);
                 _logger.LogInformation(payload.ExpirationTimeSeconds.ToString());
 
@@ -139,7 +142,7 @@ namespace SB.Web.Controllers
         {
             if (_users.Count == 0)
             {
-                _users.Add(new User() {id = Guid.NewGuid(), name = "Test Person1", email = "test@gmail.com"});
+                _users.Add(new User() { id = Guid.NewGuid(), name = "Test Person1", email = "test@gmail.com" });
             }
         }
     }
