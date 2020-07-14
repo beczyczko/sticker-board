@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using SB.Auth;
 using SB.Boards.Domain;
 using SB.Common;
 using SB.Common.Dispatchers;
@@ -16,6 +17,7 @@ using SB.Common.MediatR;
 using SB.Common.Mongo;
 using SB.Common.Mvc;
 using SB.SignalR.Board;
+using SB.Users.Domain;
 using SB.Web.Auth;
 
 namespace SB.Web
@@ -72,13 +74,16 @@ namespace SB.Web
         {
             builder.RegisterAssemblyTypes(Assembly.GetEntryAssembly()).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Dispatcher).Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(IAuthService).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Sticker).Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(User).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(BoardHub).Assembly).AsImplementedInterfaces();
 
             builder.AddDispatchers();
             AddMediatR(builder);
             builder.AddMongo();
             builder.AddMongoRepository<Sticker>("stickers");
+            builder.AddMongoRepository<User>("users");
         }
 
         private void AddMediatR(ContainerBuilder builder)

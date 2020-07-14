@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SB.Common", "SB.Common\SB.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SB.Boards", "SB.Boards\SB.Boards.csproj", "{EC861036-0E83-4E8E-9E25-5649F75F52FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB.SignalR", "SB.SignalR\SB.SignalR.csproj", "{57F7AF9E-ABB0-425C-B1C5-F4D040810079}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SB.SignalR", "SB.SignalR\SB.SignalR.csproj", "{57F7AF9E-ABB0-425C-B1C5-F4D040810079}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB.Auth", "SB.Auth\SB.Auth.csproj", "{49E3129A-D6C1-4549-A2B5-5DA5C0CDCC09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB.Users", "SB.Users\SB.Users.csproj", "{6D8F333A-754C-4404-8B7C-918624945D01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{57F7AF9E-ABB0-425C-B1C5-F4D040810079}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57F7AF9E-ABB0-425C-B1C5-F4D040810079}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57F7AF9E-ABB0-425C-B1C5-F4D040810079}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49E3129A-D6C1-4549-A2B5-5DA5C0CDCC09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49E3129A-D6C1-4549-A2B5-5DA5C0CDCC09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49E3129A-D6C1-4549-A2B5-5DA5C0CDCC09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49E3129A-D6C1-4549-A2B5-5DA5C0CDCC09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D8F333A-754C-4404-8B7C-918624945D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D8F333A-754C-4404-8B7C-918624945D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D8F333A-754C-4404-8B7C-918624945D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D8F333A-754C-4404-8B7C-918624945D01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
