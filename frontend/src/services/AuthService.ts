@@ -59,7 +59,7 @@ export class AuthService {
         });
     }
 
-    login() {
+    login(): Promise<any> {
         return manager.signinRedirect();
     }
 

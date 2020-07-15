@@ -1,13 +1,11 @@
-import { StickersService } from './services';
-import { config } from '../app-settings';
-import { axiosDefault } from './AxiosService';
+import { IConfig, StickersService } from './services';
 
 export class ServicesProvider {
     private static _stickersService: StickersService;
 
     public static get stickersService(): StickersService {
         if (!this._stickersService) {
-            this._stickersService = new StickersService(config.BASE_API_URL, axiosDefault);
+            this._stickersService = new StickersService(new IConfig());
         }
 
         return this._stickersService;

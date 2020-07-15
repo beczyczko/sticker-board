@@ -1,10 +1,11 @@
-﻿{
+{
   "runtime": "NetCore31",
   "defaultVariables": null,
   "documentGenerator": {
     "fromDocument": {
       "url": "https://localhost:44301/swagger/v1/swagger.json",
-      "output": null
+      "output": null,
+      "newLineBehavior": "Auto"
     }
   },
   "codeGenerators": {
@@ -13,7 +14,7 @@
       "moduleName": "",
       "namespace": "",
       "typeScriptVersion": 2.7,
-      "template": "Axios",
+      "template": "Fetch",
       "promiseType": "Promise",
       "httpClass": "HttpClient",
       "withCredentials": false,
@@ -28,23 +29,25 @@
       "exportTypes": true,
       "wrapDtoExceptions": false,
       "exceptionClass": "ApiException",
-      "clientBaseClass": null,
+      "clientBaseClass": "AuthorizedApiBase",
       "wrapResponses": false,
       "wrapResponseMethods": [],
       "generateResponseClasses": true,
       "responseClass": "SwaggerResponse",
       "protectedMethods": [],
-      "configurationClass": null,
-      "useTransformOptionsMethod": false,
-      "useTransformResultMethod": false,
+      "configurationClass": "IConfig",
+      "useTransformOptionsMethod": true,
+      "useTransformResultMethod": true,
       "generateDtoTypes": true,
       "operationGenerationMode": "MultipleClientsFromOperationId",
       "markOptionalProperties": false,
       "generateCloneMethod": true,
       "typeStyle": "Interface",
+      "enumStyle": "Enum",
+      "useLeafType": false,
       "classTypes": [],
       "extendedClasses": [],
-      "extensionCode": "",
+      "extensionCode": "src/services/AuthorizedApiBase.ts",
       "generateDefaultValues": true,
       "excludedTypeNames": [],
       "excludedParameterNames": [],
@@ -52,7 +55,7 @@
       "generateConstructorInterface": true,
       "convertConstructorInterfaceData": false,
       "importRequiredTypes": true,
-      "useGetBaseUrlMethod": false,
+      "useGetBaseUrlMethod": true,
       "baseUrlTokenName": "API_BASE_URL",
       "queryNullValue": "",
       "inlineNamedDictionaries": false,
@@ -63,7 +66,8 @@
       "enumNameGeneratorType": null,
       "serviceHost": null,
       "serviceSchemes": null,
-      "output": "src/services/services.ts"
+      "output": "src/services/services.ts",
+      "newLineBehavior": "Auto"
     }
   }
 }
