@@ -35,7 +35,7 @@
       "generateResponseClasses": true,
       "responseClass": "SwaggerResponse",
       "protectedMethods": [],
-      "configurationClass": "IConfig",
+      "configurationClass": "IAuthConfig",
       "useTransformOptionsMethod": true,
       "useTransformResultMethod": true,
       "generateDtoTypes": true,

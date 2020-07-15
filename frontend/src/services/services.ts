@@ -11,8 +11,7 @@ import { config } from '../app-settings';
 import { AuthService } from './AuthService';
 import * as moment from 'moment';
 
-export class IConfig {
-    //todo db something is not fine here
+export class IAuthConfig {
     getAuthorization: () => string = () => {
         const api_access_token = localStorage.getItem('api_access_token');
         return `Bearer ${api_access_token}`;
@@ -20,10 +19,10 @@ export class IConfig {
 }
 
 export class AuthorizedApiBase {
-    private readonly config: IConfig;
+    private readonly config: IAuthConfig;
 
-    protected constructor(config: IConfig) {
-        this.config = config;
+    protected constructor(config?: IAuthConfig) {
+        this.config = config ? config : new IAuthConfig();
     }
 
     protected transformOptions = (options: RequestInit): Promise<RequestInit> => {
@@ -60,7 +59,7 @@ export class AuthenticationService extends AuthorizedApiBase {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: IConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
@@ -144,7 +143,7 @@ export class StickersService extends AuthorizedApiBase {
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(configuration: IConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+    constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
         this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);

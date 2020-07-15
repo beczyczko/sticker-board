@@ -1,8 +1,7 @@
 import { config } from '../app-settings';
 import { AuthService } from './AuthService';
 
-export class IConfig {
-    //todo db something is not fine here
+export class IAuthConfig {
     getAuthorization: () => string = () => {
         const api_access_token = localStorage.getItem('api_access_token');
         return `Bearer ${api_access_token}`;
@@ -10,10 +9,10 @@ export class IConfig {
 }
 
 export class AuthorizedApiBase {
-    private readonly config: IConfig;
+    private readonly config: IAuthConfig;
 
-    protected constructor(config: IConfig) {
-        this.config = config;
+    protected constructor(config?: IAuthConfig) {
+        this.config = config ? config : new IAuthConfig();
     }
 
     protected transformOptions = (options: RequestInit): Promise<RequestInit> => {
