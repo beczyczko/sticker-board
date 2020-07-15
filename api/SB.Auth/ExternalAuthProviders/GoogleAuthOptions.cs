@@ -1,4 +1,4 @@
-﻿namespace SB.Web.Auth
+﻿namespace SB.Auth.ExternalAuthProviders
 {
     public class GoogleAuthOptions
     {

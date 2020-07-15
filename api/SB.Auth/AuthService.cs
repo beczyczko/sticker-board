@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Google.Apis.Auth;
 using JetBrains.Annotations;
 using SB.Common.Dispatchers;
 using SB.Users.Commands;
@@ -17,9 +16,8 @@ namespace SB.Auth
             _dispatcher = dispatcher;
         }
 
-        public async Task<UserDto> Authenticate(GoogleJsonWebSignature.Payload payload)
+        public async Task<UserDto> Authenticate(AuthTokenPayload payload)
         {
-            //todo db this class should not depend on Google.Apis.Auth
             var userDto = await _dispatcher.QueryAsync(new UserQuery(payload.Email));
             if (userDto.HasValue)
             {

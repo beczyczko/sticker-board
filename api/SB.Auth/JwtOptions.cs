@@ -1,4 +1,4 @@
-﻿namespace SB.Web.Auth
+﻿namespace SB.Auth
 {
     public class JwtOptions
     {
