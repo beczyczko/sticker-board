@@ -15,7 +15,6 @@ const manager = new UserManager(getClientSettings());
 
 manager.signinCallback()
     .then(response => {
-        // debugger;
         console.log('signinCallback', response);
 
         const tokenBlob = new Blob([JSON.stringify({ IdToken: response.id_token }, null, 2)], { type: 'application/json' });

@@ -5,16 +5,13 @@ import { BoardComponent } from './board/BoardComponent';
 import Login from './authentication/Login';
 
 function App() {
-//todo db check if authorized
     return (
-        <div className="App">
-            <Router>
+        <Router>
+            <div className="App">
                 <Route exact={true} path="/" component={BoardComponent}/>
-            </Router>
-            <Router>
                 <Route path="/login" component={Login}/>
-            </Router>
-        </div>
+            </div>
+        </Router>
     );
 }
 

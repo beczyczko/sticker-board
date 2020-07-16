@@ -34,7 +34,9 @@ export class AuthorizedApiBase {
 
     protected transformResult(url: string, response: Response, processor: (response: Response) => Promise<any>): Promise<any> {
         if (response.status === 401) {
-            window.location.assign('/login');
+            if (window.location.pathname !== '/login') {
+                window.location.assign('/login');
+            }
         }
 
         return processor(response);
