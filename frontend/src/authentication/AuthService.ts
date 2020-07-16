@@ -1,4 +1,3 @@
-import { BehaviorSubject } from 'rxjs';
 import { User, UserManager, UserManagerSettings } from 'oidc-client';
 
 //todo db move this config somewhere else
@@ -32,9 +31,10 @@ manager.signinCallback()
                 r.json().then(user => {
                     const token = user.token;
                     console.log(token);
-                    // debugger;
                     //todo db clean
+
                     localStorage.setItem('api_access_token', token);
+                    window.location.assign('/');
                 });
             })
 
@@ -43,19 +43,12 @@ manager.signinCallback()
 });
 
 export class AuthService {
-
-    // Observable navItem source
-    private _authNavStatusSource = new BehaviorSubject<boolean>(false);
-    // Observable navItem stream
-    authNavStatus$ = this._authNavStatusSource.asObservable();
-
     private user: User | null = null;
 
     constructor() {
 
         manager.getUser().then(user => {
             this.user = user;
-            this._authNavStatusSource.next(this.isAuthenticated());
         });
     }
 
@@ -66,7 +59,6 @@ export class AuthService {
     async completeAuthentication() {
         // debugger;
         this.user = await manager.signinRedirectCallback();
-        this._authNavStatusSource.next(this.isAuthenticated());
     }
 
     //
@@ -93,22 +85,4 @@ export class AuthService {
     signout() {
         manager.signoutRedirect();
     }
-
-
 }
-
-//
-// const googleAuthConfig = {
-//     authority: 'https://accounts.google.com/',
-//     client_id: 'sb-main-app',
-//     redirect_uri: 'http://localhost:3000/',
-//     response_type: 'id_token token',
-//     scope: 'openid'
-// };
-//
-// const userManager = new Oidc.UserManager(googleAuthConfig);
-//
-// const signIn = () => {
-//     userManager.signinRedirect();
-// };
-//

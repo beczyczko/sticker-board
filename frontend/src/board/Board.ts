@@ -45,10 +45,7 @@ class Board {
 
         this.registerMouseEventHandlers();
 
-        //todo db temp fix that can't stay here, it was made for waiting to token save in storage
-        setTimeout(() => {
-            this.loadStickers();
-        }, 2000);
+        this.loadStickers();
         this.subscribeSignalREvents(boardSignalRService);
         subscribeToScrollEvents(this);
 
@@ -120,7 +117,7 @@ class Board {
             this.boardHtmlElementsLayer.style.transform = `scale(${this.scale})`;
             this.boardHtmlElementsLayer.style.top = `${this.position.y}px`;
             this.boardHtmlElementsLayer.style.left = `${this.position.x}px`;
-            
+
             this.viewChangedService.emitViewChanged$();
         }
     }

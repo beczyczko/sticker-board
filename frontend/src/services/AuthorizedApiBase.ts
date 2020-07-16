@@ -1,5 +1,4 @@
 import { config } from '../app-settings';
-import { AuthService } from './AuthService';
 
 export class IAuthConfig {
     getAuthorization: () => string = () => {
@@ -25,8 +24,7 @@ export class AuthorizedApiBase {
 
     protected transformResult(url: string, response: Response, processor: (response: Response) => Promise<any>): Promise<any> {
         if (response.status === 401) {
-            //todo db it can be better
-            new AuthService().login().then();
+            window.location.assign('/login');
         }
 
         return processor(response);
