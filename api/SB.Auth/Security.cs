@@ -35,10 +35,10 @@ namespace SB.Auth
                     resultArray = cryptoTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                //todo db
-                // SimpleLogger.Log(ex);
+                //todo db log error
+                throw e;
             }
 
             return Convert.ToBase64String(resultArray, 0, resultArray.Length);
@@ -73,10 +73,10 @@ namespace SB.Auth
                     resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                //todo db
-                // SimpleLogger.Log(ex);
+                //todo db log error
+                throw e;
             }
 
             return Encoding.UTF8.GetString(resultArray);

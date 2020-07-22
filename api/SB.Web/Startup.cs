@@ -42,14 +42,12 @@ namespace SB.Web
                 {
                     var authJwtOptions = Configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
 
-                    cfg.SaveToken = true; //todo db what is that?
-
-                    cfg.TokenValidationParameters = new TokenValidationParameters()
+                    cfg.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authJwtOptions.Secret)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
+                        ValidIssuer = authJwtOptions.Issuer,
+                        ValidAudience = authJwtOptions.Audience,
                     };
                 });
 

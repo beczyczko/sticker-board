@@ -13,7 +13,6 @@ namespace SB.Web.Controllers
     {
         private readonly IGoogleAuthenticator _googleAuthenticator;
 
-        //todo db prepare basic login page with information that only google auth is available and create there LoginWithGoogle button
         public AuthenticationController(IGoogleAuthenticator googleAuthenticator)
         {
             _googleAuthenticator = googleAuthenticator;
