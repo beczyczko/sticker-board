@@ -1,18 +1,19 @@
 import { AuthService } from './AuthService';
-import Button from '@material-ui/core/Button';
 import React from 'react';
+import GoogleLogin from 'react-google-login';
+import { googleAuthSettings } from './GoogleAuthSettings';
 
 function Login() {
-    //todo db make it a little bit fancy
-    function loginWithGoogle() {
-        new AuthService().login().then();
+    function onGoogleLoginSuccess(response: any): void {
+        new AuthService().loginWithGoogle(response.tokenId);
     }
 
     return (
         <div>
-            <Button onClick={loginWithGoogle} color="primary">
-                Login with google
-            </Button>
+            <GoogleLogin clientId={googleAuthSettings.client_id}
+                         onSuccess={onGoogleLoginSuccess}
+                         scope={googleAuthSettings.scope}>
+            </GoogleLogin>
         </div>
     );
 }

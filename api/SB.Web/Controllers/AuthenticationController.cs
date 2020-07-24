@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SB.Auth;
 using SB.Auth.ExternalAuthProviders;
 
 namespace SB.Web.Controllers
@@ -26,7 +27,7 @@ namespace SB.Web.Controllers
 
         [AllowAnonymous]
         [HttpPost("[Action]")]
-        public async Task<IActionResult> Google([FromBody] GoogleAuthToken googleAuthToken)
+        public async Task<ActionResult<SbApiAuthToken>> Google([FromBody] GoogleAuthToken googleAuthToken)
         {
             var authenticationResult = await _googleAuthenticator.AuthenticateAsync(googleAuthToken);
             if (authenticationResult.IsSuccess)
