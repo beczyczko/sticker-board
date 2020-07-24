@@ -1,7 +1,7 @@
 import { AuthenticationService, GoogleAuthToken, IAuthConfig, SbApiAuthToken } from '../services/services';
 
 export class AuthService {
-    public loginWithGoogle(idToken: string): Promise<void> {
+    public signinWithGoogle(idToken: string): Promise<void> {
 
         const authenticationService = new AuthenticationService(new IAuthConfig());
         return authenticationService.google({
