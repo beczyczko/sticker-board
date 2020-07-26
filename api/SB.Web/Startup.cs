@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,16 +39,32 @@ namespace SB.Web
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer(cfg =>
+                .AddJwtBearer(options =>
                 {
                     var authJwtOptions = Configuration.GetOptions<JwtOptions>(JwtOptions.SectionName);
 
-                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authJwtOptions.Secret)),
                         ValidIssuer = authJwtOptions.Issuer,
                         ValidAudience = authJwtOptions.Audience,
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 
@@ -132,7 +149,7 @@ namespace SB.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
-                endpoints.MapHub<BoardHub>("/board");
+                endpoints.MapHub<BoardHub>("hubs/board");
             });
 
             mongoDbInitializer.InitializeAsync();

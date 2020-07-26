@@ -1,9 +1,12 @@
 ﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SB.SignalR.Board
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BoardHub : Hub<IBoardHub>
     {
         [UsedImplicitly]
