@@ -68,7 +68,7 @@ namespace SB.Web.Controllers
         }
 
         [HttpGet("[Action]")]
-        public async Task<ActionResult<IEnumerable<ColorDto>>> Colors()
+        public ActionResult<IEnumerable<ColorDto>> Colors()
         {
             return Collection(Boards.Domain.Color.DefaultColors.Select(c => new ColorDto(c.Red, c.Green, c.Blue)));
         }

@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HttpTransportType, HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
 import { StickerMovedEvent } from './Types/StickerMovedEvent';
 import { StickerCreatedEvent } from './Types/StickerCreatedEvent';
@@ -42,8 +42,13 @@ export class BoardSignalRService {
     }
 
     private createConnection(): HubConnection {
+        const api_access_token = localStorage.getItem('api_access_token') ?? '';
         return new HubConnectionBuilder()
-            .withUrl(this.baseUrl + '/board')
+            .withUrl(this.baseUrl + '/hubs/board', {
+                accessTokenFactory(): string | Promise<string> {
+                    return api_access_token;
+                }
+            })
             .build();
     }
 

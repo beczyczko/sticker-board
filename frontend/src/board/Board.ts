@@ -117,7 +117,7 @@ class Board {
             this.boardHtmlElementsLayer.style.transform = `scale(${this.scale})`;
             this.boardHtmlElementsLayer.style.top = `${this.position.y}px`;
             this.boardHtmlElementsLayer.style.left = `${this.position.x}px`;
-            
+
             this.viewChangedService.emitViewChanged$();
         }
     }
