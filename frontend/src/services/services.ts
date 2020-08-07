@@ -62,7 +62,7 @@ export class AuthenticationService extends AuthorizedApiBase {
     constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
+        this.baseUrl = this.getBaseUrl("", baseUrl);
     }
 
     isAuthenticated(): Promise<FileResponse> {
@@ -147,7 +147,7 @@ export class StickersService extends AuthorizedApiBase {
     constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
+        this.baseUrl = this.getBaseUrl("", baseUrl);
     }
 
     stickers(): Promise<StickerDto[]> {
