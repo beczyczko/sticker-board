@@ -3,7 +3,7 @@ const dev = {
 };
 
 const prod = {
-    BASE_API_URL: '',
+    BASE_API_URL: '/',
 };
 
 export const config = process.env.NODE_ENV === 'development' ? dev : prod;
