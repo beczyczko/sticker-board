@@ -44,7 +44,7 @@ export class BoardSignalRService {
     private createConnection(): HubConnection {
         const api_access_token = localStorage.getItem('api_access_token') ?? '';
         return new HubConnectionBuilder()
-            .withUrl(this.baseUrl + '/hubs/board', {
+            .withUrl(this.baseUrl + '/api/hubs/board', {
                 accessTokenFactory(): string | Promise<string> {
                     return api_access_token;
                 }

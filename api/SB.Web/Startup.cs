@@ -58,7 +58,7 @@ namespace SB.Web
                             var accessToken = context.Request.Query["access_token"];
 
                             var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/api/hubs"))
                             {
                                 context.Token = accessToken;
                             }
@@ -149,7 +149,7 @@ namespace SB.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
-                endpoints.MapHub<BoardHub>("hubs/board");
+                endpoints.MapHub<BoardHub>("api/hubs/board");
             });
 
             mongoDbInitializer.InitializeAsync();
