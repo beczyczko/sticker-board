@@ -22,7 +22,7 @@ namespace SB.Boards.Queries.Stickers
 
         public async Task<IImmutableList<StickerDto>> HandleAsync(StickersQuery query)
         {
-            var stickers = await _repository.FindAsync(s => true);
+            var stickers = await _repository.FindAsync(s => s.RemoveMoment == null);
 
             return stickers
                 .Select(s => new StickerDto(
