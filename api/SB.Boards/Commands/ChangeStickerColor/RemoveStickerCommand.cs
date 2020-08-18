@@ -41,12 +41,10 @@ namespace SB.Boards.Commands.ChangeStickerColor
                 sticker.Remove(command);
                 await _repository.UpdateAsync(sticker);
 
-                var stickerColorChangedEvent =
+                var stickerRemovedEvent =
                     new StickerRemovedEvent("testId", sticker.Id, command.CorrelationId); //todo db boardId unhardcode
-                //todo db handle event on frontend
-                await _publisher.Publish(stickerColorChangedEvent, PublishStrategy.ParallelNoWait);
+                await _publisher.Publish(stickerRemovedEvent, PublishStrategy.ParallelNoWait);
             }
         }
-
     }
 }

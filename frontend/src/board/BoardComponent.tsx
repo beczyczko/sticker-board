@@ -10,7 +10,7 @@ import Sticker from './Sticker';
 import { v4 as uuidv4 } from 'uuid';
 import { AddStickerCommand } from '../services/services';
 import AddStickerDialog from '../add-sticker-dialog/AddStickerDialog';
-import ElementToolbox from '../ElementToolbox';
+import ElementToolbox from '../element-toolbox/ElementToolbox';
 
 export function BoardComponent() {
     const stickersService = ServicesProvider.stickersService;
@@ -77,8 +77,10 @@ export function BoardComponent() {
             <div id="board-html-layer">
                 <div id="board-html-elements-layer"></div>
             </div>
-            <ElementToolbox>
+            {board &&
+            <ElementToolbox board={board}>
             </ElementToolbox>
+            }
         </div>
     );
 }

@@ -50,7 +50,8 @@ export class SelectionService {
 
     private configureSelectionFlow() {
         ElementChangedService.elementChanged$
-            .pipe(filter(element => this.selectedElements.value.some(e => e.id === element.id)))
+            .pipe(
+                filter(element => this.selectedElements.value.some(e => e.id === element.id)))
             .subscribe(() => {
                 this.showSelectionMarkers(this.selectedElements.value);
             });

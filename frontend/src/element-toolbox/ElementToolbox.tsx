@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { SelectionService } from './services/SelectionService';
+import { SelectionService } from '../services/SelectionService';
 import { debounceTime, filter, map, tap } from 'rxjs/operators';
-import SelectStickerColor from './add-sticker-dialog/select-sticker-color/SelectStickerColor';
-import { StickerColor } from './board/StickerColor';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { createStyles } from '@material-ui/core';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Sticker from './board/Sticker';
+import Sticker from '../board/Sticker';
+import RemoveElement from './RemoveElement';
+import ChangeStickerColor from './ChangeStickerColor';
+import Board from '../board/Board';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
-        colorPicker: {
-            paddingTop: theme.spacing(1.5),
-            paddingRight: theme.spacing(2),
-            paddingBottom: theme.spacing(1.5),
-            paddingLeft: theme.spacing(2),
-            width: 220,
-            height: 76,
+        toolbox: {
+            display: 'flex',
+            paddingTop: theme.spacing(0.5),
+            paddingRight: theme.spacing(1),
+            paddingBottom: theme.spacing(0.5),
+            paddingLeft: theme.spacing(1),
             marginTop: theme.spacing(6),
             marginBottom: theme.spacing(6),
             pointerEvents: 'initial',
@@ -28,7 +28,12 @@ const useStyles = makeStyles((theme) =>
     }),
 );
 
-const ElementToolbox = ({ props }: any) => {
+interface ElementToolboxProps {
+    children: never[],
+    board: Board;
+}
+
+const ElementToolbox = ({ board }: ElementToolboxProps) => {
     const classes = useStyles();
 
     const [initialized, setInitialized] = useState(false);
@@ -75,12 +80,6 @@ const ElementToolbox = ({ props }: any) => {
             .subscribe();
     };
 
-    const onColorSelected = (c: StickerColor | undefined) => {
-        if (c && selectedElementData && !c.equals(selectedElementData.color)) {
-            selectedElementData.updateColor(c);
-        }
-    };
-
     return (
         <div>
             <Popper
@@ -89,10 +88,15 @@ const ElementToolbox = ({ props }: any) => {
                 placement="top"
                 open={toolboxOpen}
                 anchorEl={toolboxAnchorEl}>
-                <Paper className={classes.colorPicker}>
-                    <SelectStickerColor onColorSelected={c => onColorSelected(c)}
-                                        initialColor={selectedElementData?.color}>
-                    </SelectStickerColor>
+                <Paper className={classes.toolbox}>
+                    {selectedElementData &&
+                    <ChangeStickerColor element={selectedElementData}>
+                    </ChangeStickerColor>
+                    }
+                    {selectedElementData &&
+                    <RemoveElement element={selectedElementData} board={board}>
+                    </RemoveElement>
+                    }
                 </Paper>
             </Popper>
         </div>
