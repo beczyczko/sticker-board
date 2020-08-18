@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Sticker from '../board/Sticker';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Tooltip from '@material-ui/core/Tooltip';
 import Board from '../board/Board';
 
 interface RemoveElementProps {
@@ -30,9 +31,11 @@ const RemoveElement = ({ element, board }: RemoveElementProps) => {
 
     return (
         <div>
-            <IconButton aria-label="delete" onClick={onClickButtonClick}>
-                <DeleteIcon/>
-            </IconButton>
+            <Tooltip title="Delete">
+                <IconButton aria-label="delete" onClick={onClickButtonClick}>
+                    <DeleteIcon/>
+                </IconButton>
+            </Tooltip>
         </div>
     );
 };

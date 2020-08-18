@@ -8,6 +8,7 @@ import SelectStickerColor from '../add-sticker-dialog/select-sticker-color/Selec
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { createStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -59,9 +60,11 @@ const ChangeStickerColor = ({ element }: ChangeStickerColor) => {
 
     return (
         <div>
-            <IconButton aria-label="open-color-palette" onClick={openPalette}>
-                <PaletteIcon/>
-            </IconButton>
+            <Tooltip title="Change color">
+                <IconButton aria-label="open-color-palette" onClick={openPalette}>
+                    <PaletteIcon/>
+                </IconButton>
+            </Tooltip>
             <Popper
                 id="change-color-palette-popper"
                 open={paletteOpen}
