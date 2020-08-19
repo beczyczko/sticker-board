@@ -59,15 +59,16 @@ const ChangeStickerColor = ({ element }: ChangeStickerColor) => {
 
     return (
         <>
-            <div className={classes.openPaletteButton}>
-                <Tooltip title="Change color">
+            <Tooltip title="Change color">
+                <div className={classes.openPaletteButton}>
+
                     <ColorSampleButton aria-label="open-color-palette"
                                        onClick={openPalette}
                                        color={element.color}
                                        isSelected={false}>
                     </ColorSampleButton>
-                </Tooltip>
-            </div>
+                </div>
+            </Tooltip>
             <Popper
                 id="change-color-palette-popper"
                 open={paletteOpen}

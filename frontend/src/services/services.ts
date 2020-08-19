@@ -44,7 +44,7 @@ export class AuthorizedApiBase {
 
     protected getBaseUrl(defaultBaseUrl: string, baseUrl: string | undefined): string {
         const BASE_API_URL = config.BASE_API_URL;
-        if (BASE_API_URL === null || BASE_API_URL === undefined) {
+        if (BASE_API_URL !== null && BASE_API_URL !== undefined) {
             return BASE_API_URL;
         } else if (baseUrl) {
             return baseUrl;
