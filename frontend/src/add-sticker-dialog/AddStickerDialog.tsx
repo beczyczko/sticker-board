@@ -48,7 +48,7 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
         }
     }, [open]);
 
-    const keyPress = (e: any) => {
+    const onKeyPress = (e: any) => {
         if (e.keyCode === 13) {
             e.preventDefault();
             onSave();
@@ -79,7 +79,7 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
                         fullWidth
                         value={stickerText}
                         onChange={updateStickerText}
-                        onKeyDown={keyPress}
+                        onKeyDown={onKeyPress}
                     />
                 </DialogContent>
 

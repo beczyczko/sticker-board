@@ -7,6 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 import Board from '../board/Board';
+import { deletePressed } from '../services/KeyboardService';
+import { Subscription } from 'rxjs';
 
 interface RemoveElementProps {
     children: never[],
@@ -16,9 +18,21 @@ interface RemoveElementProps {
 
 const stickersService = ServicesProvider.stickersService;
 
-const RemoveElement = ({ element, board }: RemoveElementProps) => {
-//todo db remove element when delete button was pressed
-    const onClickButtonClick = () => {
+class RemoveElement extends React.Component<RemoveElementProps> {
+    private readonly subscription: Subscription = new Subscription();
+
+    componentDidMount(): void {
+        this.subscription.add(deletePressed().subscribe(e => {
+            this.removeElement();
+        }));
+    }
+
+    componentWillUnmount(): void {
+        this.subscription.unsubscribe();
+    }
+
+    removeElement(): void {
+        const { element, board } = this.props;
         board.removeElement(element);
 
         const correlationId = uuidv4();
@@ -29,15 +43,16 @@ const RemoveElement = ({ element, board }: RemoveElementProps) => {
             });
     };
 
-    return (
-        <div>
+    render() {
+        return (
             <Tooltip title="Delete">
-                <IconButton aria-label="delete" onClick={onClickButtonClick}>
+                <IconButton aria-label="delete"
+                            onClick={() => this.removeElement()}>
                     <DeleteIcon/>
                 </IconButton>
             </Tooltip>
-        </div>
-    );
-};
+        );
+    }
+}
 
 export default RemoveElement;
