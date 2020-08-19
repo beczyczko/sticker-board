@@ -67,6 +67,15 @@ namespace SB.Web.Controllers
             return Accepted();
         }
 
+        [HttpDelete("{stickerId}/[Action]")]
+        [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
+        public async Task<ActionResult> Remove(Guid stickerId, DateTimeOffset commandMoment, Guid correlationId)
+        {
+            //todo db find out how to pass correlationId in a proper way
+            await SendAsync(new RemoveStickerCommand(stickerId, commandMoment, correlationId));
+            return Accepted();
+        }
+
         [HttpGet("[Action]")]
         public ActionResult<IEnumerable<ColorDto>> Colors()
         {

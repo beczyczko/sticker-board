@@ -1,4 +1,5 @@
-﻿using SB.Boards.Commands.AddSticker;
+﻿using System;
+using SB.Boards.Commands.AddSticker;
 using SB.Boards.Commands.ChangeStickerColor;
 using SB.Boards.Commands.ChangeStickerText;
 using SB.Boards.Commands.MoveSticker;
@@ -14,13 +15,14 @@ namespace SB.Boards.Domain
             Text = command.Text;
             Position = new Position(command.PositionX, command.PositionY);
             Color = new Color(command.Color);
+
+            RemovedMoment = null;
         }
 
         public Position Position { get; private set; }
-
         public string Text { get; private set; }
-
         public Color Color { get; private set; }
+        public DateTimeOffset? RemovedMoment { get; private set; }
 
         public void Move(MoveStickerCommand command)
         {
@@ -35,6 +37,11 @@ namespace SB.Boards.Domain
         public void ChangeColor(ChangeStickerColorCommand command)
         {
             Color = new Color(command.NewColor);
+        }
+
+        public void Remove(RemoveStickerCommand command)
+        {
+            RemovedMoment = command.CommandMoment;
         }
     }
 }

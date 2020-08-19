@@ -27,11 +27,11 @@ class Sticker {
 
     private cursorSubscriptions = new Array<Subscription>();
     private positionBeforeDrag: Position = { x: 0, y: 0 };
-    private stickerHtmlElement: HTMLElement | undefined;
     private stickerTextHtmlElement: HTMLElement | undefined;
     private displayMode: DisplayMode = DisplayMode.Read;
     private textChanged = new Subject<string>();
 
+    public stickerHtmlElement: HTMLElement | undefined;
     public dragging: boolean = false;
     public selected = false;
     public width = 200;

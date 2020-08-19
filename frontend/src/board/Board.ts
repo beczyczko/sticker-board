@@ -9,6 +9,7 @@ import { MouseButton } from './MouseButton';
 import { subscribeToScrollEvents } from './BoardNavigation';
 import { SelectionService } from '../services/SelectionService';
 import { ViewChangedService } from '../services/ViewChangedService';
+import { ElementChangedService } from '../services/ElementChangedService';
 
 class Board {
     private readonly selectionService: SelectionService | undefined;
@@ -70,6 +71,18 @@ class Board {
         if (!this.stickers.some(s => s.id === sticker.id)) {
             this.stickers.push(sticker);
             sticker.showTextField();
+        }
+    }
+
+    public removeElement(element: Sticker): void {
+        if (element.stickerHtmlElement) {
+            this.boardHtmlElementsLayer?.removeChild(element.stickerHtmlElement);
+            const indexOfElement = this.stickers.indexOf(element);
+            if (indexOfElement !== -1) {
+                this.stickers.splice(indexOfElement, 1);
+            }
+
+            ElementChangedService.emitElementChanged$(element);
         }
     }
 
@@ -177,6 +190,19 @@ class Board {
                     return !this.stickers.find(s => s.id === e.stickerId);
                 }),
                 tap(s => this.stickerToLoad$.next(new StickerId(s.stickerId))))
+            .subscribe();
+
+        boardSignalRService.stickerRemoved()
+            .pipe(
+                filter(e => {
+                    return !!this.stickers.find(s => s.id === e.stickerId);
+                }),
+                tap(e => {
+                    const sticker = this.stickers.find(s => s.id === e.stickerId);
+                    if (sticker) {
+                        this.removeElement(sticker);
+                    }
+                }))
             .subscribe();
     }
 

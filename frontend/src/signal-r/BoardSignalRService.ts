@@ -1,9 +1,10 @@
-import { HttpTransportType, HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
 import { StickerMovedEvent } from './Types/StickerMovedEvent';
 import { StickerCreatedEvent } from './Types/StickerCreatedEvent';
 import { StickerTextChangedEvent } from './Types/StickerTextChangedEvent';
 import { StickerColorChangedEvent } from './Types/StickerColorChangedEvent';
+import { StickerRemovedEvent } from './Types/StickerRemovedEvent';
 
 export class BoardSignalRService {
 
@@ -16,6 +17,7 @@ export class BoardSignalRService {
     private stickerTextChanged$ = new Subject<StickerTextChangedEvent>();
     private stickerColorChanged$ = new Subject<StickerColorChangedEvent>();
     private stickerCreated$ = new Subject<StickerCreatedEvent>();
+    private stickerRemoved$ = new Subject<StickerRemovedEvent>();
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
@@ -39,6 +41,10 @@ export class BoardSignalRService {
 
     public stickerCreated(): Observable<StickerCreatedEvent> {
         return this.stickerCreated$.asObservable();
+    }
+
+    public stickerRemoved(): Observable<StickerRemovedEvent> {
+        return this.stickerRemoved$.asObservable();
     }
 
     private createConnection(): HubConnection {
@@ -88,6 +94,11 @@ export class BoardSignalRService {
             'StickerColorChanged',
             (data: StickerColorChangedEvent) => {
                 this.stickerColorChanged$.next(data);
+            });
+        this.hubConnection.on(
+            'StickerRemoved',
+            (data: StickerRemovedEvent) => {
+                this.stickerRemoved$.next(data);
             });
     }
 }

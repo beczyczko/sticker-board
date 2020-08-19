@@ -44,7 +44,7 @@ export class AuthorizedApiBase {
 
     protected getBaseUrl(defaultBaseUrl: string, baseUrl: string | undefined): string {
         const BASE_API_URL = config.BASE_API_URL;
-        if (BASE_API_URL) {
+        if (BASE_API_URL !== null && BASE_API_URL !== undefined) {
             return BASE_API_URL;
         } else if (baseUrl) {
             return baseUrl;
@@ -62,7 +62,7 @@ export class AuthenticationService extends AuthorizedApiBase {
     constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("", baseUrl);
+        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
     }
 
     isAuthenticated(): Promise<FileResponse> {
@@ -147,7 +147,7 @@ export class StickersService extends AuthorizedApiBase {
     constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         super(configuration);
         this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("", baseUrl);
+        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
     }
 
     stickers(): Promise<StickerDto[]> {
@@ -368,6 +368,49 @@ export class StickersService extends AuthorizedApiBase {
     }
 
     protected processColor(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 202) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+
+    remove(stickerId: string, commandMoment: moment.Moment | undefined, correlationId: string | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Remove?";
+        if (stickerId === undefined || stickerId === null)
+            throw new Error("The parameter 'stickerId' must be defined.");
+        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+        if (commandMoment === null)
+            throw new Error("The parameter 'commandMoment' cannot be null.");
+        else if (commandMoment !== undefined)
+            url_ += "commandMoment=" + encodeURIComponent(commandMoment ? "" + commandMoment.toJSON() : "") + "&";
+        if (correlationId === null)
+            throw new Error("The parameter 'correlationId' cannot be null.");
+        else if (correlationId !== undefined)
+            url_ += "correlationId=" + encodeURIComponent("" + correlationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processRemove(_response));
+        });
+    }
+
+    protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 202) {
