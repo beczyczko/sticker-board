@@ -25,6 +25,7 @@ export function BoardComponent() {
         }
 
         setInitialized(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialized]);
 
     const initBoard = () => {

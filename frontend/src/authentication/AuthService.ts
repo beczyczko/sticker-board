@@ -13,7 +13,7 @@ export class AuthService {
                     window.location.assign('/');
                     return;
                 } else {
-                    throw 'empty sb api auth token';
+                    throw new Error('empty sb api auth token');
                 }
             });
     }

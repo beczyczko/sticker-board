@@ -1,4 +1,4 @@
-import { HttpTransportType, HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
 import { StickerMovedEvent } from './Types/StickerMovedEvent';
 import { StickerCreatedEvent } from './Types/StickerCreatedEvent';

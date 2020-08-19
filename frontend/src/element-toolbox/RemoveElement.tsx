@@ -17,7 +17,7 @@ interface RemoveElementProps {
 const stickersService = ServicesProvider.stickersService;
 
 const RemoveElement = ({ element, board }: RemoveElementProps) => {
-
+//todo db remove element when delete button was pressed
     const onClickButtonClick = () => {
         board.removeElement(element);
 

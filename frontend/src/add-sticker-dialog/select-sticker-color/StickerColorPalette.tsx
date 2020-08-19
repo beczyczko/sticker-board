@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import './SelectStickerColor.scss';
+import './StickerColorPalette.scss';
 import { ServicesProvider } from '../../services/services-provider';
 import { StickerColor } from '../../board/StickerColor';
 import ColorSampleButton from './ColorSampleButton';
 
-interface SelectStickerColorProps {
+interface StickerColorPaletteProps {
     children: never[],
     initialColor: StickerColor | undefined,
     onColorSelected: (color: StickerColor | undefined) => void
 }
 
-const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColorProps) => {
+const StickerColorPalette = ({ onColorSelected, initialColor }: StickerColorPaletteProps) => {
     const latestSelectedColorStorageKey = 'latestSelectedColor';
 
     const [initialized, setInitialized] = useState(false);
@@ -31,6 +31,7 @@ const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColo
 
     useEffect(() => {
         onColorSelected(selectedColor);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedColor]);
 
     useEffect(() => {
@@ -51,7 +52,7 @@ const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColo
                 setSelectedColor(stickerColors[0]);
             }
         }
-    }, [stickerColors]);
+    }, [initialColor, stickerColors]);
 
     const colorSelected = (color: StickerColor) => {
         localStorage.setItem(latestSelectedColorStorageKey, JSON.stringify(color));
@@ -73,4 +74,4 @@ const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColo
     );
 };
 
-export default SelectStickerColor;
+export default StickerColorPalette;

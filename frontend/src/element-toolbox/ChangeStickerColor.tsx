@@ -2,7 +2,7 @@ import Sticker from '../board/Sticker';
 import React, { useState } from 'react';
 import { StickerColor } from '../board/StickerColor';
 import Popper from '@material-ui/core/Popper';
-import SelectStickerColor from '../add-sticker-dialog/select-sticker-color/SelectStickerColor';
+import StickerColorPalette from '../add-sticker-dialog/select-sticker-color/StickerColorPalette';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { createStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
@@ -74,9 +74,9 @@ const ChangeStickerColor = ({ element }: ChangeStickerColor) => {
                 placement="bottom"
                 anchorEl={paletteAnchorEl}>
                 <Paper className={classes.palette}>
-                    <SelectStickerColor onColorSelected={c => onColorSelected(c)}
-                                        initialColor={element?.color}>
-                    </SelectStickerColor>
+                    <StickerColorPalette onColorSelected={c => onColorSelected(c)}
+                                         initialColor={element?.color}>
+                    </StickerColorPalette>
                 </Paper>
             </Popper>
         </>

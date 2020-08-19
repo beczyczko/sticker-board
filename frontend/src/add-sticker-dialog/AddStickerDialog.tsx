@@ -5,7 +5,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import SelectStickerColor from './select-sticker-color/SelectStickerColor';
+import StickerColorPalette from './select-sticker-color/StickerColorPalette';
 import { StickerColor } from '../board/StickerColor';
 
 const textElementId = 'sticker-text';
@@ -67,8 +67,8 @@ const AddStickerDialog = ({ open, setOpen, onSaveCallback }: AddStickerDialogPro
                 </DialogTitle>
 
                 <DialogContent>
-                    <SelectStickerColor onColorSelected={c => onColorSelected(c)} initialColor={undefined}>
-                    </SelectStickerColor>
+                    <StickerColorPalette onColorSelected={c => onColorSelected(c)} initialColor={undefined}>
+                    </StickerColorPalette>
                     <TextField
                         autoFocus
                         margin="dense"
