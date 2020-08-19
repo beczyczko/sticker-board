@@ -16,13 +16,13 @@ namespace SB.Boards.Domain
             Position = new Position(command.PositionX, command.PositionY);
             Color = new Color(command.Color);
 
-            RemoveMoment = null;
+            RemovedMoment = null;
         }
 
         public Position Position { get; private set; }
         public string Text { get; private set; }
         public Color Color { get; private set; }
-        public DateTimeOffset? RemoveMoment { get; private set; }
+        public DateTimeOffset? RemovedMoment { get; private set; }
 
         public void Move(MoveStickerCommand command)
         {
@@ -41,7 +41,7 @@ namespace SB.Boards.Domain
 
         public void Remove(RemoveStickerCommand command)
         {
-            RemoveMoment = command.CommandMoment;
+            RemovedMoment = command.CommandMoment;
         }
     }
 }
