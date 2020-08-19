@@ -82,6 +82,7 @@ const ElementToolbox = ({ board }: ElementToolboxProps) => {
 
     return (
         <div>
+            {toolboxAnchorEl &&
             <Popper
                 id="toolbox-popper"
                 className={classes.popper}
@@ -99,6 +100,7 @@ const ElementToolbox = ({ board }: ElementToolboxProps) => {
                     }
                 </Paper>
             </Popper>
+            }
         </div>
     );
 };

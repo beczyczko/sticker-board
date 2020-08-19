@@ -98,7 +98,6 @@ export class BoardSignalRService {
         this.hubConnection.on(
             'StickerRemoved',
             (data: StickerRemovedEvent) => {
-                console.log(data);
                 this.stickerRemoved$.next(data);
             });
     }

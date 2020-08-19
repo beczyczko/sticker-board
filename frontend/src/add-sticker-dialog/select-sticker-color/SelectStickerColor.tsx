@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './SelectStickerColor.scss';
 import { ServicesProvider } from '../../services/services-provider';
-import { ColorDto } from '../../services/services';
 import { StickerColor } from '../../board/StickerColor';
+import ColorSampleButton from './ColorSampleButton';
 
 interface SelectStickerColorProps {
     children: never[],
@@ -53,10 +53,6 @@ const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColo
         }
     }, [stickerColors]);
 
-    const colorAsCssRgbValue = (color: StickerColor) => {
-        return `rgb(${color.red}, ${color.green}, ${color.blue})`;
-    };
-
     const colorSelected = (color: StickerColor) => {
         localStorage.setItem(latestSelectedColorStorageKey, JSON.stringify(color));
         if (color !== selectedColor) {
@@ -64,27 +60,14 @@ const SelectStickerColor = ({ onColorSelected, initialColor }: SelectStickerColo
         }
     };
 
-    const colorSampleClassNames = (color: ColorDto) => {
-        const classNames = ['color-sample'];
-
-        const selected = color === selectedColor;
-        if (selected) {
-            classNames.push('color-selected');
-        }
-
-        return classNames.join(' ');
-    };
-
     return (
         <div className="color-picker">
             {stickerColors.map((c, i) => (
-                <button className="color-sample-container"
-                        onClick={() => colorSelected(c)}
-                        key={i}>
-                    <div className={colorSampleClassNames(c)}
-                         style={{ backgroundColor: colorAsCssRgbValue(c) }}>
-                    </div>
-                </button>
+                <ColorSampleButton onClick={() => colorSelected(c)}
+                                   color={c}
+                                   isSelected={c === selectedColor}
+                                   key={i}>
+                </ColorSampleButton>
             ))}
         </div>
     );

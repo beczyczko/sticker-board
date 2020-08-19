@@ -1,26 +1,25 @@
 import Sticker from '../board/Sticker';
 import React, { useState } from 'react';
 import { StickerColor } from '../board/StickerColor';
-import IconButton from '@material-ui/core/IconButton';
-import PaletteIcon from '@material-ui/icons/Palette';
 import Popper from '@material-ui/core/Popper';
 import SelectStickerColor from '../add-sticker-dialog/select-sticker-color/SelectStickerColor';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { createStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
+import ColorSampleButton from '../add-sticker-dialog/select-sticker-color/ColorSampleButton';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
+        openPaletteButton: {
+            padding: theme.spacing(0.5),
+            display: 'flex'
+        },
         palette: {
-            paddingTop: theme.spacing(1.5),
-            paddingRight: theme.spacing(2),
-            paddingBottom: theme.spacing(1.5),
-            paddingLeft: theme.spacing(2),
-            marginTop: theme.spacing(1),
+            padding: theme.spacing(1),
+            marginTop: theme.spacing(1.5),
             marginBottom: theme.spacing(1),
-            width: 220,
-            height: 76,
+            width: 228,
             pointerEvents: 'initial',
         },
         popper: {
@@ -59,12 +58,16 @@ const ChangeStickerColor = ({ element }: ChangeStickerColor) => {
     };
 
     return (
-        <div>
-            <Tooltip title="Change color">
-                <IconButton aria-label="open-color-palette" onClick={openPalette}>
-                    <PaletteIcon/>
-                </IconButton>
-            </Tooltip>
+        <>
+            <div className={classes.openPaletteButton}>
+                <Tooltip title="Change color">
+                    <ColorSampleButton aria-label="open-color-palette"
+                                       onClick={openPalette}
+                                       color={element.color}
+                                       isSelected={false}>
+                    </ColorSampleButton>
+                </Tooltip>
+            </div>
             <Popper
                 id="change-color-palette-popper"
                 open={paletteOpen}
@@ -76,7 +79,7 @@ const ChangeStickerColor = ({ element }: ChangeStickerColor) => {
                     </SelectStickerColor>
                 </Paper>
             </Popper>
-        </div>
+        </>
     );
 };
 
