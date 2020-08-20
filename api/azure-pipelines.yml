@@ -1,7 +1,5 @@
 trigger:
-  branches:
-    include:
-      - master
+- master
 
 variables:
   buildConfiguration: 'Release'
@@ -23,7 +21,7 @@ steps:
   - task: Docker@2
     inputs:
       containerRegistry: 'Nazwa.pl docker registry'
-      repository: 'beczyczko/sb.api'
+      repository: 'sb.api'
       command: 'buildAndPush'
       Dockerfile: 'api/Dockerfile.prod'
       tags: |
