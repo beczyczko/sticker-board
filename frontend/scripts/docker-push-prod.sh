@@ -1,2 +1,2 @@
-docker tag sticker-board/frontend:prod beczyczko/sb.frontend:prod
-docker push beczyczko/sb.frontend:prod
+docker tag sb/frontend:prod registry.stickerboard.eu/sb.frontend:prod
+docker push registry.stickerboard.eu/sb.frontend:prod
