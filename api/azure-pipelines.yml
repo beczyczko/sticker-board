@@ -17,12 +17,12 @@ steps:
   - task: Docker@2
     displayName: Login to Azure Container Registry
     inputs:
-      containerRegistry: 'beczyczko-docker-hub'
+      containerRegistry: 'Nazwa.pl docker registry'
       command: 'login'
 
   - task: Docker@2
     inputs:
-      containerRegistry: 'beczyczko-docker-hub'
+      containerRegistry: 'Nazwa.pl docker registry'
       repository: 'beczyczko/sb.api'
       command: 'buildAndPush'
       Dockerfile: 'api/Dockerfile.prod'
