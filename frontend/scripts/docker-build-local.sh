@@ -1,4 +1,4 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 cd ..
-docker build -t sticker-board/frontend:local .
+docker build -t sb/frontend:local .
