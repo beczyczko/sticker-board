@@ -11,7 +11,18 @@
 > docker-compose run --rm --service-ports certbot certonly -d registry.stickerboard.eu  --standalone
 > docker-compose run --rm --service-ports certbot certonly -d rui.stickerboard.eu  --standalone
 ```
-4. Start servers
+4. In `.docker/config.json` file add section `auths`
+```
+"auths": {
+        "registry.stickerboard.eu": {
+                "auth": "<base64 encoded username:password to docker registry>"
+        },
+        "rui.stickerboard.eu": {
+                "auth": "<base64 encoded username:password to docker registry>"
+        }
+},
+```
+5. Start servers
 ```
 docker-compose up -d
 ```
