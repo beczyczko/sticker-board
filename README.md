@@ -5,7 +5,9 @@
 
 ## Setup:
 1. Copy content of infrastructure/vps directory to VPS
-2. Configure secrets/passwords
+2. Configure environment values in docker-compose.yml and nginx .conf files
+3. Configure docker-registry basic-auth according to https://docs.docker.com/registry/deploying/#native-basic-auth
+    - Only first step is required: Create a password file with user:password credentials
 3. Generate TLS certificates for your HTTP domains with Certbot:
 ```
 > docker-compose run --rm --service-ports certbot certonly -d registry.stickerboard.eu  --standalone
