@@ -8,12 +8,12 @@
 2. Configure environment values in docker-compose.yml and nginx .conf files
 3. Configure docker-registry basic-auth according to https://docs.docker.com/registry/deploying/#native-basic-auth
     - Only first step is required: Create a password file with user:password credentials
-3. Generate TLS certificates for your HTTP domains with Certbot:
+4. Generate TLS certificates for your HTTP domains with Certbot:
 ```
 > docker-compose run --rm --service-ports certbot certonly -d registry.stickerboard.eu  --standalone
 > docker-compose run --rm --service-ports certbot certonly -d rui.stickerboard.eu  --standalone
 ```
-4. In `.docker/config.json` file add section `auths`
+5. In `.docker/config.json` file add section `auths`
 ```
 "auths": {
         "registry.stickerboard.eu": {
@@ -24,7 +24,7 @@
         }
 },
 ```
-5. Start servers
+6. Start servers
 ```
 docker-compose up -d
 ```
