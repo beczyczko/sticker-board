@@ -1,0 +1,69 @@
+version: '3'
+
+volumes:
+  mongo:
+    driver: local
+  registry:
+    driver: local
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./tls:/tls # Certificates from nazwa.pl
+      - ./le:/le # certbot-generated certs
+
+  registry:
+    image: registry:2
+    volumes:
+      - registry:/registry # For storing registry data
+      - ./registry/auth:/auth # For authentication creds
+      - ./registry/config/config.yml:/etc/docker/registry/config.yml
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Stickerboard
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+
+  front:
+#    image: registry.stickerboard.eu/sb.frontend:migration-to-nazwapl-docker-registry
+    image: registry.stickerboard.eu/sb.frontend:prod
+
+  api:
+#    image: registry.stickerboard.eu/sb.api:migration-to-nazwapl-docker-registry
+    image: registry.stickerboard.eu/sb.api:prod
+    environment:
+      - Authentication__Google__ClientId=<google_client_id>
+      - Authentication__Jwt__Audience=https://stickerboard.eu
+      - Authentication__Jwt__Issuer=https://stickerboard.eu
+      - Authentication__Jwt__EmailEncryptionSecret=<some_secret>
+      - Authentication__Jwt__Secret=<some_secret>
+      - mongo__ConnectionString=mongodb://mongo:27017
+      - mongo__Database=sb-prod
+      - mongo__seed=false
+
+  mongo:
+    image: mongo
+    command: ["mongod", "--replSet", "rs"]
+    volumes:
+      - mongo:/data/db # DB data
+
+  registry-ui:
+    image: joxit/docker-registry-ui:static
+    environment:
+      - REGISTRY_TITLE="Stickerboard Registry"
+      - DELETE_IMAGES=true
+      - URL=http://registry:5000
+      - PULL_URL=http://registry:5000
+
+  # For requesting certs
+  certbot:
+    image: certbot/certbot
+    ports:
+      - 80:80
+    volumes:
+      - ./le:/etc/letsencrypt
