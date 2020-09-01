@@ -1,3 +1,9 @@
+# Stickerboard
+Stickerboard is a tool that allows you to place colorful sticky notes on a board. With stickerboard you can save your thoughts in a legible form.
+
+## Demo
+https://stickerboard.eu/
+
 ## Requirements
 * VPS / local server with public IP and ports `80`, `443` accessible from public
 * yourdomain.com domain with DNS A record for pointing to your VPS IP
