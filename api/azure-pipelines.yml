@@ -16,10 +16,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        BRANCH_NAME=$(echo "$(System.PullRequest.TargetBranch)" | awk -F/ '{print $NF}')
-        echo "##vso[task.setvariable variable=PullRequest_Target_Branch;]$BRANCH_NAME"
+        BRANCH_NAME=$(echo "$(System.PullRequest.SourceBranch)" | awk -F/ '{print $NF}')
+        echo "##vso[task.setvariable variable=PullRequest_Source_Branch;]$BRANCH_NAME"
   
-  - script: echo $(PullRequest_Target_Branch)
+  - script: echo $(PullRequest_Source_Branch)
     name: echovar
 
   - task: Docker@2
