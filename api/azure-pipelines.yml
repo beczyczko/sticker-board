@@ -16,11 +16,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        branchFullName=$(git describe --contains --all HEAD)
-        echo "##vso[task.setvariable variable=branchFullName;isOutput=true]$branchFullName"
-    name: branchName
+        BRANCH_NAME=$(echo "$(System.PullRequest.TargetBranch)" | awk -F/ '{print $NF}')
+        echo "##vso[task.setvariable variable=PullRequest_Target_Branch;]$BRANCH_NAME"
   
-  - script: echo $(branchName.branchFullName)
+  - script: echo $(PullRequest_Target_Branch)
     name: echovar
 
   - task: Docker@2
