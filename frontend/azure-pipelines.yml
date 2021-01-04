@@ -2,6 +2,7 @@ trigger:
 - master
 
 variables:
+  buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
   buildName: '$(branchName)-$(Build.BuildId)'
 
