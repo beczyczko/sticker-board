@@ -3,6 +3,7 @@ trigger:
   exclude:
     - master
 
+
 variables:
   buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
