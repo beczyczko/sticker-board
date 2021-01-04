@@ -2,6 +2,7 @@ trigger:
 - master
 
 variables:
+  buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
   buildName: '$(branchName)-$(Build.BuildId)'
 
@@ -12,7 +13,7 @@ pool:
 
 steps:
   - task: Docker@2
-    displayName: Login to Azure Container Registry
+    displayName: Login to docker registry
     inputs:
       containerRegistry: 'Nazwa.pl docker registry'
       command: 'login'
