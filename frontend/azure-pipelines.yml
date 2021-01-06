@@ -1,7 +1,11 @@
-trigger:
- branches:
-  exclude:
-    - master
+trigger: none
+
+pr:
+  paths:
+    exclude:
+      - '*'
+    include:
+      - frontend/*
 
 variables:
   buildConfiguration: 'Release'
