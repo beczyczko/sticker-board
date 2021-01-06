@@ -10,6 +10,7 @@ services:
   nginx:
     image: nginx
     container_name: nginx
+    restart: unless-stopped
     ports:
       - 80:80
       - 443:443
@@ -21,6 +22,7 @@ services:
   registry:
     image: registry:2
     container_name: registry
+    restart: unless-stopped
     volumes:
       - registry:/registry # For storing registry data
       - ./registry/auth:/auth # For authentication creds
@@ -34,10 +36,12 @@ services:
   front:
     image: registry.stickerboard.eu/sb.frontend:prod
     container_name: front
+    restart: unless-stopped
 
   api:
     image: registry.stickerboard.eu/sb.api:prod
     container_name: api
+    restart: unless-stopped
     environment:
       - Authentication__Google__ClientId=<google_client_id>
       - Authentication__Jwt__Audience=https://stickerboard.eu
@@ -51,6 +55,7 @@ services:
   mongo:
     image: mongo
     container_name: mongo
+    restart: unless-stopped
     command: ["mongod", "--replSet", "rs"]
     volumes:
       - mongo:/data/db # DB data
@@ -58,6 +63,7 @@ services:
   registry-ui:
     image: joxit/docker-registry-ui:static
     container_name: registry-ui
+    restart: unless-stopped
     environment:
       - REGISTRY_TITLE=Stickerboard Registry
       - DELETE_IMAGES=true
