@@ -7,7 +7,6 @@ pr:
     include:
       - frontend/*
 
-
 variables:
   buildConfiguration: 'Release'
   branchName: $(System.PullRequest.SourceBranch)
