@@ -9,6 +9,7 @@ volumes:
 services:
   nginx:
     image: nginx
+    container_name: nginx
     ports:
       - 80:80
       - 443:443
@@ -19,6 +20,7 @@ services:
 
   registry:
     image: registry:2
+    container_name: registry
     volumes:
       - registry:/registry # For storing registry data
       - ./registry/auth:/auth # For authentication creds
@@ -28,13 +30,14 @@ services:
       - REGISTRY_AUTH=htpasswd
       - REGISTRY_AUTH_HTPASSWD_REALM=Stickerboard
       - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
-      - REGISTRY_STORAGE_DELETE_ENABLED=true
 
   front:
     image: registry.stickerboard.eu/sb.frontend:prod
+    container_name: front
 
   api:
     image: registry.stickerboard.eu/sb.api:prod
+    container_name: api
     environment:
       - Authentication__Google__ClientId=<google_client_id>
       - Authentication__Jwt__Audience=https://stickerboard.eu
@@ -47,12 +50,14 @@ services:
 
   mongo:
     image: mongo
+    container_name: mongo
     command: ["mongod", "--replSet", "rs"]
     volumes:
       - mongo:/data/db # DB data
 
   registry-ui:
     image: joxit/docker-registry-ui:static
+    container_name: registry-ui
     environment:
       - REGISTRY_TITLE=Stickerboard Registry
       - DELETE_IMAGES=true
