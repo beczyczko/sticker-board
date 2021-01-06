@@ -1,5 +1,11 @@
-trigger:
-- master
+trigger: none
+
+pr:
+  paths:
+    exclude:
+      - '*'
+    include:
+      - api/*
 
 variables:
   buildConfiguration: 'Release'
