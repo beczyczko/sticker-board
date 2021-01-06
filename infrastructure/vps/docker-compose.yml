@@ -55,10 +55,10 @@ services:
   registry-ui:
     image: joxit/docker-registry-ui:static
     environment:
-      - REGISTRY_TITLE="Stickerboard Registry"
+      - REGISTRY_TITLE=Stickerboard Registry
       - DELETE_IMAGES=true
-      - URL=http://registry:5000
-      - PULL_URL=http://registry:5000
+      - URL=https://registry.stickerboard.eu
+      - PULL_URL=https://registry.stickerboard.eu
 
   # For requesting certs
   certbot:
