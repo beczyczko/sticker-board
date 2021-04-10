@@ -37,7 +37,11 @@ docker-compose run --rm --service-ports certbot certonly -d stickerboard.eu  --s
 },
 ```
 
-6. Start servers
+6. Setup docker network
+```
+sh setup.sh
+```
+7. Start servers
 ```
 docker-compose -f docker-compose.infrastructure.yml up -d
 ```
