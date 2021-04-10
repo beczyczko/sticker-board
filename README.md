@@ -16,22 +16,31 @@ https://stickerboard.eu/
     - Only first step is required: Create a password file with user:password credentials
 4. Generate TLS certificates for your HTTP domains with Certbot:
 ```
-> docker-compose run --rm --service-ports certbot certonly -d registry.stickerboard.eu  --standalone
-> docker-compose run --rm --service-ports certbot certonly -d rui.stickerboard.eu  --standalone
+docker-compose run --rm --service-ports certbot certonly -d registry.mbtl.life  --standalone
 ```
+```
+docker-compose run --rm --service-ports certbot certonly -d rui.mbtl.life  --standalone
+```
+```
+docker-compose run --rm --service-ports certbot certonly -d stickerboard.eu  --standalone
+```
+
 5. In `.docker/config.json` file add section `auths`
 ```
 "auths": {
-        "registry.stickerboard.eu": {
+        "registry.mbtl.life": {
                 "auth": "<base64 encoded username:password to docker registry>"
         },
-        "rui.stickerboard.eu": {
+        "rui.mbtl.life": {
                 "auth": "<base64 encoded username:password to docker registry>"
         }
 },
 ```
 
 6. Start servers
+```
+docker-compose -f docker-compose.infrastructure.yml up -d
+```
 ```
 docker-compose up -d
 ```
