@@ -30,6 +30,7 @@ https://stickerboard.eu/
         }
 },
 ```
+
 6. Start servers
 ```
 docker-compose up -d
