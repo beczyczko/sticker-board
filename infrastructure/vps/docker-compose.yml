@@ -1,45 +1,22 @@
-version: '3'
+version: '3.4'
+
+networks:
+  default:
+    external:
+      name: docker-shared-network
 
 volumes:
   mongo:
     driver: local
-  registry:
-    driver: local
 
 services:
-  nginx:
-    image: nginx
-    container_name: nginx
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./tls:/tls # Certificates from nazwa.pl
-      - ./le:/le # certbot-generated certs
-
-  registry:
-    image: registry:2
-    container_name: registry
-    restart: unless-stopped
-    volumes:
-      - registry:/registry # For storing registry data
-      - ./registry/auth:/auth # For authentication creds
-      - ./registry/config/config.yml:/etc/docker/registry/config.yml
-    environment:
-      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
-      - REGISTRY_AUTH=htpasswd
-      - REGISTRY_AUTH_HTPASSWD_REALM=Stickerboard
-      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
-
   front:
-    image: registry.stickerboard.eu/sb.frontend:prod
+    image: registry.mbtl.life/sb.frontend:prod
     container_name: front
     restart: unless-stopped
 
   api:
-    image: registry.stickerboard.eu/sb.api:prod
+    image: registry.mbtl.life/sb.api:prod
     container_name: api
     restart: unless-stopped
     environment:
@@ -56,23 +33,11 @@ services:
     image: mongo
     container_name: mongo
     restart: unless-stopped
-    command: ["mongod", "--replSet", "rs"]
+    hostname: mongo
     volumes:
       - mongo:/data/db # DB data
-
-  registry-ui:
-    image: joxit/docker-registry-ui:static
-    container_name: registry-ui
-    restart: unless-stopped
-    environment:
-      - REGISTRY_TITLE=Stickerboard Registry
-      - DELETE_IMAGES=true
-      - REGISTRY_URL=http://registry:5000
-
-  # For requesting certs
-  certbot:
-    image: certbot/certbot
-    ports:
-      - 80:80
-    volumes:
-      - ./le:/etc/letsencrypt
+    command: ["--replSet", "rs0"]
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo  --quiet) -eq 1
+      interval: 10s
+      start_period: 30s

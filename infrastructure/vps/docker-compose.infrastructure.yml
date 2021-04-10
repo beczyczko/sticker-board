@@ -1,0 +1,46 @@
+version: '3.4'
+
+networks:
+  default:
+    external:
+      name: docker-shared-network
+
+volumes:
+  registry:
+    driver: local
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./tls:/tls # Certificates from nazwa.pl
+      - ./le:/le # certbot-generated certs
+
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    volumes:
+      - registry:/registry # For storing registry data
+      - ./registry/auth:/auth # For authentication creds
+      - ./registry/config/config.yml:/etc/docker/registry/config.yml
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Stickerboard
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+
+  registry-ui:
+    image: joxit/docker-registry-ui:static
+    container_name: registry-ui
+    restart: unless-stopped
+    environment:
+      - REGISTRY_TITLE=Stickerboard Registry
+      - DELETE_IMAGES=true
+      - REGISTRY_URL=http://registry:5000
