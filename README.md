@@ -2,7 +2,7 @@
 Stickerboard is a tool that allows you to place colorful sticky notes on a board. With stickerboard you can save your thoughts in a legible form.
 
 ## Demo
-https://stickerboard.eu/
+https://sb.mbtl.life/
 
 ## Requirements
 * VPS / local server with public IP and ports `80`, `443` accessible from public
@@ -22,7 +22,7 @@ docker-compose run --rm --service-ports certbot certonly -d registry.mbtl.life  
 docker-compose run --rm --service-ports certbot certonly -d rui.mbtl.life  --standalone
 ```
 ```
-docker-compose run --rm --service-ports certbot certonly -d stickerboard.eu  --standalone
+docker-compose run --rm --service-ports certbot certonly -d sb.mbtl.life  --standalone
 ```
 
 5. In `.docker/config.json` file add section `auths`
