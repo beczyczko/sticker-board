@@ -30,7 +30,7 @@ services:
       - mongo__seed=false
 
   mongo:
-    image: mongo
+    image: mongo:4
     container_name: mongo
     restart: unless-stopped
     hostname: mongo
