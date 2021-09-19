@@ -18,6 +18,12 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/api/scripts/docker-scripts'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
+
   - task: Docker@2
     displayName: Login to docker registry
     inputs:
@@ -33,4 +39,4 @@ steps:
       tags: |
         $(buildName)
         $(branchName)
-        
+  
