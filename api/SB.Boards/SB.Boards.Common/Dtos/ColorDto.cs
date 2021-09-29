@@ -2,7 +2,7 @@
 
 namespace SB.Boards.Common.Dtos
 {
-    public class ColorDto
+    public record ColorDto
     {
         [JsonConstructor]
         public ColorDto(int red, int green, int blue)
@@ -12,8 +12,8 @@ namespace SB.Boards.Common.Dtos
             Blue = blue;
         }
 
-        public int Red { get; }
-        public int Green { get; }
-        public int Blue { get; }
+        public int Red { get; init; }
+        public int Green { get; init; }
+        public int Blue { get; init; }
     }
 }

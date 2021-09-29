@@ -599,10 +599,7 @@ export interface Sticker extends Element {
     anchors: Anchor[];
 }
 
-export interface ValueObject {
-}
-
-export interface Color extends ValueObject {
+export interface Color {
     red: number;
     green: number;
     blue: number;
