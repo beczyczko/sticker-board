@@ -17,7 +17,7 @@ using SB.Boards.Write.Commands.RemoveElement;
 using SB.Common.Dispatchers;
 using SB.Common.Types;
 
-namespace SB.Web.Controllers
+namespace SB.Web.Controllers.Elements
 {
     public class ElementsController : BaseController
     {
@@ -53,14 +53,15 @@ namespace SB.Web.Controllers
 
         [HttpPost("{elementId}/[Action]")]
         [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
-        public async Task<ActionResult> Text(Guid elementId, string newText, Guid correlationId)
+        public async Task<ActionResult> Text(Guid elementId, ChangeElementTextCommand command, Guid correlationId)
         {
             //todo db find out how to pass correlationId in a proper way
+            var changeElementTextCommand = new Boards.Write.Commands.ChangeElementText.ChangeElementTextCommand(
+                elementId,
+                command.NewText,
+                correlationId);
 
-            //todo db if method argument newText was object this null check would not be needed?
-            newText ??= string.Empty;
-
-            await SendAsync(new ChangeElementTextCommand(elementId, newText, correlationId));
+            await SendAsync(changeElementTextCommand);
             return Accepted();
         }
 

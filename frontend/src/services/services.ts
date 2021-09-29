@@ -139,6 +139,53 @@ export class AuthenticationService extends AuthorizedApiBase {
     }
 }
 
+export class SignalRService extends AuthorizedApiBase {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
+    }
+
+    types(): Promise<EventsTypes> {
+        let url_ = this.baseUrl + "/Types";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTypes(_response));
+        });
+    }
+
+    protected processTypes(response: Response): Promise<EventsTypes> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <EventsTypes>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<EventsTypes>(<any>null);
+    }
+}
+
 export class ElementsService extends AuthorizedApiBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -298,22 +345,24 @@ export class ElementsService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    text(elementId: string, newText: string | null | undefined, correlationId: string | undefined): Promise<void> {
+    text(elementId: string, correlationId: string | undefined, command: ChangeElementTextCommand): Promise<void> {
         let url_ = this.baseUrl + "/api/Elements/{elementId}/Text?";
         if (elementId === undefined || elementId === null)
             throw new Error("The parameter 'elementId' must be defined.");
         url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
-        if (newText !== undefined && newText !== null)
-            url_ += "newText=" + encodeURIComponent("" + newText) + "&";
         if (correlationId === null)
             throw new Error("The parameter 'correlationId' cannot be null.");
         else if (correlationId !== undefined)
             url_ += "correlationId=" + encodeURIComponent("" + correlationId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(command);
+
         let options_ = <RequestInit>{
+            body: content_,
             method: "POST",
             headers: {
+                "Content-Type": "application/json",
             }
         };
 
@@ -496,59 +545,62 @@ export class ElementsService extends AuthorizedApiBase {
     }
 }
 
-export class SignalRService extends AuthorizedApiBase {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        super(configuration);
-        this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
-    }
-
-    types(): Promise<EventsTypes> {
-        let url_ = this.baseUrl + "/Types";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processTypes(_response));
-        });
-    }
-
-    protected processTypes(response: Response): Promise<EventsTypes> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <EventsTypes>JSON.parse(_responseText, this.jsonParseReviver);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<EventsTypes>(<any>null);
-    }
-}
-
 export interface SbApiAuthToken {
     token: string | undefined;
 }
 
 export interface GoogleAuthToken {
     idToken: string | undefined;
+}
+
+export interface EventsTypes {
+    elementColorChangedEvent: ElementColorChangedEvent | undefined;
+    elementMovedEvent: ElementMovedEvent | undefined;
+    elementRemovedEvent: ElementRemovedEvent | undefined;
+    elementTextChangedEvent: ElementTextChangedEvent | undefined;
+    stickerCreatedEvent: StickerCreatedEvent | undefined;
+}
+
+export interface ElementColorChangedEvent {
+    boardId: string;
+    elementId: string;
+    newColor: ColorDto;
+    correlationId: string;
+}
+
+export interface ColorDto {
+    red: number;
+    green: number;
+    blue: number;
+}
+
+export interface ElementMovedEvent {
+    boardId: string;
+    elementId: string;
+    centerAnchor: SbVector2;
+}
+
+export interface SbVector2 {
+    x: number;
+    y: number;
+}
+
+export interface ElementRemovedEvent {
+    boardId: string;
+    elementId: string;
+    correlationId: string;
+}
+
+export interface ElementTextChangedEvent {
+    boardId: string;
+    elementId: string;
+    text: string;
+    correlationId: string;
+}
+
+export interface StickerCreatedEvent {
+    boardId: string;
+    stickerId: string;
 }
 
 export interface BaseEntity {
@@ -565,11 +617,6 @@ export interface Anchor extends BaseEntity {
     position: SbVector2;
 }
 
-export interface SbVector2 {
-    x: number;
-    y: number;
-}
-
 export interface AddStickerCommand {
     id: string;
     text: string | undefined;
@@ -578,10 +625,8 @@ export interface AddStickerCommand {
     color: ColorDto | undefined;
 }
 
-export interface ColorDto {
-    red: number;
-    green: number;
-    blue: number;
+export interface ChangeElementTextCommand {
+    newText: string | undefined;
 }
 
 export interface ElementsTypes {
@@ -610,45 +655,6 @@ export interface Connection extends Element {
     end: Anchor;
     color: Color;
     anchors: Anchor[];
-}
-
-export interface EventsTypes {
-    elementColorChangedEvent: ElementColorChangedEvent | undefined;
-    elementMovedEvent: ElementMovedEvent | undefined;
-    elementRemovedEvent: ElementRemovedEvent | undefined;
-    elementTextChangedEvent: ElementTextChangedEvent | undefined;
-    stickerCreatedEvent: StickerCreatedEvent | undefined;
-}
-
-export interface ElementColorChangedEvent {
-    boardId: string;
-    elementId: string;
-    newColor: ColorDto;
-    correlationId: string;
-}
-
-export interface ElementMovedEvent {
-    boardId: string;
-    elementId: string;
-    centerAnchor: SbVector2;
-}
-
-export interface ElementRemovedEvent {
-    boardId: string;
-    elementId: string;
-    correlationId: string;
-}
-
-export interface ElementTextChangedEvent {
-    boardId: string;
-    elementId: string;
-    text: string;
-    correlationId: string;
-}
-
-export interface StickerCreatedEvent {
-    boardId: string;
-    stickerId: string;
 }
 
 export interface FileResponse {

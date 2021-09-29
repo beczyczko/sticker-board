@@ -1,4 +1,10 @@
-import { ColorDto, ElementColorChangedEvent, SbVector2, Sticker as StickerApi } from '../services/services';
+import {
+    ChangeElementTextCommand,
+    ColorDto,
+    ElementColorChangedEvent,
+    SbVector2,
+    Sticker as StickerApi
+} from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -13,7 +19,7 @@ import { ElementChangedService } from '../services/ElementChangedService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
-const stickersService = ServicesProvider.elementsService;
+const elementsService = ServicesProvider.elementsService;
 
 enum DisplayMode {
     Read,
@@ -58,8 +64,9 @@ class Sticker {
                 concatMap(t => {
                     const correlationId = uuidv4();
                     this.commandCorrelationIds.add(correlationId);
-                    return stickersService
-                        .text(this.id, this.text, correlationId)
+                    const command = { newText: this.text } as ChangeElementTextCommand;
+                    return elementsService
+                        .text(this.id, correlationId, command)
                         .then()
                 })
             )
@@ -95,7 +102,7 @@ class Sticker {
 
         const correlationId = uuidv4();
         this.commandCorrelationIds.add(correlationId);
-        stickersService
+        elementsService
             .color(this.id, correlationId, newColor as ColorDto)
             .then()
             .catch(() => {
@@ -300,7 +307,7 @@ class Sticker {
 
         const positionChanged = this.positionBeforeDrag.x !== this.position.x || this.positionBeforeDrag.y !== this.position.y;
         if (positionChanged) {
-            stickersService.position(
+            elementsService.position(
                 this.id,
                 {
                     x: this.position.x,
