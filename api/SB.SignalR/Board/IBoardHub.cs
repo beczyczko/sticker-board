@@ -5,10 +5,10 @@ namespace SB.SignalR.Board
 {
     public interface IBoardHub
     {
-        Task StickerMoved(StickerMovedEvent @event);
-        Task StickerTextChanged(StickerTextChangedEvent @event);
-        Task StickerColorChanged(StickerColorChangedEvent @event);
+        Task ElementMoved(ElementMovedEvent @event);
+        Task ElementTextChanged(ElementTextChangedEvent @event);
+        Task ElementColorChanged(ElementColorChangedEvent @event);
         Task StickerCreated(StickerCreatedEvent @event);
-        Task StickerRemoved(StickerRemovedEvent @event);
+        Task ElementRemoved(ElementRemovedEvent @event);
     }
 }

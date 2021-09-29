@@ -1,13 +1,13 @@
-import { IAuthConfig, StickersService } from './services';
+import { IAuthConfig, ElementsService } from './services';
 
 export class ServicesProvider {
-    private static _stickersService: StickersService;
+    private static _elementsService: ElementsService;
 
-    public static get stickersService(): StickersService {
-        if (!this._stickersService) {
-            this._stickersService = new StickersService(new IAuthConfig());
+    public static get elementsService(): ElementsService {
+        if (!this._elementsService) {
+            this._elementsService = new ElementsService(new IAuthConfig());
         }
 
-        return this._stickersService;
+        return this._elementsService;
     }
 }

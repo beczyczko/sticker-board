@@ -19,7 +19,7 @@ const StickerColorPalette = ({ onColorSelected, initialColor }: StickerColorPale
 
     useEffect(() => {
         if (!initialized) {
-            const stickersService = ServicesProvider.stickersService;
+            const stickersService = ServicesProvider.elementsService;
             stickersService.colors().then(response => {
                 const colors = response.map(c => StickerColor.create(c));
                 setStickerColors(colors);

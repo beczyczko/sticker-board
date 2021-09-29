@@ -16,7 +16,7 @@ interface RemoveElementProps {
     board: Board;
 }
 
-const stickersService = ServicesProvider.stickersService;
+const stickersService = ServicesProvider.elementsService;
 
 class RemoveElement extends React.Component<RemoveElementProps> {
     private readonly subscription: Subscription = new Subscription();

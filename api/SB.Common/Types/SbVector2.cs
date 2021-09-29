@@ -23,7 +23,7 @@ namespace SB.Common.Types
         {
             return new SbVector2(X - vector.X, Y - vector.Y);
         }
-        
+
         public SbVector2 Multiply(double factor)
         {
             return new SbVector2(X * factor, Y * factor);

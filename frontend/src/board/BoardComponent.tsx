@@ -13,7 +13,7 @@ import AddStickerDialog from '../add-sticker-dialog/AddStickerDialog';
 import ElementToolbox from '../element-toolbox/ElementToolbox';
 
 export function BoardComponent() {
-    const stickersService = ServicesProvider.stickersService;
+    const stickersService = ServicesProvider.elementsService;
     const [initialized, setInitialized] = useState(false);
     const [board, setBoard] = useState<Board | undefined>(undefined);
     const [newStickerCreating, setNewStickerCreating] = useState<boolean>(false);

@@ -1,10 +1,12 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
-import { StickerMovedEvent } from './Types/StickerMovedEvent';
-import { StickerCreatedEvent } from './Types/StickerCreatedEvent';
-import { StickerTextChangedEvent } from './Types/StickerTextChangedEvent';
-import { StickerColorChangedEvent } from './Types/StickerColorChangedEvent';
-import { StickerRemovedEvent } from './Types/StickerRemovedEvent';
+import {
+    ElementColorChangedEvent,
+    ElementMovedEvent,
+    ElementRemovedEvent,
+    ElementTextChangedEvent,
+    StickerCreatedEvent
+} from '../services/services';
 
 export class BoardSignalRService {
 
@@ -13,11 +15,11 @@ export class BoardSignalRService {
     private connectionIsEstablished = false;
     private hubConnection: HubConnection;
 
-    private stickerMoved$ = new Subject<StickerMovedEvent>();
-    private stickerTextChanged$ = new Subject<StickerTextChangedEvent>();
-    private stickerColorChanged$ = new Subject<StickerColorChangedEvent>();
+    private elementMoved$ = new Subject<ElementMovedEvent>();
+    private elementTextChanged$ = new Subject<ElementTextChangedEvent>();
+    private elementColorChanged$ = new Subject<ElementColorChangedEvent>();
     private stickerCreated$ = new Subject<StickerCreatedEvent>();
-    private stickerRemoved$ = new Subject<StickerRemovedEvent>();
+    private elementRemoved$ = new Subject<ElementRemovedEvent>();
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
@@ -27,24 +29,24 @@ export class BoardSignalRService {
         this.startConnection();
     }
 
-    public stickerMoved(): Observable<StickerMovedEvent> {
-        return this.stickerMoved$.asObservable();
+    public elementMoved(): Observable<ElementMovedEvent> {
+        return this.elementMoved$.asObservable();
     }
 
-    public stickerTextChanged(): Observable<StickerTextChangedEvent> {
-        return this.stickerTextChanged$.asObservable();
+    public elementTextChanged(): Observable<ElementTextChangedEvent> {
+        return this.elementTextChanged$.asObservable();
     }
 
-    public stickerColorChanged(): Observable<StickerColorChangedEvent> {
-        return this.stickerColorChanged$.asObservable();
+    public elementColorChanged(): Observable<ElementColorChangedEvent> {
+        return this.elementColorChanged$.asObservable();
     }
 
     public stickerCreated(): Observable<StickerCreatedEvent> {
         return this.stickerCreated$.asObservable();
     }
 
-    public stickerRemoved(): Observable<StickerRemovedEvent> {
-        return this.stickerRemoved$.asObservable();
+    public elementRemoved(): Observable<ElementRemovedEvent> {
+        return this.elementRemoved$.asObservable();
     }
 
     private createConnection(): HubConnection {
@@ -76,14 +78,14 @@ export class BoardSignalRService {
 
     private registerOnServerEvents(): void {
         this.hubConnection.on(
-            'StickerMoved',
-            (data: StickerMovedEvent) => {
-                this.stickerMoved$.next(data);
+            'ElementMoved',
+            (data: ElementMovedEvent) => {
+                this.elementMoved$.next(data);
             });
         this.hubConnection.on(
-            'StickerTextChanged',
-            (data: StickerTextChangedEvent) => {
-                this.stickerTextChanged$.next(data);
+            'ElementTextChanged',
+            (data: ElementTextChangedEvent) => {
+                this.elementTextChanged$.next(data);
             });
         this.hubConnection.on(
             'StickerCreated',
@@ -91,14 +93,14 @@ export class BoardSignalRService {
                 this.stickerCreated$.next(data);
             });
         this.hubConnection.on(
-            'StickerColorChanged',
-            (data: StickerColorChangedEvent) => {
-                this.stickerColorChanged$.next(data);
+            'ElementColorChanged',
+            (data: ElementColorChangedEvent) => {
+                this.elementColorChanged$.next(data);
             });
         this.hubConnection.on(
-            'StickerRemoved',
-            (data: StickerRemovedEvent) => {
-                this.stickerRemoved$.next(data);
+            'ElementRemoved',
+            (data: ElementRemovedEvent) => {
+                this.elementRemoved$.next(data);
             });
     }
 }

@@ -139,7 +139,7 @@ export class AuthenticationService extends AuthorizedApiBase {
     }
 }
 
-export class StickersService extends AuthorizedApiBase {
+export class ElementsService extends AuthorizedApiBase {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -150,8 +150,8 @@ export class StickersService extends AuthorizedApiBase {
         this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
     }
 
-    stickers(): Promise<Element[]> {
-        let url_ = this.baseUrl + "/api/Stickers";
+    elements(): Promise<Element[]> {
+        let url_ = this.baseUrl + "/api/Elements";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -164,11 +164,11 @@ export class StickersService extends AuthorizedApiBase {
         return this.transformOptions(options_).then(transformedOptions_ => {
             return this.http.fetch(url_, transformedOptions_);
         }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processStickers(_response));
+            return this.transformResult(url_, _response, (_response: Response) => this.processElements(_response));
         });
     }
 
-    protected processStickers(response: Response): Promise<Element[]> {
+    protected processElements(response: Response): Promise<Element[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -186,7 +186,7 @@ export class StickersService extends AuthorizedApiBase {
     }
 
     create(command: AddStickerCommand): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers";
+        let url_ = this.baseUrl + "/api/Elements";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(command);
@@ -221,11 +221,11 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    sticker(stickerId: string): Promise<StickerDto> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}";
-        if (stickerId === undefined || stickerId === null)
-            throw new Error("The parameter 'stickerId' must be defined.");
-        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+    element(elementId: string): Promise<StickerDto> {
+        let url_ = this.baseUrl + "/api/Elements/{elementId}";
+        if (elementId === undefined || elementId === null)
+            throw new Error("The parameter 'elementId' must be defined.");
+        url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -238,11 +238,11 @@ export class StickersService extends AuthorizedApiBase {
         return this.transformOptions(options_).then(transformedOptions_ => {
             return this.http.fetch(url_, transformedOptions_);
         }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processSticker(_response));
+            return this.transformResult(url_, _response, (_response: Response) => this.processElement(_response));
         });
     }
 
-    protected processSticker(response: Response): Promise<StickerDto> {
+    protected processElement(response: Response): Promise<StickerDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -259,11 +259,11 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<StickerDto>(<any>null);
     }
 
-    position(stickerId: string, newPosition: SbVector2): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Position";
-        if (stickerId === undefined || stickerId === null)
-            throw new Error("The parameter 'stickerId' must be defined.");
-        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+    position(elementId: string, newPosition: SbVector2): Promise<void> {
+        let url_ = this.baseUrl + "/api/Elements/{elementId}/Position";
+        if (elementId === undefined || elementId === null)
+            throw new Error("The parameter 'elementId' must be defined.");
+        url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(newPosition);
@@ -298,11 +298,11 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    text(stickerId: string, newText: string | null | undefined, correlationId: string | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Text?";
-        if (stickerId === undefined || stickerId === null)
-            throw new Error("The parameter 'stickerId' must be defined.");
-        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+    text(elementId: string, newText: string | null | undefined, correlationId: string | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Elements/{elementId}/Text?";
+        if (elementId === undefined || elementId === null)
+            throw new Error("The parameter 'elementId' must be defined.");
+        url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
         if (newText !== undefined && newText !== null)
             url_ += "newText=" + encodeURIComponent("" + newText) + "&";
         if (correlationId === null)
@@ -339,11 +339,11 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    color(stickerId: string, correlationId: string | undefined, newColor: ColorDto): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Color?";
-        if (stickerId === undefined || stickerId === null)
-            throw new Error("The parameter 'stickerId' must be defined.");
-        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+    color(elementId: string, correlationId: string | undefined, newColor: ColorDto): Promise<void> {
+        let url_ = this.baseUrl + "/api/Elements/{elementId}/Color?";
+        if (elementId === undefined || elementId === null)
+            throw new Error("The parameter 'elementId' must be defined.");
+        url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
         if (correlationId === null)
             throw new Error("The parameter 'correlationId' cannot be null.");
         else if (correlationId !== undefined)
@@ -382,11 +382,11 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    remove(stickerId: string, commandMoment: moment.Moment | undefined, correlationId: string | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/api/Stickers/{stickerId}/Remove?";
-        if (stickerId === undefined || stickerId === null)
-            throw new Error("The parameter 'stickerId' must be defined.");
-        url_ = url_.replace("{stickerId}", encodeURIComponent("" + stickerId));
+    remove(elementId: string, commandMoment: moment.Moment | undefined, correlationId: string | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Elements/{elementId}/Remove?";
+        if (elementId === undefined || elementId === null)
+            throw new Error("The parameter 'elementId' must be defined.");
+        url_ = url_.replace("{elementId}", encodeURIComponent("" + elementId));
         if (commandMoment === null)
             throw new Error("The parameter 'commandMoment' cannot be null.");
         else if (commandMoment !== undefined)
@@ -426,7 +426,7 @@ export class StickersService extends AuthorizedApiBase {
     }
 
     colors(): Promise<ColorDto[]> {
-        let url_ = this.baseUrl + "/api/Stickers/Colors";
+        let url_ = this.baseUrl + "/api/Elements/Colors";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -460,8 +460,8 @@ export class StickersService extends AuthorizedApiBase {
         return Promise.resolve<ColorDto[]>(<any>null);
     }
 
-    types(): Promise<ElementTypes> {
-        let url_ = this.baseUrl + "/api/Stickers/Types";
+    types(): Promise<ElementsTypes> {
+        let url_ = this.baseUrl + "/api/Elements/Types";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -478,13 +478,13 @@ export class StickersService extends AuthorizedApiBase {
         });
     }
 
-    protected processTypes(response: Response): Promise<ElementTypes> {
+    protected processTypes(response: Response): Promise<ElementsTypes> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : <ElementTypes>JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = _responseText === "" ? null : <ElementsTypes>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -492,7 +492,54 @@ export class StickersService extends AuthorizedApiBase {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ElementTypes>(<any>null);
+        return Promise.resolve<ElementsTypes>(<any>null);
+    }
+}
+
+export class SignalRService extends AuthorizedApiBase {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(configuration: IAuthConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super(configuration);
+        this.http = http ? http : <any>window;
+        this.baseUrl = this.getBaseUrl("https://localhost:44301", baseUrl);
+    }
+
+    types(): Promise<EventsTypes> {
+        let url_ = this.baseUrl + "/Types";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTypes(_response));
+        });
+    }
+
+    protected processTypes(response: Response): Promise<EventsTypes> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <EventsTypes>JSON.parse(_responseText, this.jsonParseReviver);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<EventsTypes>(<any>null);
     }
 }
 
@@ -549,7 +596,7 @@ export interface AddStickerCommand {
     color: ColorDto | undefined;
 }
 
-export interface ElementTypes {
+export interface ElementsTypes {
     sticker: Sticker | undefined;
     connection: Connection | undefined;
 }
@@ -578,6 +625,45 @@ export interface Connection extends Element {
     end: Anchor;
     color: Color;
     anchors: Anchor[];
+}
+
+export interface EventsTypes {
+    elementColorChangedEvent: ElementColorChangedEvent | undefined;
+    elementMovedEvent: ElementMovedEvent | undefined;
+    elementRemovedEvent: ElementRemovedEvent | undefined;
+    elementTextChangedEvent: ElementTextChangedEvent | undefined;
+    stickerCreatedEvent: StickerCreatedEvent | undefined;
+}
+
+export interface ElementColorChangedEvent {
+    boardId: string;
+    elementId: string;
+    newColor: ColorDto;
+    correlationId: string;
+}
+
+export interface ElementMovedEvent {
+    boardId: string;
+    elementId: string;
+    centerAnchor: SbVector2;
+}
+
+export interface ElementRemovedEvent {
+    boardId: string;
+    elementId: string;
+    correlationId: string;
+}
+
+export interface ElementTextChangedEvent {
+    boardId: string;
+    elementId: string;
+    text: string;
+    correlationId: string;
+}
+
+export interface StickerCreatedEvent {
+    boardId: string;
+    stickerId: string;
 }
 
 export interface FileResponse {

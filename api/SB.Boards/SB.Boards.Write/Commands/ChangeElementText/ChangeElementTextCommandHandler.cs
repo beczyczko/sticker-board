@@ -30,9 +30,9 @@ namespace SB.Boards.Write.Commands.ChangeElementText
 
             await _repository.UpdateAsync(element);
 
-            var stickerTextChangedEvent =
-                new StickerTextChangedEvent("testId", element.Id, textable.Text, command.CorrelationId); //todo db boardId unhardcode
-            await _publisher.Publish(stickerTextChangedEvent, PublishStrategy.ParallelNoWait);
+            var elementTextChangedEvent =
+                new ElementTextChangedEvent("testId", element.Id, textable.Text, command.CorrelationId); //todo db boardId unhardcode
+            await _publisher.Publish(elementTextChangedEvent, PublishStrategy.ParallelNoWait);
         }
     }
 }

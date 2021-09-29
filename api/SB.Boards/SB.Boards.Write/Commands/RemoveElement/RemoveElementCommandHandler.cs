@@ -11,10 +11,10 @@ namespace SB.Boards.Write.Commands.RemoveElement
     [UsedImplicitly]
     internal class RemoveElementCommandHandler : ICommandHandler<RemoveElementCommand>
     {
-        private readonly IMongoRepository<Sticker> _repository;
+        private readonly IMongoRepository<Element> _repository;
         private readonly Publisher _publisher;
 
-        public RemoveElementCommandHandler(IMongoRepository<Sticker> repository, Publisher publisher)
+        public RemoveElementCommandHandler(IMongoRepository<Element> repository, Publisher publisher)
         {
             _repository = repository;
             _publisher = publisher;
@@ -26,9 +26,9 @@ namespace SB.Boards.Write.Commands.RemoveElement
             element.Remove(command);
             await _repository.UpdateAsync(element);
 
-            var stickerRemovedEvent =
-                new StickerRemovedEvent("testId", element.Id, command.CorrelationId); //todo db boardId unhardcode
-            await _publisher.Publish(stickerRemovedEvent, PublishStrategy.ParallelNoWait);
+            var elementRemovedEvent =
+                new ElementRemovedEvent("testId", element.Id, command.CorrelationId); //todo db boardId unhardcode
+            await _publisher.Publish(elementRemovedEvent, PublishStrategy.ParallelNoWait);
         }
     }
 }

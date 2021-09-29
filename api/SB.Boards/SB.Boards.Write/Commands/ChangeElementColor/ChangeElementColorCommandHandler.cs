@@ -30,9 +30,9 @@ namespace SB.Boards.Write.Commands.ChangeElementColor
 
             await _repository.UpdateAsync(element);
 
-            var stickerColorChangedEvent =
-                new StickerColorChangedEvent("testId", element.Id, command.NewColor, command.CorrelationId); //todo db boardId unhardcode
-            await _publisher.Publish(stickerColorChangedEvent, PublishStrategy.ParallelNoWait);
+            var elementColorChangedEvent =
+                new ElementColorChangedEvent("testId", element.Id, command.NewColor, command.CorrelationId); //todo db boardId unhardcode
+            await _publisher.Publish(elementColorChangedEvent, PublishStrategy.ParallelNoWait);
         }
     }
 }

@@ -19,25 +19,24 @@ using SB.Common.Types;
 
 namespace SB.Web.Controllers
 {
-    //todo db rename to ElementsController, fix every name related to Sticker
-    public class StickersController : BaseController
+    public class ElementsController : BaseController
     {
-        public StickersController(IDispatcher dispatcher) : base(dispatcher)
+        public ElementsController(IDispatcher dispatcher) : base(dispatcher)
         {
         }
 
         [HttpGet]
-        public async Task<ActionResult<IImmutableList<Boards.Read.Domain.Element>>> Stickers()
+        public async Task<ActionResult<IImmutableList<Boards.Read.Domain.Element>>> Elements()
         {
-            var stickers = await QueryAsync(new StickersQuery());
-            return Ok(stickers);
+            var elements = await QueryAsync(new StickersQuery());
+            return Ok(elements);
         }
 
-        [HttpGet("{stickerId}")]
-        public async Task<ActionResult<StickerDto>> Sticker(Guid stickerId)
+        [HttpGet("{elementId}")]
+        public async Task<ActionResult<StickerDto>> Element(Guid elementId)
         {
-            var sticker = await QueryAsync(new StickerByIdQuery(stickerId));
-            return Single(sticker);
+            var element = await QueryAsync(new StickerByIdQuery(elementId));
+            return Single(element);
         }
 
         [HttpPost]
@@ -46,40 +45,40 @@ namespace SB.Web.Controllers
             await SendAsync(command);
         }
 
-        [HttpPost("{stickerId}/[Action]")]
-        public async Task Position(Guid stickerId, SbVector2 newPosition)
+        [HttpPost("{elementId}/[Action]")]
+        public async Task Position(Guid elementId, SbVector2 newPosition)
         {
-            await SendAsync(new MoveElementCommand(stickerId, newPosition));
+            await SendAsync(new MoveElementCommand(elementId, newPosition));
         }
 
-        [HttpPost("{stickerId}/[Action]")]
+        [HttpPost("{elementId}/[Action]")]
         [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
-        public async Task<ActionResult> Text(Guid stickerId, string newText, Guid correlationId)
+        public async Task<ActionResult> Text(Guid elementId, string newText, Guid correlationId)
         {
             //todo db find out how to pass correlationId in a proper way
 
             //todo db if method argument newText was object this null check would not be needed?
             newText ??= string.Empty;
 
-            await SendAsync(new ChangeElementTextCommand(stickerId, newText, correlationId));
+            await SendAsync(new ChangeElementTextCommand(elementId, newText, correlationId));
             return Accepted();
         }
 
-        [HttpPost("{stickerId}/[Action]")]
+        [HttpPost("{elementId}/[Action]")]
         [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
-        public async Task<ActionResult> Color(Guid stickerId, ColorDto newColor, Guid correlationId)
+        public async Task<ActionResult> Color(Guid elementId, ColorDto newColor, Guid correlationId)
         {
             //todo db find out how to pass correlationId in a proper way
-            await SendAsync(new ChangeElementColorCommand(stickerId, newColor, correlationId));
+            await SendAsync(new ChangeElementColorCommand(elementId, newColor, correlationId));
             return Accepted();
         }
 
-        [HttpDelete("{stickerId}/[Action]")]
+        [HttpDelete("{elementId}/[Action]")]
         [SwaggerResponse(HttpStatusCode.Accepted, typeof(void))]
-        public async Task<ActionResult> Remove(Guid stickerId, DateTimeOffset commandMoment, Guid correlationId)
+        public async Task<ActionResult> Remove(Guid elementId, DateTimeOffset commandMoment, Guid correlationId)
         {
             //todo db find out how to pass correlationId in a proper way
-            await SendAsync(new RemoveElementCommand(stickerId, commandMoment, correlationId));
+            await SendAsync(new RemoveElementCommand(elementId, commandMoment, correlationId));
             return Accepted();
         }
 
@@ -90,12 +89,12 @@ namespace SB.Web.Controllers
         }
 
         [HttpGet("[Action]")]
-        public ActionResult<ElementTypes> Types()
+        public ActionResult<ElementsTypes> Types()
         {
             return Ok();
         }
 
-        public class ElementTypes
+        public class ElementsTypes
         {
             public Boards.Read.Domain.Sticker Sticker { get; }
             public Boards.Read.Domain.Connection Connection { get; }

@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
-using SB.Boards.Common.Dtos;
 using SB.Boards.Write.Domain;
 using SB.Boards.Write.Events;
 using SB.Common.Handlers;
@@ -30,10 +29,10 @@ namespace SB.Boards.Write.Commands.MoveElement
             await _repository.UpdateAsync(element);
 
             var stickerMovedEvent =
-                new StickerMovedEvent(
+                new ElementMovedEvent(
                     "testId", //todo db boardId unhardcode
                     element.Id,
-                    new PositionDto(element.CenterAnchor.Position.X, element.CenterAnchor.Position.Y));
+                    element.CenterAnchor.Position);
             await _publisher.Publish(stickerMovedEvent, PublishStrategy.ParallelNoWait);
         }
     }

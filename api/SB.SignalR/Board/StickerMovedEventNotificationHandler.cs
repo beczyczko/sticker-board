@@ -8,7 +8,7 @@ using SB.Boards.Write.Events;
 namespace SB.SignalR.Board
 {
     [UsedImplicitly]
-    public class StickerMovedEventNotificationHandler : INotificationHandler<StickerMovedEvent>
+    public class StickerMovedEventNotificationHandler : INotificationHandler<ElementMovedEvent>
     {
         private readonly IHubContext<BoardHub, IBoardHub> _hub;
 
@@ -17,9 +17,9 @@ namespace SB.SignalR.Board
             _hub = hub;
         }
 
-        public async Task Handle(StickerMovedEvent notification, CancellationToken cancellationToken)
+        public async Task Handle(ElementMovedEvent notification, CancellationToken cancellationToken)
         {
-            await _hub.Clients.Groups(notification.BoardId).StickerMoved(notification);
+            await _hub.Clients.Groups(notification.BoardId).ElementMoved(notification);
         }
     }
 }

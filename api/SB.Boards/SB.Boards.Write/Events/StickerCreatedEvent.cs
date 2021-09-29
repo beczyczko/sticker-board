@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using MediatR;
 
 namespace SB.Boards.Write.Events
@@ -11,6 +12,7 @@ namespace SB.Boards.Write.Events
             StickerId = stickerId;
         }
 
+        [Required]
         public string BoardId { get; }
         public Guid StickerId { get; }
     }

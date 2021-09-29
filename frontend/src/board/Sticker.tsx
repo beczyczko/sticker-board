@@ -1,4 +1,4 @@
-import { ColorDto, SbVector2, StickerDto } from '../services/services';
+import { ColorDto, ElementColorChangedEvent, SbVector2, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -9,12 +9,11 @@ import { boardScaleValue } from './BoardScaleService';
 import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectionService } from '../services/SelectionService';
-import { StickerColorChangedEvent } from '../signal-r/Types/StickerColorChangedEvent';
 import { ElementChangedService } from '../services/ElementChangedService';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
-const stickersService = ServicesProvider.stickersService;
+const stickersService = ServicesProvider.elementsService;
 
 enum DisplayMode {
     Read,
@@ -107,7 +106,7 @@ class Sticker {
             });
     }
 
-    public updateColorFromExternalDevice($event: StickerColorChangedEvent): void {
+    public updateColorFromExternalDevice($event: ElementColorChangedEvent): void {
         if (this.commandCorrelationIds.has($event.correlationId)) {
             this.commandCorrelationIds.delete($event.correlationId);
             return;

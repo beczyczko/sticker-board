@@ -1,7 +1,7 @@
 import Sticker from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
 import { concatMap, filter, tap } from 'rxjs/operators';
-import { StickerDto, Sticker as StickerApi, StickersService } from '../services/services';
+import { StickerDto, Sticker as StickerApi, ElementsService } from '../services/services';
 import { StickerColor } from './StickerColor';
 import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
@@ -13,11 +13,11 @@ import { ElementChangedService } from '../services/ElementChangedService';
 
 class Board {
     private readonly selectionService: SelectionService | undefined;
-    private readonly stickersService: StickersService;
+    private readonly elementsService: ElementsService;
     private readonly viewChangedService: ViewChangedService;
     private _middleButtonClicked$ = new Subject<void>();
     private _doubleClicked$ = new Subject<Position>();
-    private stickerToLoad$ = new Subject<StickerId>();
+    private elementToLoad$ = new Subject<ElementId>();
 
     public position: Position = { x: 0, y: 0 };
     public scale: number = 1;
@@ -29,7 +29,7 @@ class Board {
 
     constructor(
         boardSignalRService: BoardSignalRService,
-        stickersService: StickersService,
+        elementsService: ElementsService,
         windowWidth: number,
         windowHeight: number) {
         this.boardHtmlElementsLayer = document.getElementById('board-html-elements-layer');
@@ -42,7 +42,7 @@ class Board {
 
         this.moveToPosition({ x: windowWidth / 2, y: windowHeight / 2 });
 
-        this.stickersService = stickersService;
+        this.elementsService = elementsService;
 
         this.registerMouseEventHandlers();
 
@@ -50,10 +50,10 @@ class Board {
         this.subscribeSignalREvents(boardSignalRService);
         subscribeToScrollEvents(this);
 
-        this.stickerToLoad$
+        this.elementToLoad$
             .pipe(
                 concatMap(id => {
-                    return this.stickersService.sticker(id.value)
+                    return this.elementsService.element(id.value)
                         .then((stickerDto: StickerDto) => {
                             if (!this.stickers.some(s => s.id === stickerDto.id)) {
                                 const sticker = Sticker.create(stickerDto);
@@ -136,11 +136,10 @@ class Board {
     }
 
     private loadStickers(): void {
-        this.stickersService.stickers()
-            .then(stickers => {
-                //todo db not stickers but elements
-                console.log(stickers);
-                stickers
+        this.elementsService.elements()
+            .then(elements => {
+                console.log('loaded elements:', elements);
+                elements
                     .filter(x => x.type === 'Sticker')
                     .map(x => x as StickerApi)
                     .forEach(s => {
@@ -155,35 +154,35 @@ class Board {
     }
 
     private subscribeSignalREvents(boardSignalRService: BoardSignalRService) {
-        boardSignalRService.stickerMoved()
+        boardSignalRService.elementMoved()
             .pipe(tap(e => {
-                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                const sticker = this.stickers.find(s => s.id === e.elementId);
                 if (sticker) {
-                    sticker.updateElementPosition(e.position);
+                    sticker.updateElementPosition(e.centerAnchor);
                 } else {
-                    this.stickerToLoad$.next(new StickerId(e.stickerId));
+                    this.elementToLoad$.next(new ElementId(e.elementId));
                 }
             }))
             .subscribe();
 
-        boardSignalRService.stickerTextChanged()
+        boardSignalRService.elementTextChanged()
             .pipe(tap(e => {
-                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                const sticker = this.stickers.find(s => s.id === e.elementId);
                 if (sticker) {
                     sticker.updateText(e.text, e.correlationId);
                 } else {
-                    this.stickerToLoad$.next(new StickerId(e.stickerId));
+                    this.elementToLoad$.next(new ElementId(e.elementId));
                 }
             }))
             .subscribe();
 
-        boardSignalRService.stickerColorChanged()
+        boardSignalRService.elementColorChanged()
             .pipe(tap(e => {
-                const sticker = this.stickers.find(s => s.id === e.stickerId);
+                const sticker = this.stickers.find(s => s.id === e.elementId);
                 if (sticker) {
                     sticker.updateColorFromExternalDevice(e);
                 } else {
-                    this.stickerToLoad$.next(new StickerId(e.stickerId));
+                    this.elementToLoad$.next(new ElementId(e.elementId));
                 }
             }))
             .subscribe();
@@ -193,16 +192,16 @@ class Board {
                 filter(e => {
                     return !this.stickers.find(s => s.id === e.stickerId);
                 }),
-                tap(s => this.stickerToLoad$.next(new StickerId(s.stickerId))))
+                tap(s => this.elementToLoad$.next(new ElementId(s.stickerId))))
             .subscribe();
 
-        boardSignalRService.stickerRemoved()
+        boardSignalRService.elementRemoved()
             .pipe(
                 filter(e => {
-                    return !!this.stickers.find(s => s.id === e.stickerId);
+                    return !!this.stickers.find(s => s.id === e.elementId);
                 }),
                 tap(e => {
-                    const sticker = this.stickers.find(s => s.id === e.stickerId);
+                    const sticker = this.stickers.find(s => s.id === e.elementId);
                     if (sticker) {
                         this.removeElement(sticker);
                     }
@@ -237,7 +236,7 @@ class Board {
     }
 }
 
-class StickerId {
+class ElementId {
     constructor(public value: string) {
     }
 }
