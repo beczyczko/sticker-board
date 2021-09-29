@@ -1,7 +1,7 @@
 import Sticker from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
 import { concatMap, filter, tap } from 'rxjs/operators';
-import { StickerDto, StickersService } from '../services/services';
+import { StickerDto, Sticker as StickerApi, StickersService } from '../services/services';
 import { StickerColor } from './StickerColor';
 import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
@@ -138,15 +138,19 @@ class Board {
     private loadStickers(): void {
         this.stickersService.stickers()
             .then(stickers => {
-                stickers.forEach(s => {
-                    if (s.position && s.text && s.color)
+                //todo db not stickers but elements
+                console.log(stickers);
+                stickers
+                    .filter(x => x.type === 'Sticker')
+                    .map(x => x as StickerApi)
+                    .forEach(s => {
                         this.addSticker(new Sticker(
                             s.id,
-                            s.position.x,
-                            s.position.y,
+                            s.centerAnchor.position.x,
+                            s.centerAnchor.position.y,
                             s.text,
                             StickerColor.create(s.color)));
-                });
+                    });
             });
     }
 

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using SB.Boards.Events;
+using SB.Boards.Write.Events;
 
 namespace SB.SignalR.Board
 {

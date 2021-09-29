@@ -1,4 +1,4 @@
-import { ColorDto, PositionDto, StickerDto } from '../services/services';
+import { ColorDto, SbVector2, StickerDto } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -50,7 +50,7 @@ class Sticker {
         this.positionBeforeDrag = {
             x: positionX,
             y: positionY
-        } as PositionDto;
+        } as SbVector2;
 
         this.textChanged
             .pipe(
@@ -69,11 +69,11 @@ class Sticker {
     }
 
     public static create(stickerDto: StickerDto): Sticker | undefined {
-        if (stickerDto && stickerDto.position && stickerDto.text && stickerDto.color) {
+        if (stickerDto) {
             return new Sticker(
                 stickerDto.id,
-                stickerDto.position.x,
-                stickerDto.position.y,
+                stickerDto.centerAnchor.position.x,
+                stickerDto.centerAnchor.position.y,
                 stickerDto.text,
                 StickerColor.create(stickerDto.color)
             );
@@ -121,6 +121,7 @@ class Sticker {
         }
     }
 
+    //todo db every element should have method render() or something like that
     public showTextField() {
         const textHtmlElementId = `sticker-text-${this.id}`;
 
@@ -249,6 +250,10 @@ class Sticker {
     }
 
     private get maxWordLength(): number {
+        if (!this.text) {
+            return 0;
+        }
+
         const wordsLength = this.text.split(' ')
             .map(t => t.length);
         return Math.max(...wordsLength);
@@ -301,12 +306,12 @@ class Sticker {
                 {
                     x: this.position.x,
                     y: this.position.y
-                } as PositionDto)
+                } as SbVector2)
                 .then(() => {
                     this.positionBeforeDrag = {
                         x: this.position.x,
                         y: this.position.y
-                    } as PositionDto;
+                    } as SbVector2;
                 })
                 .catch(() => {
                     this.position.x = this.positionBeforeDrag.x;

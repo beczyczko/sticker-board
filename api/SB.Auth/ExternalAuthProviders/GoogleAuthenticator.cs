@@ -53,7 +53,7 @@ namespace SB.Auth.ExternalAuthProviders
                         Audience = new[] { authGoogleOptions.ClientId },
                     });
 
-                return Result.Ok(payload);
+                return Result.Success(payload);
             }
             catch (Exception e)
             {
@@ -86,7 +86,7 @@ namespace SB.Auth.ExternalAuthProviders
                 claims,
                 expires: DateTime.Now.AddSeconds(3600),
                 signingCredentials: creds);
-            return Result.Ok(new SbApiAuthToken(new JwtSecurityTokenHandler().WriteToken(token)));
+            return Result.Success(new SbApiAuthToken(new JwtSecurityTokenHandler().WriteToken(token)));
         }
     }
 }

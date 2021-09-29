@@ -19,7 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SB.Auth\SB.Auth.csproj" />
-    <ProjectReference Include="..\SB.Boards\SB.Boards.csproj" />
+    <ProjectReference Include="..\SB.Boards\SB.Boards.Common\SB.Boards.Common.csproj" />
+    <ProjectReference Include="..\SB.Boards\SB.Boards.Read\SB.Boards.Read.csproj" />
+    <ProjectReference Include="..\SB.Boards\SB.Boards.Write\SB.Boards.Write.csproj" />
     <ProjectReference Include="..\SB.Common\SB.Common.csproj" />
     <ProjectReference Include="..\SB.SignalR\SB.SignalR.csproj" />
     <ProjectReference Include="..\SB.Users\SB.Users.csproj" />

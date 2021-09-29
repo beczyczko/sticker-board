@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using SB.Boards.Events;
+using SB.Boards.Write.Events;
 
 namespace SB.SignalR.Board
 {

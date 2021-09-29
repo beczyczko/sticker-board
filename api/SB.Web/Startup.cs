@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using SB.Auth;
-using SB.Boards.Domain;
+using SB.Boards.Write.Domain;
 using SB.Common;
 using SB.Common.Dispatchers;
 using SB.Common.MediatR;
@@ -90,13 +90,15 @@ namespace SB.Web
             builder.RegisterAssemblyTypes(typeof(Dispatcher).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(JwtOptions).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(Sticker).Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(SB.Boards.Read.Domain.Sticker).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(User).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(BoardHub).Assembly).AsImplementedInterfaces();
 
             builder.AddDispatchers();
             AddMediatR(builder);
             builder.AddMongo();
-            builder.AddMongoRepository<Sticker>("stickers");
+            builder.AddMongoRepository<Element>("elements");
+            builder.AddMongoRepository<SB.Boards.Read.Domain.Element>("elements");
             builder.AddMongoRepository<User>("users");
         }
 
