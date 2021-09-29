@@ -2,9 +2,9 @@
 using SB.Boards.Read.Domain;
 using SB.Common.Types;
 
-namespace SB.Boards.Read.Queries.Stickers
+namespace SB.Boards.Read.Queries.Elements
 {
-    public class StickersQuery : IQuery<IImmutableList<Element>>
+    public class ElementsQuery : IQuery<IImmutableList<Element>>
     {
     }
 }

@@ -1,7 +1,7 @@
 import Sticker from './Sticker';
 import { BoardSignalRService } from '../signal-r/BoardSignalRService';
 import { concatMap, filter, tap } from 'rxjs/operators';
-import { StickerDto, Sticker as StickerApi, ElementsService } from '../services/services';
+import { Sticker as StickerApi, ElementsService, Element } from '../services/services';
 import { StickerColor } from './StickerColor';
 import { Position } from './Position';
 import { Observable, Subject } from 'rxjs';
@@ -54,11 +54,14 @@ class Board {
             .pipe(
                 concatMap(id => {
                     return this.elementsService.element(id.value)
-                        .then((stickerDto: StickerDto) => {
-                            if (!this.stickers.some(s => s.id === stickerDto.id)) {
-                                const sticker = Sticker.create(stickerDto);
-                                if (sticker) {
-                                    this.addSticker(sticker);
+                        .then((element: Element) => {
+                            if (element.type === 'Sticker') {
+                                const stickerData = element as StickerApi;
+                                if (!this.stickers.some(s => s.id === stickerData.id)) {
+                                    const sticker = Sticker.create(stickerData);
+                                    if (sticker) {
+                                        this.addSticker(sticker);
+                                    }
                                 }
                             }
                         });

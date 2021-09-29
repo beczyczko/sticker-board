@@ -221,7 +221,7 @@ export class ElementsService extends AuthorizedApiBase {
         return Promise.resolve<void>(<any>null);
     }
 
-    element(elementId: string): Promise<StickerDto> {
+    element(elementId: string): Promise<Element> {
         let url_ = this.baseUrl + "/api/Elements/{elementId}";
         if (elementId === undefined || elementId === null)
             throw new Error("The parameter 'elementId' must be defined.");
@@ -242,13 +242,13 @@ export class ElementsService extends AuthorizedApiBase {
         });
     }
 
-    protected processElement(response: Response): Promise<StickerDto> {
+    protected processElement(response: Response): Promise<Element> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : <StickerDto>JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = _responseText === "" ? null : <Element>JSON.parse(_responseText, this.jsonParseReviver);
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -256,7 +256,7 @@ export class ElementsService extends AuthorizedApiBase {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<StickerDto>(<any>null);
+        return Promise.resolve<Element>(<any>null);
     }
 
     position(elementId: string, newPosition: SbVector2): Promise<void> {
@@ -570,30 +570,18 @@ export interface SbVector2 {
     y: number;
 }
 
-export interface StickerDto {
-    id: string;
-    text: string;
-    color: ColorDto;
-    centerAnchor: AnchorDto;
-}
-
-export interface ColorDto {
-    red: number;
-    green: number;
-    blue: number;
-}
-
-export interface AnchorDto {
-    id: string;
-    position: SbVector2;
-}
-
 export interface AddStickerCommand {
     id: string;
     text: string | undefined;
     positionX: number;
     positionY: number;
     color: ColorDto | undefined;
+}
+
+export interface ColorDto {
+    red: number;
+    green: number;
+    blue: number;
 }
 
 export interface ElementsTypes {

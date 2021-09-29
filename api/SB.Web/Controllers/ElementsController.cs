@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using SB.Boards.Common.Dtos;
-using SB.Boards.Read.Queries.Stickers;
-using SB.Boards.Read.Queries.Stickers.StickerById;
+using SB.Boards.Read.Queries.ElementById;
+using SB.Boards.Read.Queries.Elements;
 using SB.Boards.Write.Commands.AddSticker;
 using SB.Boards.Write.Commands.ChangeElementColor;
 using SB.Boards.Write.Commands.ChangeElementText;
@@ -28,14 +28,14 @@ namespace SB.Web.Controllers
         [HttpGet]
         public async Task<ActionResult<IImmutableList<Boards.Read.Domain.Element>>> Elements()
         {
-            var elements = await QueryAsync(new StickersQuery());
+            var elements = await QueryAsync(new ElementsQuery());
             return Ok(elements);
         }
 
         [HttpGet("{elementId}")]
-        public async Task<ActionResult<StickerDto>> Element(Guid elementId)
+        public async Task<ActionResult<Boards.Read.Domain.Element>> Element(Guid elementId)
         {
-            var element = await QueryAsync(new StickerByIdQuery(elementId));
+            var element = await QueryAsync(new ElementByIdQuery(elementId));
             return Single(element);
         }
 

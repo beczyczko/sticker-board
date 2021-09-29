@@ -1,4 +1,4 @@
-import { ColorDto, ElementColorChangedEvent, SbVector2, StickerDto } from '../services/services';
+import { ColorDto, ElementColorChangedEvent, SbVector2, Sticker as StickerApi } from '../services/services';
 import { ServicesProvider } from '../services/services-provider';
 import { StickerColor } from './StickerColor';
 import { MouseButton } from './MouseButton';
@@ -67,7 +67,7 @@ class Sticker {
         SelectionService.instance$.subscribe(ss => this.selectionService = ss);
     }
 
-    public static create(stickerDto: StickerDto): Sticker | undefined {
+    public static create(stickerDto: StickerApi): Sticker | undefined {
         if (stickerDto) {
             return new Sticker(
                 stickerDto.id,
