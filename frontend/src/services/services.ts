@@ -577,7 +577,7 @@ export interface ColorDto {
 export interface ElementMovedEvent {
     boardId: string;
     elementId: string;
-    centerAnchor: SbVector2;
+    position: SbVector2;
 }
 
 export interface SbVector2 {
@@ -609,12 +609,8 @@ export interface BaseEntity {
 
 export interface Element extends BaseEntity {
     type: string;
-    centerAnchor: Anchor;
-    removedMoment: moment.Moment;
-}
-
-export interface Anchor extends BaseEntity {
     position: SbVector2;
+    removedMoment: moment.Moment;
 }
 
 export interface AddStickerCommand {
@@ -637,11 +633,6 @@ export interface ElementsTypes {
 export interface Sticker extends Element {
     text: string;
     color: Color;
-    topAnchor: Anchor;
-    rightAnchor: Anchor;
-    bottomAnchor: Anchor;
-    leftAnchor: Anchor;
-    anchors: Anchor[];
 }
 
 export interface Color {
@@ -654,7 +645,10 @@ export interface Connection extends Element {
     start: Anchor;
     end: Anchor;
     color: Color;
-    anchors: Anchor[];
+}
+
+export interface Anchor extends BaseEntity {
+    position: SbVector2;
 }
 
 export interface FileResponse {

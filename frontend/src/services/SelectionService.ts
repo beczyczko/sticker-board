@@ -4,6 +4,7 @@ import Sticker from '../board/Sticker';
 import { ElementChangedService } from './ElementChangedService';
 import { ViewChangedService } from './ViewChangedService';
 import { filter, tap } from 'rxjs/operators';
+import { Layers } from '../layers';
 
 export class SelectionService {
     private static selectionService$ = new BehaviorSubject<SelectionService | undefined>(undefined);
@@ -25,6 +26,8 @@ export class SelectionService {
 
     private _singleSelectedElement$ = new Subject<SelectionMarker | null>();
 
+    private anchorsDisplayedForElements = new Array<Sticker>();
+
     public get singleSelectedElement$(): Observable<SelectionMarker | null> {
         return this._singleSelectedElement$.asObservable();
     }
@@ -36,7 +39,7 @@ export class SelectionService {
         private readonly viewChangedService: ViewChangedService) {
         const selectionLayer = document.createElement('div');
         selectionLayer.id = 'selection-layer';
-        selectionLayer.style.zIndex = '2147483647';
+        selectionLayer.style.zIndex = `${Layers.Selection}`;
         selectionLayer.style.position = 'fixed';
         selectionLayer.style.width = '100%';
         selectionLayer.style.height = '100%';
@@ -46,40 +49,6 @@ export class SelectionService {
         this.selectionLayer = selectionLayer;
 
         this.configureSelectionFlow();
-    }
-
-    private configureSelectionFlow() {
-        ElementChangedService.elementChanged$
-            .pipe(
-                filter(element => this.selectedElements.value.some(e => e.id === element.id)))
-            .subscribe(() => {
-                this.showSelectionMarkers(this.selectedElements.value);
-            });
-
-        this.viewChangedService.viewChanged$.subscribe(() => {
-            this.showSelectionMarkers(this.selectedElements.value);
-        });
-
-        this.selectedElements
-            .pipe(
-                filter(elements => elements.length === 1),
-                tap(elements => this.showSelectionMarkers(elements))
-            )
-            .subscribe();
-
-        this.selectedElements
-            .pipe(
-                filter(elements => elements.length === 0),
-                tap(() => this.removeSelectionMarkers())
-            )
-            .subscribe();
-
-        this.selectionMarkers
-            .pipe(
-                filter(elements => elements.length === 1),
-                tap(elements => this._singleSelectedElement$.next(elements[0]))
-            )
-            .subscribe();
     }
 
     public selectElement(singleSelection: boolean, selectedElementData: Sticker): void {
@@ -104,6 +73,62 @@ export class SelectionService {
     public clearSelection(): void {
         this.selectedElements.next(new Array<Sticker>());
         this.removeSelectionMarkers();
+    }
+
+    private configureSelectionFlow() {
+        ElementChangedService.elementChanged$
+            .pipe(
+                filter(element => this.selectedElements.value.some(e => e.id === element.id)))
+            .subscribe(() => {
+                this.showSelectionMarkers(this.selectedElements.value);
+            });
+
+        this.viewChangedService.viewChanged$.subscribe(() => {
+            this.showSelectionMarkers(this.selectedElements.value);
+        });
+
+        this.selectedElements
+            .pipe(
+                filter(elements => elements.length === 1),
+                tap(elements => this.showSelectionMarkers(elements)),
+                tap(elements => this.showAnchors(elements))
+            )
+            .subscribe();
+
+        this.selectedElements
+            .pipe(
+                filter(elements => elements.length !== 1),
+                tap(() => this.hideAllAnchors())
+            )
+            .subscribe();
+
+        this.selectedElements
+            .pipe(
+                filter(elements => elements.length === 0),
+                tap(() => this.removeSelectionMarkers())
+            )
+            .subscribe();
+
+        this.selectionMarkers
+            .pipe(
+                filter(elements => elements.length === 1),
+                tap(elements => this._singleSelectedElement$.next(elements[0]))
+            )
+            .subscribe();
+    }
+
+    private showAnchors(elements: Array<Sticker>) {
+        this.hideAllAnchors();
+
+        return elements.forEach(e => {
+            e.showAnchors();
+            this.anchorsDisplayedForElements.push(e);
+        });
+    }
+
+    private hideAllAnchors() {
+        this.anchorsDisplayedForElements.forEach(e => e.removeAnchors())
+        this.anchorsDisplayedForElements = [];
     }
 
     private showSelectionMarkers(elements: Array<Sticker>): void {

@@ -32,7 +32,7 @@ namespace SB.Boards.Write.Commands.MoveElement
                 new ElementMovedEvent(
                     "testId", //todo db boardId unhardcode
                     element.Id,
-                    element.CenterAnchor.Position);
+                    element.Position);
             await _publisher.Publish(stickerMovedEvent, PublishStrategy.ParallelNoWait);
         }
     }

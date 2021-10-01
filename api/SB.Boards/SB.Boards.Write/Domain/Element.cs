@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using SB.Boards.Write.Commands.MoveElement;
 using SB.Boards.Write.Commands.RemoveElement;
 using SB.Common.Mongo;
+using SB.Common.Types;
 
 namespace SB.Boards.Write.Domain
 {
@@ -17,7 +18,7 @@ namespace SB.Boards.Write.Domain
 
         [BsonElement("_t")]
         public string Type { get; protected set; }
-        public Anchor CenterAnchor { get; protected set; }
+        public SbVector2 Position { get; protected set; }
         public abstract void Move(MoveElementCommand command);
         public DateTimeOffset? RemovedMoment { get; protected set; }
 

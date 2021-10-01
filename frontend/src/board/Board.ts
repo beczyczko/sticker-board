@@ -148,8 +148,8 @@ class Board {
                     .forEach(s => {
                         this.addSticker(new Sticker(
                             s.id,
-                            s.centerAnchor.position.x,
-                            s.centerAnchor.position.y,
+                            s.position.x,
+                            s.position.y,
                             s.text,
                             StickerColor.create(s.color)));
                     });
@@ -161,7 +161,7 @@ class Board {
             .pipe(tap(e => {
                 const sticker = this.stickers.find(s => s.id === e.elementId);
                 if (sticker) {
-                    sticker.updateElementPosition(e.centerAnchor);
+                    sticker.updateElementPosition(e.position);
                 } else {
                     this.elementToLoad$.next(new ElementId(e.elementId));
                 }

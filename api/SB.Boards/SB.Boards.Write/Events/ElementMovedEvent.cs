@@ -7,11 +7,11 @@ namespace SB.Boards.Write.Events
 {
     public class ElementMovedEvent : INotification
     {
-        public ElementMovedEvent(string boardId, Guid elementId, SbVector2 centerAnchor)
+        public ElementMovedEvent(string boardId, Guid elementId, SbVector2 position)
         {
             BoardId = boardId;
             ElementId = elementId;
-            CenterAnchor = centerAnchor;
+            Position = position;
         }
 
         [Required]
@@ -19,6 +19,6 @@ namespace SB.Boards.Write.Events
         public Guid ElementId { get; }
 
         [Required]
-        public SbVector2 CenterAnchor { get; }
+        public SbVector2 Position { get; }
     }
 }

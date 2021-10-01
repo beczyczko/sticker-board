@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson.Serialization.Attributes;
 using SB.Common.Mongo;
+using SB.Common.Types;
 
 namespace SB.Boards.Read.Domain
 {
@@ -14,7 +15,7 @@ namespace SB.Boards.Read.Domain
         public string Type { get; protected set; }
 
         [Required]
-        public Anchor CenterAnchor { get; protected set; }
+        public SbVector2 Position { get; protected set; }
 
         [Required]
         public DateTimeOffset? RemovedMoment { get; protected set; }

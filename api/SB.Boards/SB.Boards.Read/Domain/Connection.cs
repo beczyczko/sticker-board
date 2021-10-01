@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using SB.Boards.Common.Domain;
 
 namespace SB.Boards.Read.Domain
@@ -14,8 +13,5 @@ namespace SB.Boards.Read.Domain
 
         [Required]
         public Color Color { get; private set; }
-
-        [Required]
-        public IReadOnlyList<Anchor> Anchors => new[] { CenterAnchor, Start, End };
     }
 }

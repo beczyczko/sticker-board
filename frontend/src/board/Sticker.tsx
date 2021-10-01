@@ -16,6 +16,7 @@ import { concatMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SelectionService } from '../services/SelectionService';
 import { ElementChangedService } from '../services/ElementChangedService';
+import { Layers } from '../layers';
 
 let dragItemOffsetPosition = { x: 0, y: 0 };
 
@@ -37,11 +38,44 @@ class Sticker {
     private textChanged = new Subject<string>();
 
     public stickerHtmlElement: HTMLElement | undefined;
+    public anchorHtmlElements = new Array<HTMLElement>();
     public dragging: boolean = false;
-    public selected = false;
     public width = 200;
     public height = 200;
     public position: Position;
+
+    public anchors = [
+        {
+            posRelative: {
+                x: 0,
+                y: 0,
+            } as Position,
+        },
+        {
+            posRelative: {
+                x: 0,
+                y: -this.height / 2,
+            } as Position,
+        },
+        {
+            posRelative: {
+                x: this.height / 2,
+                y: 0,
+            } as Position,
+        },
+        {
+            posRelative: {
+                x: 0,
+                y: this.height / 2,
+            } as Position,
+        },
+        {
+            posRelative: {
+                x: -this.height / 2,
+                y: 0,
+            } as Position,
+        },
+    ];
 
     constructor(
         public id: string,
@@ -74,14 +108,14 @@ class Sticker {
         SelectionService.instance$.subscribe(ss => this.selectionService = ss);
     }
 
-    public static create(stickerDto: StickerApi): Sticker | undefined {
-        if (stickerDto) {
+    public static create(stickerData: StickerApi): Sticker | undefined {
+        if (stickerData) {
             return new Sticker(
-                stickerDto.id,
-                stickerDto.centerAnchor.position.x,
-                stickerDto.centerAnchor.position.y,
-                stickerDto.text,
-                StickerColor.create(stickerDto.color)
+                stickerData.id,
+                stickerData.position.x,
+                stickerData.position.y,
+                stickerData.text,
+                StickerColor.create(stickerData.color)
             );
         } else {
             return undefined;
@@ -128,7 +162,7 @@ class Sticker {
     }
 
     //todo db every element should have method render() or something like that
-    public showTextField() {
+    public showTextField(): void {
         const textHtmlElementId = `sticker-text-${this.id}`;
 
         const textHtmlElement = document.createElement('p');
@@ -168,6 +202,36 @@ class Sticker {
 
         this.fitText(textHtmlElement);
         this.addClickEventListeners();
+    }
+
+    public showAnchors(): void {
+        const anchorSize = 12;
+
+        this.anchors.forEach((a, i) => {
+            const anchorId = `a-${i}-sticker-${this.id}`;
+
+            const anchorHtmlElement = document.createElement('div');
+            anchorHtmlElement.id = anchorId;
+            anchorHtmlElement.style.width = `${anchorSize}px`;
+            anchorHtmlElement.style.height = `${anchorSize}px`;
+            anchorHtmlElement.style.borderRadius = `${anchorSize / 2}px`;
+            anchorHtmlElement.style.background = 'rgb(79 145 251)';
+            anchorHtmlElement.style.position = 'absolute';
+            anchorHtmlElement.style.zIndex = `${Layers.Anchors}`;
+            anchorHtmlElement.style.top = `${(a.posRelative.x + (this.width - anchorSize) / 2).toString()}px`;
+            anchorHtmlElement.style.left = `${(a.posRelative.y + (this.height - anchorSize) / 2).toString()}px`;
+
+            this.stickerHtmlElement?.appendChild(anchorHtmlElement);
+
+            this.anchorHtmlElements.push(anchorHtmlElement);
+        });
+    }
+
+    public removeAnchors(): void {
+        this.anchorHtmlElements.forEach(a => {
+            this.stickerHtmlElement?.removeChild(a);
+        });
+        this.anchorHtmlElements = [];
     }
 
     public updateElementPosition(position: Position): void {
@@ -233,7 +297,7 @@ class Sticker {
 
     private addClickEventListeners(): void {
         if (this.stickerHtmlElement) {
-            this.stickerHtmlElement.style.zIndex = '100';
+            this.stickerHtmlElement.style.zIndex = `${Layers.Elements}`;
 
             this.stickerHtmlElement.addEventListener('mousedown', (e: MouseEvent) => this.onClick(e));
             this.stickerHtmlElement.addEventListener('touchstart', (e: any) => this.onClick(e));
@@ -275,16 +339,8 @@ class Sticker {
         }
     }
 
-    private select(): void {
-        this.selected = true;
-    }
-
-    private removeSelection(): void {
-        this.selected = false;
-    }
-
     private onDragStart(event: any): void {
-        if (!this.selected) {
+        if (this.displayMode !== DisplayMode.Modify) {
             this.dragging = true;
 
             const boardScale = boardScaleValue();
@@ -325,11 +381,15 @@ class Sticker {
                 });
         } else {
             if (this.stickerHtmlElement) {
-                this.selectionService?.selectElement(true, this);
+                this.select();
             }
         }
 
         dragItemOffsetPosition = { x: 0, y: 0 };
+    }
+
+    private select(): void {
+        this.selectionService?.selectElement(true, this);
     }
 
     private onDragMove(cursorPosition: Position): void {
@@ -353,7 +413,6 @@ class Sticker {
                 this.stickerTextHtmlElement.contentEditable = 'true';
 
                 placeCaretAtEnd(this.stickerTextHtmlElement);
-                this.select();
 
                 const onKeyDown = (e: KeyboardEvent) => {
                     setTimeout(() => {
@@ -370,8 +429,6 @@ class Sticker {
                     if (this.stickerTextHtmlElement && this.stickerHtmlElement) {
                         this.displayMode = DisplayMode.Read;
                         this.stickerTextHtmlElement.contentEditable = 'false';
-
-                        this.removeSelection();
 
                         this.stickerHtmlElement.removeEventListener('keydown', onKeyDown);
                         this.stickerHtmlElement.removeEventListener('focusout', onFocusOut);
