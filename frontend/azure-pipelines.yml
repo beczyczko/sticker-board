@@ -21,12 +21,12 @@ steps:
   - task: Docker@2
     displayName: Login to docker registry
     inputs:
-      containerRegistry: 'Nazwa.pl docker registry'
+      containerRegistry: 'MBTL Docker registry-Sticker Board'
       command: 'login'
 
   - task: Docker@2
     inputs:
-      containerRegistry: 'Nazwa.pl docker registry'
+      containerRegistry: 'MBTL Docker registry-Sticker Board'
       repository: 'sb.frontend'
       command: 'buildAndPush'
       Dockerfile: 'frontend/Dockerfile.prod'
